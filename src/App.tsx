@@ -25,13 +25,19 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
       case '/tasbih': return isBn ? 'তাসবিহ' : 'Tasbih';
       case '/qibla': return isBn ? 'কিবলা' : 'Qibla';
       case '/settings': return isBn ? 'সেটিংস' : 'Settings';
-      default: return isBn ? 'সাকিনাহ' : 'Sakinah';
+      default: return isBn ? 'নূর কম্প্যানিয়ন' : 'Noor Companion';
     }
   };
 
+  const currentTitle = getTitle(location.pathname);
+
+  React.useEffect(() => {
+    document.title = `${currentTitle} | নূর কম্প্যানিয়ন`;
+  }, [currentTitle]);
+
   return (
     <div className={cn("min-h-screen font-sans transition-colors duration-300", state.theme === 'dark' ? "bg-gray-900 text-white dark" : "bg-gray-50 text-gray-900")}>
-      <AppHeader title={getTitle(location.pathname)} />
+      <AppHeader title={currentTitle} />
       <main className="max-w-md mx-auto relative">
         <AnimatePresence mode="wait">
           <motion.div

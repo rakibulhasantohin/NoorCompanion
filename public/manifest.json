@@ -1,7 +1,7 @@
 {
-  "name": "Sakinah",
-  "short_name": "Sakinah",
-  "description": "Premium Islamic Companion App",
+  "name": "Noor Companion - নূর কম্প্যানিয়ন",
+  "short_name": "Noor Companion",
+  "description": "নামাজ, কুরআন, হাদিস — সব এক অ্যাপে",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#064e3b",
