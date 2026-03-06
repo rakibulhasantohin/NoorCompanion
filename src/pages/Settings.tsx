@@ -4,9 +4,10 @@ import { Bell, Globe, Moon, Shield, ChevronRight, LogOut, Info, MapPin, X, Check
 import { Card, SectionTitle } from '../components/Common';
 import { useAppState } from '../hooks/useAppState';
 import { Auth } from '../components/Auth';
+import { ProfileSection } from '../components/Profile';
 
 export const Settings = () => {
-  const { state, updateState } = useAppState();
+  const { state, updateState, user } = useAppState();
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const toggleTheme = () => {
@@ -89,8 +90,8 @@ export const Settings = () => {
       </div>
 
       <section>
-        <SectionTitle title="অ্যাকাউন্ট" />
-        <Auth />
+        <SectionTitle title="প্রোফাইল ও প্রগ্রেস" />
+        {user ? <ProfileSection /> : <Auth />}
       </section>
 
       {settingsSections.map((section, i) => (

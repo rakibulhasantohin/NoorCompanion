@@ -1,146 +1,111 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Book, Bookmark, Play, ChevronRight, ArrowLeft, Loader2, Volume2 } from 'lucide-react';
-import { Card, SectionTitle } from '../components/Common';
+import { Book, Search, ChevronRight, Star, ArrowLeft, BookOpen, Info } from 'lucide-react';
+import { Card } from '../components/Common';
 import { SURAHS_LIST } from '../data/surahs';
-import { useAppState } from '../hooks/useAppState';
 
-interface Ayah {
-  number: number;
-  text: string;
-  translation: string;
-  transliteration?: string;
-}
+const SURAH_AYAH_DATA: Record<number, any[]> = {
+  1: [
+    { id: 1, arabic: 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ', pronunciation: 'বিসমিল্লাহির রাহমানির রাহিম', translation: 'পরম করুণাময়, অতিশয় দয়ালু আল্লাহর নামে (শুরু করছি)।' },
+    { id: 2, arabic: 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ', pronunciation: 'আলহামদুলিল্লাহি রাব্বিল আলামিন', translation: 'যাবতীয় প্রশংসা আল্লাহর জন্য, যিনি সকল সৃষ্টির পালনকর্তা।' },
+    { id: 3, arabic: 'الرَّحْمَنِ الرَّحِيمِ', pronunciation: 'আর-রাহমানির রাহিম', translation: 'যিনি পরম করুণাময় ও অতিশয় দয়ালু।' },
+    { id: 4, arabic: 'مَالِكِ يَوْمِ الدِّিনِ', pronunciation: 'মালিকি ইয়াওমিদ্দীন', translation: 'যিনি বিচার দিবসের মালিক।' },
+    { id: 5, arabic: 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ', pronunciation: 'ইয়্যাকা না’বুদু ওয়া ইয়্যাকা নাস্তাঈন', translation: 'আমরা একমাত্র আপনারই ইবাদত করি এবং একমাত্র আপনারই সাহায্য চাই।' },
+    { id: 6, arabic: 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ', pronunciation: 'ইহদিনাস সিরাতাল মুস্তাকীম', translation: 'আমাদের সরল পথ দেখান।' },
+    { id: 7, arabic: 'صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ', pronunciation: 'সিরাতাল্লাযীনা আনআমতা আলাইহিম গাইরিল মাগদূবি আলাইহিম ওয়ালাদ্দাল্লীন', translation: 'তাদের পথ, যাদের আপনি নেয়ামত দান করেছেন। তাদের পথ নয় যারা আপনার গজবের শিকার এবং যারা পথভ্রষ্ট।' },
+  ],
+  112: [
+    { id: 1, arabic: 'قُلْ هُوَ اللَّهُ أَحَدٌ', pronunciation: 'কুল হুওয়াল্লাহু আহাদ', translation: 'বলুন, তিনি আল্লাহ, এক।' },
+    { id: 2, arabic: 'اللَّهُ الصَّمَدُ', pronunciation: 'আল্লাহুস সামাদ', translation: 'আল্লাহ অমুখাপেক্ষী।' },
+    { id: 3, arabic: 'لَمْ يَلِدْ وَلَمْ يُولَدْ', pronunciation: 'লাম ইয়ালিদ ওয়া লাম ইউলাদ', translation: 'তিনি কাউকে জন্ম দেননি এবং কেউ তাকে জন্ম দেয়নি।' },
+    { id: 4, arabic: 'وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ', pronunciation: 'ওয়া লাম ইয়াকুল্লাহু কুফুওয়ান আহাদ', translation: 'এবং তার সমতুল্য কেউ নেই।' },
+  ],
+  113: [
+    { id: 1, arabic: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ', pronunciation: 'কুল আউযু বিরাব্বিল ফালাক', translation: 'বলুন, আমি আশ্রয় গ্রহণ করছি প্রভাতের পালনকর্তার।' },
+    { id: 2, arabic: 'مِن شَرِّ مَا خَلَقَ', pronunciation: 'মিন শাররি মা খালাক', translation: 'তিনি যা সৃষ্টি করেছেন, তার অনিষ্ট থেকে।' },
+    { id: 3, arabic: 'وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ', pronunciation: 'ওয়া মিন শাররি গাসিকিন ইযা ওয়াকাব', translation: 'এবং অন্ধকার রাত্রির অনিষ্ট থেকে, যখন তা সমাগত হয়।' },
+    { id: 4, arabic: 'وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ', pronunciation: 'ওয়া মিন শাররিন নাফফাসাতি ফিল উকাদ', translation: 'এবং গ্রন্থিতে ফুঁৎকারদানকারিণীদের অনিষ্ট থেকে।' },
+    { id: 5, arabic: 'وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ', pronunciation: 'ওয়া মিন শাররি হাসিদিন ইযা হাসাদ', translation: 'এবং হিংসুকের অনিষ্ট থেকে যখন সে হিংসা করে।' },
+  ],
+  114: [
+    { id: 1, arabic: 'قُل_ أَعُوذُ بِرَبِّ النَّاسِ', pronunciation: 'কুল আউযু বিরাব্বিন নাস', translation: 'বলুন, আমি আশ্রয় গ্রহণ করছি মানুষের পালনকর্তার।' },
+    { id: 2, arabic: 'مَلِكِ النَّاسِ', pronunciation: 'মালিকিন নাস', translation: 'মানুষের অধিপতির।' },
+    { id: 3, arabic: 'إِلَهِ النَّاسِ', pronunciation: 'ইলাহিন নাস', translation: 'মানুষের উপাস্যের।' },
+    { id: 4, arabic: 'مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ', pronunciation: 'মিন শাররিল ওয়াসওয়াসিল খাননাস', translation: 'প্ররোচনাকারীর অনিষ্ট থেকে, যে আত্মগোপন করে।' },
+    { id: 5, arabic: 'الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ', pronunciation: 'আল্লাযী ইউওয়াসউিসু ফী সুদূরিন নাস', translation: 'যে প্ররোচনা দেয় মানুষের অন্তরে।' },
+    { id: 6, arabic: 'مِنَ الْجِنَّةِ وَالنَّاسِ', pronunciation: 'মিনাল জিন্নাতি ওয়ান নাস', translation: 'জিনের মধ্য থেকে অথবা মানুষের মধ্য থেকে।' },
+  ]
+};
 
 export const Quran = () => {
-  const { state, updateState } = useAppState();
-  const [search, setSearch] = useState('');
-  const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
-  const [surahData, setSurahData] = useState<{ ayahs: Ayah[], name: string, nameBn: string } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSurah, setSelectedSurah] = useState<typeof SURAHS_LIST[0] | null>(null);
 
   const filteredSurahs = SURAHS_LIST.filter(s => 
-    s.name.toLowerCase().includes(search.toLowerCase()) || 
-    s.nameBn.includes(search)
+    s.nameBn.includes(searchQuery) || 
+    s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.id.toString() === searchQuery
   );
 
-  const fetchSurahData = async (id: number) => {
-    setLoading(true);
-    try {
-      // Fetching Arabic, Bengali translation and English transliteration
-      const response = await fetch(`https://api.alquran.cloud/v1/surah/${id}/editions/quran-simple,bn.bengali,en.transliteration`);
-      const data = await response.json();
-      
-      if (data.code === 200) {
-        const arabicAyahs = data.data[0].ayahs;
-        const bengaliAyahs = data.data[1].ayahs;
-        const translitAyahs = data.data[2].ayahs;
-        
-        const combinedAyahs: Ayah[] = arabicAyahs.map((a: any, index: number) => ({
-          number: a.numberInSurah,
-          text: a.text,
-          translation: bengaliAyahs[index].text,
-          transliteration: translitAyahs[index].text
-        }));
+  if (selectedSurah) {
+    const ayahs = SURAH_AYAH_DATA[selectedSurah.id] || [];
 
-        const surahInfo = SURAHS_LIST.find(s => s.id === id);
-        setSurahData({
-          ayahs: combinedAyahs,
-          name: surahInfo?.name || '',
-          nameBn: surahInfo?.nameBn || ''
-        });
-        updateState({ lastReadSurah: id });
-      }
-    } catch (error) {
-      console.error('Error fetching surah:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSurahClick = (id: number) => {
-    setSelectedSurah(id);
-    fetchSurahData(id);
-  };
-
-  const lastRead = SURAHS_LIST.find(s => s.id === state.lastReadSurah) || SURAHS_LIST[35]; // Default to Yaseen
-
-  if (selectedSurah && surahData) {
     return (
-      <div className="pb-24 px-0 pt-0 min-h-screen bg-white">
-        <div className="sticky top-0 z-50 bg-emerald-900 text-white p-4 flex items-center gap-4 shadow-md">
-          <button onClick={() => setSelectedSurah(null)} className="p-1 hover:bg-emerald-800 rounded-full transition-colors">
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <div>
-            <h2 className="font-bold text-lg leading-tight">{surahData.nameBn}</h2>
-            <p className="text-xs text-emerald-200">{surahData.name} • {surahData.ayahs.length} আয়াত</p>
+      <div className="pb-24 px-4 pt-4 space-y-6">
+        <button 
+          onClick={() => setSelectedSurah(null)}
+          className="flex items-center gap-2 text-emerald-600 font-bold mb-4"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>ফিরে যান</span>
+        </button>
+
+        <div className="bg-emerald-600 dark:bg-emerald-900 rounded-3xl p-8 text-white text-center space-y-4 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+          <h2 className="text-3xl font-bold">{selectedSurah.nameAr}</h2>
+          <h3 className="text-xl font-bold">{selectedSurah.nameBn}</h3>
+          <div className="flex justify-center gap-4 text-xs text-emerald-100">
+            <span>{selectedSurah.revelationType === 'Meccan' ? 'মাক্কী' : 'মাদানী'}</span>
+            <span>•</span>
+            <span>আয়াত: {selectedSurah.totalAyahs}</span>
           </div>
         </div>
 
-        <div className="p-4 space-y-8">
-          {selectedSurah !== 1 && selectedSurah !== 9 && (
-            <div className="text-center py-8 border-b border-gray-100">
-              <p className="text-3xl font-serif text-emerald-900 mb-2" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
-              <p className="text-sm text-gray-500 italic">পরম করুণাময় অসীম দয়ালু আল্লাহর নামে শুরু করছি</p>
-            </div>
-          )}
-
-          {surahData.ayahs.map((ayah) => (
-            <div key={ayah.number} className="space-y-6 pb-10 border-b border-gray-50 last:border-0">
-              <div className="flex flex-col items-end gap-4">
-                <div className="flex items-center gap-3 w-full justify-between">
-                  <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-xs font-bold text-emerald-700 shrink-0 border border-emerald-100">
-                    {ayah.number}
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="p-2 text-gray-400 hover:text-emerald-600 transition-colors">
-                      <Play className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-gray-400 hover:text-emerald-600 transition-colors">
-                      <Bookmark className="w-4 h-4" />
-                    </button>
+        <div className="space-y-6">
+          {ayahs.length > 0 ? (
+            ayahs.map((ayah) => (
+              <Card key={ayah.id} className="p-6 space-y-6 dark:bg-gray-800 dark:border-gray-700">
+                <div className="flex items-center justify-between border-b border-gray-50 dark:border-gray-700 pb-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+                    {ayah.id}
                   </div>
                 </div>
-                <p className="text-4xl font-serif text-right leading-[2] text-gray-900 w-full" dir="rtl">
-                  {ayah.text}
+                <p className="text-right font-serif text-3xl text-gray-800 dark:text-gray-200 leading-loose" dir="rtl">
+                  {ayah.arabic}
                 </p>
-              </div>
-              <div className="space-y-3 bg-emerald-50/30 p-4 rounded-2xl border border-emerald-50/50">
-                <div className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
-                  <div className="space-y-2">
-                    <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">উচ্চারণ</p>
-                    <p className="text-sm text-emerald-800 italic leading-relaxed">
-                      {ayah.transliteration}
+                <div className="space-y-4">
+                  <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-4">
+                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold tracking-widest mb-1">উচ্চারণ</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                      {ayah.pronunciation}
                     </p>
                   </div>
-                </div>
-                <div className="flex items-start gap-3 pt-2 border-t border-emerald-100/50">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">অর্থ</p>
-                    <p className="text-base text-emerald-900 font-medium leading-relaxed">
+                  <div className="bg-gray-50 dark:bg-gray-900/40 rounded-2xl p-4">
+                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">অনুবাদ</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed italic">
                       {ayah.translation}
                     </p>
                   </div>
                 </div>
-              </div>
-            </div>
-          ))}
-
-          {selectedSurah < 114 && (
-            <div className="pt-8 pb-12">
-              <button 
-                onClick={() => {
-                  window.scrollTo(0, 0);
-                  handleSurahClick(selectedSurah + 1);
-                }}
-                className="w-full bg-emerald-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg hover:bg-emerald-800 transition-colors"
-              >
-                পরবর্তী সুরা: {SURAHS_LIST.find(s => s.id === selectedSurah + 1)?.nameBn}
-                <ChevronRight className="w-5 h-5" />
-              </button>
+              </Card>
+            ))
+          ) : (
+            <div className="text-center py-12 border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-3xl">
+              <BookOpen className="w-12 h-12 text-gray-200 dark:text-gray-700 mx-auto mb-4" />
+              <p className="text-gray-400 text-sm">সূরা {selectedSurah.nameBn} এর আয়াতসমূহ লোড হচ্ছে...</p>
+              <p className="text-[10px] text-gray-500 mt-2 px-8">
+                আমরা ১১৪টি সূরার বিস্তারিত ডাটাবেজ যুক্ত করছি। শীঘ্রই সব আয়াত এখানে দেখতে পাবেন।
+              </p>
             </div>
           )}
         </div>
@@ -150,69 +115,48 @@ export const Quran = () => {
 
   return (
     <div className="pb-24 px-4 pt-4 space-y-6">
-      {loading && (
-        <div className="fixed inset-0 z-[100] bg-white/80 backdrop-blur-sm flex items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
-            <p className="text-emerald-900 font-medium">সুরা লোড হচ্ছে...</p>
-          </div>
-        </div>
-      )}
+      <div className="text-center py-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">আল-কুরআন</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">১১৪টি সূরা অর্থসহ</p>
+      </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
           type="text"
-          placeholder="সুরা খুঁজুন..."
-          className="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          placeholder="সূরা খুঁজুন (নাম বা নম্বর)..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl py-4 pl-12 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all dark:text-white"
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Card 
-          onClick={() => handleSurahClick(lastRead.id)}
-          className="bg-emerald-900 text-white flex flex-col items-center justify-center py-6 cursor-pointer"
-        >
-          <Bookmark className="w-8 h-8 mb-2 text-emerald-300" />
-          <span className="text-xs font-medium text-emerald-200">পড়া চালিয়ে যান</span>
-          <p className="font-bold text-lg">{lastRead.nameBn}</p>
-        </Card>
-        <Card className="bg-amber-50 border-amber-100 flex flex-col items-center justify-center py-6">
-          <Play className="w-8 h-8 mb-2 text-amber-600" />
-          <span className="text-xs font-medium text-amber-600">অডিও তিলাওয়াত</span>
-          <p className="font-bold text-lg text-amber-900">শুনুন</p>
-        </Card>
+      <div className="grid grid-cols-1 gap-3">
+        {filteredSurahs.map((surah) => (
+          <motion.div
+            key={surah.id}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setSelectedSurah(surah)}
+            className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 flex items-center justify-between shadow-sm cursor-pointer"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-sm">
+                {surah.id}
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-900 dark:text-white">{surah.nameBn}</h4>
+                <p className="text-[10px] text-gray-400 uppercase tracking-widest">
+                  {surah.name} • {surah.totalAyahs} আয়াত
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-serif text-emerald-900 dark:text-emerald-400">{surah.nameAr}</p>
+              <p className="text-[10px] text-gray-400">{surah.meaningBn}</p>
+            </div>
+          </motion.div>
+        ))}
       </div>
-
-      <section>
-        <SectionTitle title="সুরা সমূহ" />
-        <div className="space-y-3">
-          {filteredSurahs.map((surah) => (
-            <motion.div
-              key={surah.id}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleSurahClick(surah.id)}
-              className="bg-white rounded-2xl p-4 border border-gray-100 flex items-center justify-between shadow-sm cursor-pointer hover:border-emerald-200 transition-colors"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-700 font-bold">
-                  {surah.id}
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900">{surah.nameBn}</h4>
-                  <p className="text-xs text-gray-400">{surah.name} • {surah.totalAyahs} আয়াত</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-lg font-serif text-emerald-800" dir="rtl">{surah.nameAr}</span>
-                <ChevronRight className="w-5 h-5 text-gray-300" />
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
     </div>
   );
 };

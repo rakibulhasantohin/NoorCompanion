@@ -73,7 +73,7 @@ export const BottomNav = () => {
     { icon: Home, label: state.language === 'bn' ? 'হোম' : 'Home', path: '/' },
     { icon: Clock, label: state.language === 'bn' ? 'নামাজ' : 'Prayer', path: '/prayer-times' },
     { icon: BookOpen, label: state.language === 'bn' ? 'কুরআন' : 'Quran', path: '/quran' },
-    { icon: Compass, label: state.language === 'bn' ? 'কিদলা' : 'Qibla', path: '/qibla' },
+    { icon: Compass, label: state.language === 'bn' ? 'কিবলা' : 'Qibla', path: '/qibla' },
     { icon: Settings, label: state.language === 'bn' ? 'সেটিংস' : 'Settings', path: '/settings' },
   ];
 

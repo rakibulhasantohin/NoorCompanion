@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { AppHeader, BottomNav } from './components/Common';
@@ -9,6 +9,9 @@ import { PrayerTimes } from './pages/PrayerTimes';
 import { Tasbih } from './pages/Tasbih';
 import { Qibla } from './pages/Qibla';
 import { Settings } from './pages/Settings';
+import { Surahs } from './pages/Surahs';
+import { Duas } from './pages/Duas';
+import { Hadith } from './pages/Hadith';
 
 import { useAppState } from './hooks/useAppState';
 
@@ -57,6 +60,12 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default function App() {
+  const { state } = useAppState();
+  
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', state.theme === 'dark');
+  }, [state.theme]);
+
   return (
     <Router>
       <PageWrapper>
@@ -67,6 +76,9 @@ export default function App() {
           <Route path="/tasbih" element={<Tasbih />} />
           <Route path="/qibla" element={<Qibla />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/surahs" element={<Surahs />} />
+          <Route path="/duas" element={<Duas />} />
+          <Route path="/hadith" element={<Hadith />} />
         </Routes>
       </PageWrapper>
     </Router>

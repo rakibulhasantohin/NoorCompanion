@@ -21,14 +21,8 @@ export const Home = () => {
   const locationLabel = state.language === 'bn' ? `${state.city}, বাংলাদেশ` : `${state.city}, Bangladesh`;
 
   // English date in English script
-  const englishDate = now.toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  });
-
-  const bengaliDate = getBengaliDate(now);
   const hijriDate = getHijriDate(now);
+  const bengaliDate = getBengaliDate(now);
   const liveTime = getLiveTime(now, state.language);
 
   // Prayer Logic
@@ -67,8 +61,8 @@ export const Home = () => {
             <span>{liveTime}</span>
           </div>
           <div className="text-[10px] text-gray-400 mt-1 flex flex-col items-end">
-            <span>{englishDate}</span>
-            <span>{bengaliDate} • {hijriDate}</span>
+            <span className="text-emerald-600 font-bold">{hijriDate}</span>
+            <span>{bengaliDate}</span>
           </div>
         </div>
       </div>
@@ -135,9 +129,9 @@ export const Home = () => {
       <div className="grid grid-cols-4 gap-4">
         {[
           { icon: Book, label: 'কুরআন', color: 'bg-blue-50 text-blue-600', path: '/quran' },
-          { icon: Star, label: 'সুরা', color: 'bg-amber-50 text-amber-600', path: '/surahs' },
-          { icon: Heart, label: 'দোয়া', color: 'bg-rose-50 text-rose-600', path: '/duas' },
-          { icon: Zap, label: 'তাসবিহ', color: 'bg-purple-50 text-purple-600', path: '/tasbih' },
+          { icon: Star, label: '১১৪ সূরা', color: 'bg-amber-50 text-amber-600', path: '/quran' },
+          { icon: Heart, label: 'দোয়া', color: 'bg-rose-50 text-rose-600', path: '/duas' },
+          { icon: Zap, label: 'হাদিস', color: 'bg-purple-50 text-purple-600', path: '/hadith' },
         ].map((item, i) => (
           <Link key={i} to={item.path} className="flex flex-col items-center gap-2">
             <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm", item.color)}>
