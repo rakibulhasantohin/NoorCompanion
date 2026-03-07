@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Book, Search, ChevronRight, Star } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Card } from '../components/Common';
 
 const HADITH_COLLECTIONS = [
@@ -26,7 +26,7 @@ const MOCK_HADITHS = [
     collection: 'bukhari',
     id: 2,
     title: 'কুরআন শিক্ষা',
-    arabic: 'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ',
+    arabic: 'خَيْرُكُمْ مَنْ تَعَلَّমَ الْقُرْآنَ وَعَلَّমَهُ',
     translation: 'তোমাদের মধ্যে সর্বোত্তম ব্যক্তি সেই যে নিজে কুরআন শিখে এবং অন্যকে শেখায়।',
     narrator: 'উসমান ইবনে আফফান (রা.)',
     reference: 'সহিহ বুখারী, হাদিস নং ৫০২৭',
@@ -39,6 +39,51 @@ const MOCK_HADITHS = [
     translation: 'পবিত্রতা ঈমানের অর্ধেক।',
     narrator: 'আবু মালেক আল-আশআরী (রা.)',
     reference: 'সহিহ মুসলিম, হাদিস নং ২২৩',
+  },
+  {
+    collection: 'muslim',
+    id: 2,
+    title: 'ইসলামের স্তম্ভ',
+    arabic: 'بُنِيَ الإِسْلَامُ عَلَى خَمْسٍ',
+    translation: 'ইসলামের ভিত্তি পাঁচটি স্তম্ভের ওপর।',
+    narrator: 'আবদুল্লাহ ইবনে উমর (রা.)',
+    reference: 'সহিহ মুসলিম, হাদিস নং ১৬',
+  },
+  {
+    collection: 'tirmidhi',
+    id: 1,
+    title: 'উত্তম চরিত্র',
+    arabic: 'أَكْمَلُ الْمُؤْمِنِينَ إِيمَانًا أَحْسَنُهُمْ خُلُقًا',
+    translation: 'মুমিনদের মধ্যে পূর্ণ ঈমানদার সেই ব্যক্তি, যার চরিত্র সবচেয়ে সুন্দর।',
+    narrator: 'আবু হুরায়রা (রা.)',
+    reference: 'সুনানে তিরমিজী, হাদিস নং ১১৬২',
+  },
+  {
+    collection: 'nasai',
+    id: 1,
+    title: 'সালাত বা নামাজ',
+    arabic: 'أَوَّلُ مَا يُحَاسَبُ بِهِ الْعَبْدُ يَوْমَ الْقِيَامَةِ الصَّلَاةُ',
+    translation: 'কিয়ামতের দিন বান্দার আমলসমূহের মধ্যে সর্বপ্রথম নামাজের হিসাব নেওয়া হবে।',
+    narrator: 'আবু হুরায়রা (রা.)',
+    reference: 'সুনানে নাসাঈ, হাদিস নং ৪৬৩',
+  },
+  {
+    collection: 'abu-dawud',
+    id: 1,
+    title: 'দোয়া ইবাদত',
+    arabic: 'الدُّعَاءُ هُوَ الْعِبَادَةُ',
+    translation: 'দোয়া-ই হলো ইবাদত।',
+    narrator: 'নুমান ইবনে বশীর (রা.)',
+    reference: 'সুনানে আবু দাউদ, হাদিস নং ১৪৭৯',
+  },
+  {
+    collection: 'ibn-majah',
+    id: 1,
+    title: 'জ্ঞান অর্জন',
+    arabic: 'طَلَبُ الْعِلْمِ فَرِيضَةٌ عَلَى كُلِّ مُسْلِمٍ',
+    translation: 'জ্ঞান অর্জন করা প্রত্যেক মুসলিমের জন্য ফরজ।',
+    narrator: 'আনাস ইবনে মালিক (রা.)',
+    reference: 'সুনানে ইবনে মাজাহ, হাদিস নং ২২৪',
   },
 ];
 

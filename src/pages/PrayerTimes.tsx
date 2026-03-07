@@ -37,20 +37,24 @@ export const PrayerTimes = () => {
     : `${countdown.h}h ${countdown.m}m left`;
 
   return (
-    <div className="pb-24 px-4 pt-4 space-y-6">
+    <div className="pb-24 px-4 pt-4 space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2 text-gray-500">
+        <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
           <MapPin className="w-4 h-4" />
           <span className="text-sm font-medium">{state.city}</span>
         </div>
         <div className="flex flex-col items-end text-right">
-          <div className="flex items-center gap-1 text-emerald-700 font-bold text-xs">
+          <div className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-bold text-xs">
             <ClockIcon className="w-3 h-3" />
             <span>{liveTime}</span>
           </div>
-          <div className="text-[10px] text-gray-400 mt-1 flex flex-col items-end">
+          <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 flex flex-col items-end">
             <span>{englishDate}</span>
-            <span>{getBengaliDate(now)} • {getHijriDate(now)}</span>
+            <div className="flex items-center gap-1">
+              <span>{getBengaliDate(now)}</span>
+              <span>•</span>
+              <span className="text-emerald-600 dark:text-emerald-500 font-bold">{getHijriDate(now)}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -104,7 +108,7 @@ export const PrayerTimes = () => {
                 whileTap={{ scale: 0.98 }}
                 className={cn(
                   "rounded-2xl p-4 border flex items-center justify-between transition-all",
-                  isNext ? "bg-emerald-50 border-emerald-200 shadow-md scale-[1.02]" : "bg-white border-gray-100 shadow-sm",
+                  isNext ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 shadow-md scale-[1.02]" : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 shadow-sm",
                   isPassed && "opacity-40 grayscale-[0.5]",
                   isCurrent && "border-emerald-500 ring-1 ring-emerald-500"
                 )}
@@ -112,25 +116,25 @@ export const PrayerTimes = () => {
                 <div className="flex items-center gap-4">
                   <div className={cn(
                     "w-12 h-12 rounded-2xl flex items-center justify-center",
-                    isNext ? "bg-emerald-600 text-white" : "bg-gray-50 text-gray-400"
+                    isNext ? "bg-emerald-600 text-white" : "bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-500"
                   )}>
                     <Clock className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className={cn("font-bold", isNext ? "text-emerald-900" : "text-gray-800")}>
+                    <h4 className={cn("font-bold", isNext ? "text-emerald-900 dark:text-emerald-100" : "text-gray-800 dark:text-gray-200")}>
                       {prayerName}
                     </h4>
-                    <p className="text-xs text-gray-400">{prayer.name}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">{prayer.name}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <span className={cn("text-lg font-bold", isNext ? "text-emerald-700" : "text-gray-900")}>
+                  <span className={cn("text-lg font-bold", isNext ? "text-emerald-700 dark:text-emerald-400" : "text-gray-900 dark:text-gray-100")}>
                     {prayer.time}
                   </span>
                   <button className={cn(
                     "p-2 rounded-xl transition-colors",
-                    isNext ? "bg-emerald-100 text-emerald-600" : "bg-gray-50 text-gray-300"
+                    isNext ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400" : "bg-gray-50 dark:bg-gray-900 text-gray-300 dark:text-gray-600"
                   )}>
                     {isNext || state.prayerAlarms ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
                   </button>
@@ -141,11 +145,11 @@ export const PrayerTimes = () => {
         </div>
       </section>
 
-      <Card className="bg-blue-50 border-blue-100 flex items-start gap-3">
-        <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+      <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-900/30 flex items-start gap-3">
+        <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
         <div className="space-y-1">
-          <h5 className="font-bold text-blue-900 text-sm">{isBn ? 'জুম্মার নামাজ' : 'Jummah Prayer'}</h5>
-          <p className="text-xs text-blue-700 leading-relaxed">
+          <h5 className="font-bold text-blue-900 dark:text-blue-100 text-sm">{isBn ? 'জুম্মার নামাজ' : 'Jummah Prayer'}</h5>
+          <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
             {isBn 
               ? 'আজ শুক্রবার। জুম্মার খুতবা শুরু হবে ১২:৩০ মিনিটে। আগেভাগে মসজিদে যাওয়ার চেষ্টা করুন।' 
               : 'Today is Friday. Jummah Khutbah starts at 12:30 PM. Try to reach the mosque early.'}

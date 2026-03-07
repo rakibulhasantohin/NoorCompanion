@@ -33,27 +33,27 @@ const SURAH_ITEMS = [
 
 export const Surahs = () => {
   return (
-    <div className="pb-24 px-4 pt-4 space-y-6">
+    <div className="pb-24 px-4 pt-4 space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="text-center py-6">
-        <h2 className="text-2xl font-bold text-gray-900">গুরুত্বপূর্ণ সূরা ও পাঠ</h2>
-        <p className="text-sm text-gray-500">নামাজের প্রয়োজনীয় দোয়া ও সূরাসমূহ</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">গুরুত্বপূর্ণ সূরা ও পাঠ</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">নামাজের প্রয়োজনীয় দোয়া ও সূরাসমূহ</p>
       </div>
 
       <div className="space-y-4">
         {SURAH_ITEMS.map((item) => (
-          <Card key={item.id} className="p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-gray-50 pb-3">
-              <h3 className="font-bold text-emerald-900">{item.title}</h3>
-              <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 text-xs font-bold">
+          <Card key={item.id} className="p-6 space-y-4 dark:bg-gray-800 dark:border-gray-700">
+            <div className="flex items-center justify-between border-b border-gray-50 dark:border-gray-700 pb-3">
+              <h3 className="font-bold text-emerald-900 dark:text-emerald-400">{item.title}</h3>
+              <div className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs font-bold">
                 {item.id}
               </div>
             </div>
-            <p className="text-right font-serif text-xl text-gray-800 leading-loose" dir="rtl">
+            <p className="text-right font-serif text-xl text-gray-800 dark:text-gray-200 leading-loose" dir="rtl">
               {item.arabic}
             </p>
-            <div className="bg-gray-50 rounded-2xl p-4">
-              <p className="text-xs text-gray-400 uppercase font-bold tracking-widest mb-2">অনুবাদ</p>
-              <p className="text-sm text-gray-700 leading-relaxed italic">
+            <div className="bg-gray-50 dark:bg-gray-900/40 rounded-2xl p-4">
+              <p className="text-xs text-gray-400 dark:text-gray-500 uppercase font-bold tracking-widest mb-2">অনুবাদ</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed italic">
                 {item.translation}
               </p>
             </div>
@@ -63,14 +63,14 @@ export const Surahs = () => {
 
       <div className="pt-4">
         <Link to="/quran">
-          <Card className="bg-emerald-900 text-white flex items-center justify-between p-4">
+          <Card className="bg-emerald-900 dark:bg-emerald-950 text-white flex items-center justify-between p-4 border-none">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-800 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-emerald-800 dark:bg-emerald-900 flex items-center justify-center">
                 <BookOpen className="w-5 h-5" />
               </div>
               <div>
                 <h4 className="font-bold">পূর্ণাঙ্গ কুরআন</h4>
-                <p className="text-[10px] text-emerald-200">১১৪টি সূরা পড়ুন</p>
+                <p className="text-[10px] text-emerald-200 dark:text-emerald-400">১১৪টি সূরা পড়ুন</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5" />

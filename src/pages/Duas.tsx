@@ -89,7 +89,7 @@ export const Duas = () => {
   });
 
   return (
-    <div className="pb-24 px-4 pt-4 space-y-6">
+    <div className="pb-24 px-4 pt-4 space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="text-center py-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">প্রয়োজনীয় দোয়া</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400">আরবি, উচ্চারণ ও অর্থসহ সংকলন</p>

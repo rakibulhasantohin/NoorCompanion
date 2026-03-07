@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import moment from 'moment-hijri';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -32,17 +33,32 @@ export function getBengaliDate(date: Date): string {
 }
 
 export function getHijriDate(date: Date): string {
-  // Simple mock for Hijri date since we don't have a library
-  // In a real app, we'd use Intl.DateTimeFormat with 'islamic' calendar
+  // Using moment-hijri for more accurate Islamic calendar calculations
+  // It supports the Umm al-Qura calendar which is widely used.
   try {
-    const formatter = new Intl.DateTimeFormat('bn-BD-u-ca-islamic-uma', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-    return formatter.format(date);
+    const m = moment(date);
+    const hijriMonthNames = [
+      'মুহররম', 'সফর', 'রবিউল আউয়াল', 'রবিউস সানি', 'জামাদিউল আউয়াল', 'জামাদিউস সানি',
+      'রজব', 'শাবান', 'রমজান', 'শাওয়াল', 'জিলকদ', 'জিলহজ'
+    ];
+    
+    const day = m.iDate();
+    const monthIndex = m.iMonth();
+    const year = m.iYear();
+    
+    return `${getBengaliNumber(day)} ${hijriMonthNames[monthIndex]}, ${getBengaliNumber(year)} হিজরি`;
   } catch (e) {
-    return '১৬ রমজান, ১৪৪৭'; // Fallback
+    // Fallback to Intl if moment-hijri fails
+    try {
+      const formatter = new Intl.DateTimeFormat('bn-BD-u-ca-islamic-uma', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+      return formatter.format(date);
+    } catch (e2) {
+      return '১৬ রমজান, ১৪৪৭'; // Absolute fallback
+    }
   }
 }
 

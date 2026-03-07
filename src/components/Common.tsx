@@ -26,18 +26,18 @@ export const AppHeader = ({ title }: { title: string }) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-emerald-900 text-white px-4 py-4 flex items-center justify-between shadow-lg">
+    <header className="sticky top-0 z-50 w-full bg-emerald-900 dark:bg-emerald-950 text-white px-4 py-4 flex items-center justify-between shadow-lg">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-emerald-700 rounded-lg flex items-center justify-center font-bold text-emerald-100">N</div>
+        <div className="w-8 h-8 bg-emerald-700 dark:bg-emerald-800 rounded-lg flex items-center justify-center font-bold text-emerald-100">N</div>
         <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
       </div>
       <div className="flex items-center gap-3">
         <Link to="/bookmarks">
-          <Heart className="w-6 h-6 text-emerald-100" />
+          <Heart className="w-6 h-6 text-emerald-100 dark:text-emerald-200" />
         </Link>
         <div 
           onClick={handleImageClick}
-          className="w-10 h-10 rounded-full bg-emerald-800 border-2 border-emerald-700 overflow-hidden cursor-pointer flex items-center justify-center relative group"
+          className="w-10 h-10 rounded-full bg-emerald-800 dark:bg-emerald-900 border-2 border-emerald-700 dark:border-emerald-800 overflow-hidden cursor-pointer flex items-center justify-center relative group"
         >
           {state.profileImage ? (
             <img 
@@ -78,7 +78,7 @@ export const BottomNav = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 px-2 py-2 flex justify-around items-center pb-safe shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 px-2 py-2 flex justify-around items-center pb-safe shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
         return (
@@ -87,10 +87,10 @@ export const BottomNav = () => {
             to={item.path}
             className={cn(
               "flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all duration-300",
-              isActive ? "text-emerald-700 bg-emerald-50" : "text-gray-400"
+              isActive ? "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30" : "text-gray-400 dark:text-gray-500"
             )}
           >
-            <item.icon className={cn("w-6 h-6", isActive && "fill-emerald-700/10")} />
+            <item.icon className={cn("w-6 h-6", isActive && "fill-emerald-700/10 dark:fill-emerald-400/10")} />
             <span className="text-[10px] font-medium">{item.label}</span>
           </Link>
         );
@@ -103,7 +103,7 @@ export const Card = ({ children, className, ...props }: { children: React.ReactN
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
-    className={cn("bg-white rounded-2xl p-4 shadow-sm border border-gray-100", className)}
+    className={cn("bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700", className)}
     {...props}
   >
     {children}
@@ -112,9 +112,9 @@ export const Card = ({ children, className, ...props }: { children: React.ReactN
 
 export const SectionTitle = ({ title, actionLabel, onAction }: { title: string, actionLabel?: string, onAction?: () => void }) => (
   <div className="flex items-center justify-between mb-3 px-1">
-    <h2 className="text-lg font-bold text-gray-800">{title}</h2>
+    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{title}</h2>
     {actionLabel && (
-      <button onClick={onAction} className="text-emerald-600 text-sm font-medium">
+      <button onClick={onAction} className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">
         {actionLabel}
       </button>
     )}

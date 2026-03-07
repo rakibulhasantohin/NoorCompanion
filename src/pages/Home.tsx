@@ -42,26 +42,26 @@ export const Home = () => {
     : `${countdown.h}h ${countdown.m}m left`;
 
   return (
-    <div className="pb-24 px-4 pt-4 space-y-6">
+    <div className="pb-24 px-4 pt-4 space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       {/* Greeting & Location */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">{greeting}</h2>
-          <p className="text-xs text-emerald-600 font-medium mt-0.5">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{greeting}</h2>
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
             {state.language === 'bn' ? 'নামাজ, কুরআন, হাদিস — সব এক অ্যাপে' : 'Prayer, Quran, Hadith — All in one app'}
           </p>
-          <div className="flex items-center gap-1 text-gray-500 text-sm mt-1">
+          <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400 text-sm mt-1">
             <MapPin className="w-3 h-3" />
             <span>{locationLabel}</span>
           </div>
         </div>
         <div className="flex flex-col items-end text-right">
-          <div className="flex items-center gap-1 text-emerald-700 font-bold text-sm">
+          <div className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-bold text-sm">
             <ClockIcon className="w-3 h-3" />
             <span>{liveTime}</span>
           </div>
-          <div className="text-[10px] text-gray-400 mt-1 flex flex-col items-end">
-            <span className="text-emerald-600 font-bold">{hijriDate}</span>
+          <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 flex flex-col items-end">
+            <span className="text-emerald-600 dark:text-emerald-500 font-bold">{hijriDate}</span>
             <span>{bengaliDate}</span>
           </div>
         </div>
@@ -128,16 +128,16 @@ export const Home = () => {
       {/* Quick Access Grid */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { icon: Book, label: 'কুরআন', color: 'bg-blue-50 text-blue-600', path: '/quran' },
-          { icon: Star, label: '১১৪ সূরা', color: 'bg-amber-50 text-amber-600', path: '/quran' },
-          { icon: Heart, label: 'দোয়া', color: 'bg-rose-50 text-rose-600', path: '/duas' },
-          { icon: Zap, label: 'হাদিস', color: 'bg-purple-50 text-purple-600', path: '/hadith' },
+          { icon: Book, label: 'কুরআন', color: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400', path: '/quran' },
+          { icon: Star, label: '১১৪ সূরা', color: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400', path: '/quran' },
+          { icon: Heart, label: 'দোয়া', color: 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400', path: '/duas' },
+          { icon: Zap, label: 'হাদিস', color: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400', path: '/hadith' },
         ].map((item, i) => (
           <Link key={i} to={item.path} className="flex flex-col items-center gap-2">
             <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm", item.color)}>
               <item.icon className="w-7 h-7" />
             </div>
-            <span className="text-xs font-medium text-gray-700">{item.label}</span>
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{item.label}</span>
           </Link>
         ))}
       </div>
@@ -180,9 +180,9 @@ export const Home = () => {
                 : (state.language === 'bn' ? prayer.nameBn : prayer.name);
               
               return (
-                <Card key={idx} className="flex flex-col items-center p-3 text-center">
-                  <span className="text-[10px] text-gray-400 mb-1 uppercase tracking-tighter">{displayName}</span>
-                  <span className="text-xs font-bold text-gray-800">{prayer.time}</span>
+                <Card key={idx} className="flex flex-col items-center p-3 text-center dark:bg-gray-800 dark:border-gray-700">
+                  <span className="text-[10px] text-gray-400 dark:text-gray-500 mb-1 uppercase tracking-tighter">{displayName}</span>
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-100">{prayer.time}</span>
                 </Card>
               );
             });
@@ -192,37 +192,37 @@ export const Home = () => {
 
       {/* Daily Ayah/Hadith */}
       <section className="space-y-4">
-        <Card className="bg-gradient-to-br from-emerald-50 to-white border-emerald-100">
+        <Card className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-900/10 dark:to-gray-800 border-emerald-100 dark:border-emerald-900/30">
           <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 bg-emerald-100 rounded-lg text-emerald-700">
+            <div className="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-700 dark:text-emerald-400">
               <Book className="w-4 h-4" />
             </div>
-            <h4 className="font-bold text-emerald-900">আজকের আয়াত</h4>
+            <h4 className="font-bold text-emerald-900 dark:text-emerald-100">আজকের আয়াত</h4>
           </div>
-          <p className="text-right font-serif text-lg text-gray-800 mb-3 leading-relaxed" dir="rtl">
+          <p className="text-right font-serif text-lg text-gray-800 dark:text-gray-200 mb-3 leading-relaxed" dir="rtl">
             إِنَّ مَعَ الْعُسْرِ يُسْرًا
           </p>
-          <p className="text-sm text-gray-600 italic">"নিশ্চয়ই কষ্টের সাথেই স্বস্তি রয়েছে।" (সুরা ইনশিরাহ: ৬)</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 italic">"নিশ্চয়ই কষ্টের সাথেই স্বস্তি রয়েছে।" (সুরা ইনশিরাহ: ৬)</p>
         </Card>
 
-        <Card>
+        <Card className="dark:bg-gray-800 dark:border-gray-700">
           <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 bg-amber-100 rounded-lg text-amber-700">
+            <div className="p-1.5 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-700 dark:text-amber-400">
               <Star className="w-4 h-4" />
             </div>
-            <h4 className="font-bold text-gray-900">আজকের হাদিস</h4>
+            <h4 className="font-bold text-gray-900 dark:text-gray-100">আজকের হাদিস</h4>
           </div>
-          <p className="text-sm text-gray-700 leading-relaxed mb-2">
+          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-2">
             {HADITHS_MOCK[0].textBn}
           </p>
-          <span className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">— {HADITHS_MOCK[0].source}</span>
+          <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-widest">— {HADITHS_MOCK[0].source}</span>
         </Card>
       </section>
 
       {/* Offline Status Indicator */}
       <div className="flex items-center justify-center gap-2 py-4">
         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">সর্বশেষ আপডেট: ০৮:০৫ AM</span>
+        <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">সর্বশেষ আপডেট: ০৮:০৫ AM</span>
       </div>
     </div>
   );
