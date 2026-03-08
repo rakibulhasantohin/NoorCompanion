@@ -13,7 +13,10 @@ export const Qibla = () => {
 
   useEffect(() => {
     const checkDesktop = () => {
-      setIsDesktop(!/Mobi|Android/i.test(navigator.userAgent));
+      // More robust check: check for orientation support or touch
+      const hasOrientation = 'DeviceOrientationEvent' in window;
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      setIsDesktop(!isTouch && !hasOrientation);
     };
     checkDesktop();
   }, []);
@@ -70,13 +73,18 @@ export const Qibla = () => {
 
   const handleOrientation = (event: DeviceOrientationEvent) => {
     let heading = 0;
+
     if ((event as any).webkitCompassHeading) {
       // iOS
       heading = (event as any).webkitCompassHeading;
+    } else if (event.absolute && event.alpha !== null) {
+      // Android Absolute
+      heading = 360 - event.alpha;
     } else if (event.alpha !== null) {
-      // Android (absolute alpha is preferred)
+      // Android Relative (fallback)
       heading = 360 - event.alpha;
     }
+    
     setHeading(heading);
   };
 

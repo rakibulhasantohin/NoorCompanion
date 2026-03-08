@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { MapPin, Bell, RefreshCw, ChevronRight, Book, Star, Heart, Moon, Sun, Zap, Clock as ClockIcon } from 'lucide-react';
+import { MapPin, Bell, RefreshCw, ChevronRight, Book, Star, Heart, Moon, Sun, Zap, Clock as ClockIcon, Plus } from 'lucide-react';
 import { Card, SectionTitle } from '../components/Common';
 import { PRAYER_TIMES_MOCK, RAMADAN_MOCK, SURAHS_MOCK, HADITHS_MOCK } from '../data/mockData';
 import { getBengaliNumber, getBengaliDate, getHijriDate, isFriday, getLiveTime, getPrayerStatus, getCountdown } from '../utils/utils';
@@ -142,6 +142,16 @@ export const Home = () => {
         ))}
       </div>
 
+      {/* Quick Tasbeeh Section */}
+      <section>
+        <SectionTitle 
+          title={state.language === 'bn' ? 'কুইক তাসবিহ' : 'Quick Tasbih'} 
+          actionLabel={state.language === 'bn' ? 'বিস্তারিত' : 'View All'} 
+          onAction={() => window.location.href = '/tasbih'} 
+        />
+        <QuickTasbih language={state.language} />
+      </section>
+
       {/* Prayer Times Summary */}
       <section>
         <SectionTitle 
@@ -231,3 +241,80 @@ export const Home = () => {
 function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(' ');
 }
+
+const QuickTasbih = ({ language }: { language: string }) => {
+  const tasbihList = [
+    { ar: 'سُبْحَانَ ٱللَّٰهِ', bn: 'সুবহানাল্লাহ', en: 'Subhanallah', target: 33 },
+    { ar: 'ٱلْحَمْدُ لِلَّٰهِ', bn: 'আলহামদুলিল্লাহ', en: 'Alhamdulillah', target: 33 },
+    { ar: 'ٱللَّٰهُ أَكْبَرُ', bn: 'আল্লাহু আকবার', en: 'Allahu Akbar', target: 34 },
+    { ar: 'لَا إِلَٰهَ إِلَّا ٱللَّٰهُ', bn: 'লা ইলাহা ইল্লাল্লাহ', en: 'La ilaha illallah', target: 100 },
+    { ar: 'أَسْتَغْفِرُ ٱللَّٰهَ', bn: 'আস্তাগফিরুল্লাহ', en: 'Astaghfirullah', target: 100 },
+  ];
+
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [count, setCount] = useState(0);
+  const selected = tasbihList[selectedIdx];
+
+  const handleCount = () => {
+    setCount(prev => prev + 1);
+    if (window.navigator.vibrate) {
+      window.navigator.vibrate(50);
+    }
+  };
+
+  const reset = () => setCount(0);
+
+  return (
+    <Card className="p-4 space-y-4 dark:bg-gray-800 dark:border-gray-700">
+      <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide">
+        {tasbihList.map((t, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelectedIdx(i); setCount(0); }}
+            className={cn(
+              "whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+              selectedIdx === i 
+                ? "bg-emerald-600 text-white" 
+                : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+            )}
+          >
+            {language === 'bn' ? t.bn : t.en}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
+        <div className="space-y-1">
+          <p className="text-right font-serif text-xl text-emerald-900 dark:text-emerald-100" dir="rtl">
+            {selected.ar}
+          </p>
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+            {language === 'bn' ? selected.bn : selected.en}
+          </p>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-2xl font-black text-emerald-900 dark:text-emerald-100">{getBengaliNumber(count)}</span>
+            <span className="text-[10px] text-emerald-600/60 dark:text-emerald-400/60 uppercase font-bold tracking-widest">
+              / {getBengaliNumber(selected.target)}
+            </span>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={reset}
+            className="p-2 text-gray-400 hover:text-rose-500 transition-colors"
+          >
+            <RefreshCw className="w-5 h-5" />
+          </button>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={handleCount}
+            className="w-16 h-16 rounded-full bg-emerald-600 text-white shadow-lg flex items-center justify-center hover:bg-emerald-700 transition-colors"
+          >
+            <Plus className="w-8 h-8" />
+          </motion.button>
+        </div>
+      </div>
+    </Card>
+  );
+};
