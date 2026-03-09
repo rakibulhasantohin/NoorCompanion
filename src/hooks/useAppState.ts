@@ -11,6 +11,7 @@ interface AppState {
   notifications: boolean;
   prayerAlarms: boolean;
   profileImage: string | null;
+  lastBackup: string | null;
 }
 
 const DEFAULT_STATE: AppState = {
@@ -23,6 +24,7 @@ const DEFAULT_STATE: AppState = {
   notifications: true,
   prayerAlarms: true,
   profileImage: null,
+  lastBackup: null,
 };
 
 export function useAppState() {
@@ -70,14 +72,26 @@ export function useAppState() {
     }
   };
 
-  const syncToSupabase = async (newState: AppState) => {
+  const syncToSupabase = async (newState: AppState, force = false) => {
     if (!user) return;
-    try {
-      await supabase
-        .from('user_profiles')
-        .upsert({ id: user.id, state: newState, updated_at: new Date() });
-    } catch (err) {
-      console.error('Sync to Supabase error:', err);
+    
+    const now = new Date();
+    const lastBackupDate = newState.lastBackup ? new Date(newState.lastBackup) : null;
+    const isOneDayApart = !lastBackupDate || (now.getTime() - lastBackupDate.getTime() > 24 * 60 * 60 * 1000);
+
+    if (force || isOneDayApart) {
+      try {
+        const stateWithTimestamp = { ...newState, lastBackup: now.toISOString() };
+        await supabase
+          .from('user_profiles')
+          .upsert({ id: user.id, state: stateWithTimestamp, updated_at: now });
+        
+        if (isOneDayApart) {
+          setState(stateWithTimestamp);
+        }
+      } catch (err) {
+        console.error('Sync to Supabase error:', err);
+      }
     }
   };
 
@@ -89,5 +103,9 @@ export function useAppState() {
     });
   };
 
-  return { state, updateState, user };
+  const manualSync = () => {
+    syncToSupabase(state, true);
+  };
+
+  return { state, updateState, user, manualSync };
 }
