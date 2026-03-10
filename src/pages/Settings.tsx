@@ -5,6 +5,7 @@ import { Card, SectionTitle } from '../components/Common';
 import { useAppState } from '../hooks/useAppState';
 import { Auth } from '../components/Auth';
 import { ProfileSection } from '../components/Profile';
+import { supabase } from '../lib/supabase';
 
 export const Settings = () => {
   const { state, updateState, user } = useAppState();
@@ -172,6 +173,18 @@ export const Settings = () => {
           </Modal>
         )}
       </AnimatePresence>
+
+      {user && (
+        <section className="pt-4">
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className="w-full py-4 rounded-2xl bg-rose-50 text-rose-600 font-bold flex items-center justify-center gap-2 border border-rose-100 hover:bg-rose-100 transition-colors shadow-sm"
+          >
+            <LogOut className="w-5 h-5" />
+            লগ আউট
+          </button>
+        </section>
+      )}
     </div>
   );
 };

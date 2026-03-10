@@ -49,10 +49,16 @@ export const Auth = () => {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
+          scopes: 'https://www.googleapis.com/auth/drive.appdata',
+          queryParams: {
+            prompt: 'select_account',
+            access_type: 'offline',
+          },
           redirectTo: window.location.origin,
+          skipBrowserRedirect: false,
         },
       });
       if (error) throw error;
@@ -79,13 +85,6 @@ export const Auth = () => {
             <p className="font-bold text-gray-900 truncate">{user.email}</p>
           </div>
         </div>
-        <button
-          onClick={handleLogout}
-          className="w-full py-3 rounded-xl bg-rose-50 text-rose-600 font-bold flex items-center justify-center gap-2 border border-rose-100 hover:bg-rose-100 transition-colors"
-        >
-          <LogOut className="w-5 h-5" />
-          লগ আউট
-        </button>
       </Card>
     );
   }

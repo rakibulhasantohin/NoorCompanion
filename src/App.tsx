@@ -12,6 +12,8 @@ import { Settings } from './pages/Settings';
 import { Surahs } from './pages/Surahs';
 import { Duas } from './pages/Duas';
 import { Hadith } from './pages/Hadith';
+import { Hajj } from './pages/Hajj';
+import { Pillars } from './pages/Pillars';
 
 import { useAppState } from './hooks/useAppState';
 
@@ -40,7 +42,7 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className={cn("min-h-screen font-sans transition-colors duration-300", state.theme === 'dark' ? "bg-gray-900 text-white dark" : "bg-gray-50 text-gray-900")}>
-      <AppHeader title={currentTitle} />
+      <AppHeader />
       <main className="max-w-md mx-auto relative">
         <AnimatePresence mode="wait">
           <motion.div
@@ -79,6 +81,8 @@ export default function App() {
           <Route path="/surahs" element={<Surahs />} />
           <Route path="/duas" element={<Duas />} />
           <Route path="/hadith" element={<Hadith />} />
+          <Route path="/hajj" element={<Hajj />} />
+          <Route path="/pillars" element={<Pillars />} />
         </Routes>
       </PageWrapper>
     </Router>

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { Search, ArrowLeft, RefreshCw, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Search, ArrowLeft, RefreshCw, AlertTriangle, Book, Download, ChevronRight, Star } from 'lucide-react';
 import { Card } from '../components/Common';
 import { SURAHS_LIST } from '../data/surahs';
+import { cn } from '../utils/utils';
 
 export const Quran = () => {
+  const [activeTab, setActiveTab] = useState<'home' | 'surah' | 'para' | 'my'>('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSurah, setSelectedSurah] = useState<typeof SURAHS_LIST[0] | null>(null);
   const [ayahs, setAyahs] = useState<any[]>([]);
@@ -16,7 +18,6 @@ export const Quran = () => {
     setError(null);
     setAyahs([]);
     try {
-      // Fetching Arabic text and Bengali translation
       const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahId}/editions/quran-uthmani,bn.bengali`);
       const data = await response.json();
       
@@ -52,6 +53,13 @@ export const Quran = () => {
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.id.toString() === searchQuery
   );
+
+  const tabs = [
+    { id: 'home', label: 'হোম' },
+    { id: 'surah', label: 'সূরা' },
+    { id: 'para', label: 'পারা' },
+    { id: 'my', label: 'আমার কুরআন' },
+  ];
 
   if (selectedSurah) {
     return (
@@ -120,48 +128,135 @@ export const Quran = () => {
   }
 
   return (
-    <div className="pb-24 px-4 pt-4 space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <div className="text-center py-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">আল-কুরআন</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">১১৪টি সূরা অর্থসহ</p>
+    <div className="pb-24 space-y-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
+      <div className="bg-white dark:bg-gray-900 px-4 pt-4 pb-2 sticky top-[64px] z-40 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={cn(
+                "px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap border",
+                activeTab === tab.id 
+                  ? "bg-emerald-700 text-white border-emerald-700 shadow-lg shadow-emerald-700/20" 
+                  : "bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-100 dark:border-gray-700"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          placeholder="সূরা খুঁজুন (নাম বা নম্বর)..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl py-4 pl-12 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all dark:text-white"
-        />
-      </div>
+      <div className="px-4 space-y-6">
+        {activeTab === 'home' && (
+          <div className="space-y-8">
+            <section>
+              <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">মুদ্রিত কুরআন</h3>
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+                {[
+                  { title: 'রঙিন হাফেজী', author: 'কুরতুবা বুকস', image: 'https://picsum.photos/seed/quran1/300/400' },
+                  { title: 'কুরআনুল কারীম', author: 'আল-মাদানী', image: 'https://picsum.photos/seed/quran2/300/400' },
+                ].map((book, i) => (
+                  <Card key={i} className="min-w-[180px] p-0 overflow-hidden border-none shadow-xl">
+                    <div className="relative h-56 bg-emerald-900">
+                      <img src={book.image} alt={book.title} className="w-full h-full object-cover opacity-80" />
+                      <div className="absolute top-2 right-2 w-8 h-8 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white">
+                        <Download className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <h4 className="font-bold text-sm text-gray-900 dark:text-white truncate">{book.title}</h4>
+                      <p className="text-[10px] text-gray-400 font-medium">{book.author}</p>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
 
-      <div className="grid grid-cols-1 gap-3">
-        {filteredSurahs.map((surah) => (
-          <motion.div
-            key={surah.id}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => handleSurahSelect(surah)}
-            className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 flex items-center justify-between shadow-sm cursor-pointer"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-sm">
-                {surah.id}
+            <section>
+              <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">বহুল ব্যবহৃত সূরা</h3>
+              <div className="space-y-3">
+                {SURAHS_LIST.slice(0, 4).map((surah) => (
+                  <motion.div
+                    key={surah.id}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleSurahSelect(surah)}
+                    className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 flex items-center justify-between shadow-sm cursor-pointer"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-sm relative">
+                        <Star className="w-8 h-8 opacity-20 absolute" />
+                        <span className="relative z-10">{surah.id}</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 dark:text-white">{surah.nameBn}</h4>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                          {surah.meaningBn} • {surah.totalAyahs} আয়াত
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-serif text-emerald-900 dark:text-emerald-400">{surah.nameAr}</p>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
-              <div>
-                <h4 className="font-bold text-gray-900 dark:text-white">{surah.nameBn}</h4>
-                <p className="text-[10px] text-gray-400 uppercase tracking-widest">
-                  {surah.name} • {surah.totalAyahs} আয়াত
-                </p>
-              </div>
+            </section>
+          </div>
+        )}
+
+        {(activeTab === 'surah' || activeTab === 'para') && (
+          <div className="space-y-6">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="সূরা খুঁজুন (নাম বা নম্বর)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl py-4 pl-12 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all dark:text-white"
+              />
             </div>
-            <div className="text-right">
-              <p className="text-lg font-serif text-emerald-900 dark:text-emerald-400">{surah.nameAr}</p>
-              <p className="text-[10px] text-gray-400">{surah.meaningBn}</p>
+
+            <div className="grid grid-cols-1 gap-3">
+              {filteredSurahs.map((surah) => (
+                <motion.div
+                  key={surah.id}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleSurahSelect(surah)}
+                  className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 flex items-center justify-between shadow-sm cursor-pointer"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-sm">
+                      {surah.id}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white">{surah.nameBn}</h4>
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest">
+                        {surah.name} • {surah.totalAyahs} আয়াত
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-serif text-emerald-900 dark:text-emerald-400">{surah.nameAr}</p>
+                    <p className="text-[10px] text-gray-400">{surah.meaningBn}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
-          </motion.div>
-        ))}
+          </div>
+        )}
+
+        {activeTab === 'my' && (
+          <div className="text-center py-20 space-y-4">
+            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto text-emerald-600">
+              <Book className="w-10 h-10" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">আমার কুরআন</h3>
+            <p className="text-sm text-gray-500 max-w-[200px] mx-auto">আপনার বুকমার্ক এবং পঠিত সূরাগুলো এখানে পাওয়া যাবে।</p>
+          </div>
+        )}
       </div>
     </div>
   );

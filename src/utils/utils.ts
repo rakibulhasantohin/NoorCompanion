@@ -95,6 +95,15 @@ export function getPrayerStatus(date: Date, prayers: any[]) {
 
   // Current prayer is the last one that has already started
   let current = [...parsedPrayers].reverse().find(p => p.totalMinutes <= currentTime);
+  
+  // Custom logic: If current is Sunrise and it has strictly passed, move to Dhuhr
+  if (current && current.name === 'Sunrise' && currentTime > current.totalMinutes) {
+    const dhuhr = parsedPrayers.find(p => p.name === 'Dhuhr');
+    if (dhuhr) {
+      current = dhuhr;
+    }
+  }
+
   if (!current) {
     // If before Fajr, current is Tahajjud of yesterday (technically)
     current = { ...parsedPrayers[parsedPrayers.length - 1], isYesterday: true };

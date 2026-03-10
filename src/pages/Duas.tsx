@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { Heart, Search, Moon, Sun, Utensils, AlertTriangle, LogOut, Plane, BookOpen, Star } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Heart, Search, Moon, Sun, Utensils, AlertTriangle, LogOut, Plane, 
+  BookOpen, Star, Droplet, Thermometer, ChevronRight, ArrowLeft 
+} from 'lucide-react';
 import { Card } from '../components/Common';
+import { cn } from '../utils/utils';
 
 const DUA_CATEGORIES = [
-  { id: 'daily', name: 'দৈনন্দিন', icon: Sun, color: 'text-amber-600 bg-amber-50' },
-  { id: 'food', name: 'খাবার', icon: Utensils, color: 'text-emerald-600 bg-emerald-50' },
-  { id: 'sleep', name: 'ঘুম', icon: Moon, color: 'text-indigo-600 bg-indigo-50' },
-  { id: 'danger', name: 'বিপদ', icon: AlertTriangle, color: 'text-rose-600 bg-rose-50' },
-  { id: 'travel', name: 'ভ্রমণ', icon: Plane, color: 'text-blue-600 bg-blue-50' },
+  { id: 'purity', name: 'পবিত্রতা', icon: Droplet, color: 'text-blue-600 bg-blue-50' },
   { id: 'prayer', name: 'নামাজ', icon: Star, color: 'text-purple-600 bg-purple-50' },
+  { id: 'morning-evening', name: 'সকাল-সন্ধ্যা', icon: Sun, color: 'text-amber-600 bg-amber-50' },
+  { id: 'sleep', name: 'ঘুম', icon: Moon, color: 'text-indigo-600 bg-indigo-50' },
+  { id: 'food', name: 'খাবার', icon: Utensils, color: 'text-emerald-600 bg-emerald-50' },
+  { id: 'travel', name: 'ভ্রমণ', icon: Plane, color: 'text-cyan-600 bg-cyan-50' },
+  { id: 'danger', name: 'বিপদ-আপদ', icon: AlertTriangle, color: 'text-rose-600 bg-rose-50' },
+  { id: 'sickness', name: 'অসুখ-বিসুখ', icon: Heart, color: 'text-pink-600 bg-pink-50' },
 ];
 
 const DUA_ITEMS = [
@@ -79,86 +85,104 @@ const DUA_ITEMS = [
 ];
 
 export const Duas = () => {
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredDuas = DUA_ITEMS.filter(item => {
-    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+    const matchesCategory = !selectedCategory || item.category === selectedCategory;
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  return (
-    <div className="pb-24 px-4 pt-4 space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <div className="text-center py-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">প্রয়োজনীয় দোয়া</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">আরবি, উচ্চারণ ও অর্থসহ সংকলন</p>
-      </div>
-
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          placeholder="দোয়া খুঁজুন..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl py-4 pl-12 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all dark:text-white"
-        />
-      </div>
-
-      <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-        <button
-          onClick={() => setSelectedCategory('all')}
-          className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${
-            selectedCategory === 'all' ? 'bg-emerald-900 text-white shadow-lg' : 'bg-white dark:bg-gray-800 text-gray-500 border border-gray-100 dark:border-gray-700'
-          }`}
+  if (selectedCategory) {
+    const category = DUA_CATEGORIES.find(c => c.id === selectedCategory);
+    return (
+      <div className="pb-24 px-4 pt-4 space-y-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
+        <button 
+          onClick={() => setSelectedCategory(null)}
+          className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold mb-4"
         >
-          সবগুলো
+          <ArrowLeft className="w-5 h-5" />
+          <span>ফিরে যান</span>
         </button>
-        {DUA_CATEGORIES.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all ${
-              selectedCategory === cat.id ? 'bg-emerald-900 text-white shadow-lg' : 'bg-white dark:bg-gray-800 text-gray-500 border border-gray-100 dark:border-gray-700'
-            }`}
-          >
-            <cat.icon className={`w-4 h-4 ${selectedCategory === cat.id ? 'text-white' : cat.color.split(' ')[0]}`} />
-            {cat.name}
-          </button>
-        ))}
+
+        <div className="flex items-center gap-3 mb-6">
+          <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm", category?.color)}>
+            {category && <category.icon className="w-6 h-6" />}
+          </div>
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white">{category?.name}</h2>
+        </div>
+
+        <div className="space-y-4">
+          {filteredDuas.map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+            >
+              <Card className="p-6 space-y-4 dark:bg-gray-800 dark:border-gray-700 border-none shadow-xl shadow-emerald-900/5">
+                <h3 className="font-bold text-emerald-900 dark:text-emerald-400 border-b border-gray-50 dark:border-gray-700 pb-3">{item.title}</h3>
+                <p className="text-right font-serif text-2xl text-gray-800 dark:text-gray-200 leading-loose" dir="rtl">
+                  {item.arabic}
+                </p>
+                <div className="space-y-3">
+                  <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-4">
+                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold tracking-widest mb-1">উচ্চারণ</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                      {item.pronunciation}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-900/40 rounded-2xl p-4">
+                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">অনুবাদ</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed italic">
+                      {item.translation}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pb-24 space-y-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
+      <div className="bg-white dark:bg-gray-900 px-4 pt-6 pb-6 space-y-6 border-b border-gray-100 dark:border-gray-800">
+        <h2 className="text-3xl font-black text-gray-900 dark:text-white">দোয়া</h2>
+        
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="দোয়া খুঁজুন..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl py-4 pl-12 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all dark:text-white"
+          />
+        </div>
       </div>
 
-      <div className="space-y-4">
-        {filteredDuas.map((item, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-          >
-            <Card className="p-6 space-y-4 dark:bg-gray-800 dark:border-gray-700">
-              <h3 className="font-bold text-emerald-900 dark:text-emerald-400 border-b border-gray-50 dark:border-gray-700 pb-3">{item.title}</h3>
-              <p className="text-right font-serif text-2xl text-gray-800 dark:text-gray-200 leading-loose" dir="rtl">
-                {item.arabic}
-              </p>
-              <div className="space-y-3">
-                <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-4">
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold tracking-widest mb-1">উচ্চারণ</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                    {item.pronunciation}
-                  </p>
-                </div>
-                <div className="bg-gray-50 dark:bg-gray-900/40 rounded-2xl p-4">
-                  <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">অনুবাদ</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed italic">
-                    {item.translation}
-                  </p>
-                </div>
+      <div className="px-4">
+        <div className="grid grid-cols-2 gap-4">
+          {DUA_CATEGORIES.map((cat) => (
+            <motion.div
+              key={cat.id}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setSelectedCategory(cat.id)}
+              className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all"
+            >
+              <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm", cat.color)}>
+                <cat.icon className="w-8 h-8" />
               </div>
-            </Card>
-          </motion.div>
-        ))}
+              <span className="font-bold text-gray-800 dark:text-gray-200 text-center">
+                {cat.name}
+              </span>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   );

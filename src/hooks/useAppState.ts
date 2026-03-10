@@ -12,6 +12,8 @@ interface AppState {
   prayerAlarms: boolean;
   profileImage: string | null;
   lastBackup: string | null;
+  fullName: string | null;
+  dateOfBirth: string | null;
 }
 
 const DEFAULT_STATE: AppState = {
@@ -25,6 +27,8 @@ const DEFAULT_STATE: AppState = {
   prayerAlarms: true,
   profileImage: null,
   lastBackup: null,
+  fullName: null,
+  dateOfBirth: null,
 };
 
 export function useAppState() {
@@ -95,10 +99,10 @@ export function useAppState() {
     }
   };
 
-  const updateState = (updates: Partial<AppState>) => {
+  const updateState = (updates: Partial<AppState>, forceSync = false) => {
     setState((prev) => {
       const newState = { ...prev, ...updates };
-      syncToSupabase(newState);
+      syncToSupabase(newState, forceSync);
       return newState;
     });
   };
