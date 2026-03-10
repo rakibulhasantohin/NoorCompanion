@@ -16,10 +16,15 @@ import { Hajj } from './pages/Hajj';
 import { Pillars } from './pages/Pillars';
 
 import { useAppState } from './hooks/useAppState';
+import { Onboarding } from './components/Onboarding/Onboarding';
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const { state } = useAppState();
+  
+  if (!state.onboardingComplete) {
+    return <Onboarding />;
+  }
   
   const getTitle = (path: string) => {
     const isBn = state.language === 'bn';
@@ -42,7 +47,6 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className={cn("min-h-screen font-sans transition-colors duration-300", state.theme === 'dark' ? "bg-gray-900 text-white dark" : "bg-gray-50 text-gray-900")}>
-      <AppHeader />
       <main className="max-w-md mx-auto relative">
         <AnimatePresence mode="wait">
           <motion.div

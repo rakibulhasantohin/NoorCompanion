@@ -1,199 +1,144 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Compass, Navigation, Info, AlertCircle } from 'lucide-react';
-import { Card } from '../components/Common';
+import { Compass, Navigation, MapPin, AlertCircle } from 'lucide-react';
+import { useAppState } from '../hooks/useAppState';
+import { AppHeader } from '../components/Common';
 
-export const Qibla = () => {
+export const Qibla: React.FC = () => {
+  const { state } = useAppState();
   const [heading, setHeading] = useState(0);
-  const [qiblaAngle, setQiblaAngle] = useState<number | null>(null);
+  const [qiblaDirection, setQiblaDirection] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [permissionGranted, setPermissionGranted] = useState(false);
-
-  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
-    const checkDesktop = () => {
-      // More robust check: check for orientation support or touch
-      const hasOrientation = 'DeviceOrientationEvent' in window;
-      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      setIsDesktop(!isTouch && !hasOrientation);
-    };
-    checkDesktop();
-  }, []);
-
-  const calculateQibla = (lat: number, lng: number) => {
-    const kaabaLat = 21.4225 * (Math.PI / 180);
-    const kaabaLng = 39.8262 * (Math.PI / 180);
-    const userLat = lat * (Math.PI / 180);
-    const userLng = lng * (Math.PI / 180);
-
-    const deltaLng = kaabaLng - userLng;
-    const y = Math.sin(deltaLng);
-    const x = Math.cos(userLat) * Math.tan(kaabaLat) - Math.sin(userLat) * Math.cos(deltaLng);
-    let qibla = Math.atan2(y, x) * (180 / Math.PI);
-    return (qibla + 360) % 360;
-  };
-
-  const startCompass = async () => {
-    setError(null);
+    // Calculate Qibla direction from current location
+    const lat = state.location?.lat || 23.8103;
+    const lng = state.location?.lng || 90.4125;
     
-    // Request Geolocation
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const angle = calculateQibla(position.coords.latitude, position.coords.longitude);
-        setQiblaAngle(angle);
-      },
-      (err) => {
-        setError('অবস্থান পাওয়া যায়নি। কিবলার দিক নির্ণয়ের জন্য লোকেশন পারমিশন প্রয়োজন।');
-      },
-      { enableHighAccuracy: true }
-    );
+    // Kaaba coordinates
+    const kaabaLat = 21.4225;
+    const kaabaLng = 39.8262;
 
-    // Request Orientation Permission (iOS 13+)
-    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-      try {
-        const response = await (DeviceOrientationEvent as any).requestPermission();
-        if (response === 'granted') {
-          setPermissionGranted(true);
-          window.addEventListener('deviceorientation', handleOrientation, true);
-        } else {
-          setError('কম্পাস ব্যবহারের অনুমতি পাওয়া যায়নি। ব্রাউজার সেটিংসে গিয়ে মোশন পারমিশন এলাউ করুন।');
-        }
-      } catch (err) {
-        setError('কম্পাস চালু করতে সমস্যা হয়েছে। অনুগ্রহ করে পেজটি রিফ্রেশ করে আবার চেষ্টা করুন।');
+    const y = Math.sin(Math.toRadians(kaabaLng - lng));
+    const x = Math.cos(Math.toRadians(lat)) * Math.tan(Math.toRadians(kaabaLat)) - 
+              Math.sin(Math.toRadians(lat)) * Math.cos(Math.toRadians(kaabaLng - lng));
+    
+    const qibla = Math.toDegrees(Math.atan2(y, x));
+    setQiblaDirection((qibla + 360) % 360);
+
+    // Device orientation
+    const handleOrientation = (e: any) => {
+      if (e.webkitCompassHeading) {
+        setHeading(e.webkitCompassHeading);
+      } else if (e.alpha) {
+        setHeading(360 - e.alpha);
       }
-    } else {
-      // Android or non-iOS
-      setPermissionGranted(true);
-      // Try both events for maximum compatibility
-      window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+    };
+
+    if (window.DeviceOrientationEvent) {
       window.addEventListener('deviceorientation', handleOrientation, true);
+    } else {
+      setError('আপনার ডিভাইসে কম্পাস সাপোর্ট নেই।');
     }
-  };
 
-  const handleOrientation = (event: DeviceOrientationEvent) => {
-    let heading = 0;
-
-    if ((event as any).webkitCompassHeading) {
-      // iOS
-      heading = (event as any).webkitCompassHeading;
-    } else if (event.absolute && event.alpha !== null) {
-      // Android Absolute
-      heading = 360 - event.alpha;
-    } else if (event.alpha !== null) {
-      // Android Relative (fallback)
-      heading = 360 - event.alpha;
-    }
-    
-    setHeading(heading);
-  };
-
-  useEffect(() => {
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation);
-      window.removeEventListener('deviceorientationabsolute', handleOrientation);
     };
-  }, []);
+  }, [state.location]);
+
+  // Helper functions for math
+  Math.toRadians = (degrees: number) => degrees * (Math.PI / 180);
+  Math.toDegrees = (radians: number) => radians * (180 / Math.PI);
+
+  const isAligned = Math.abs(heading - qiblaDirection) < 5;
 
   return (
-    <div className="pb-24 px-4 pt-8 flex flex-col items-center space-y-8">
-      <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold text-gray-900">কিবলা কম্পাস</h2>
-        <p className="text-gray-500">কাবার সঠিক দিক নির্ণয় করুন</p>
-      </div>
+    <div className="min-h-screen bg-gray-50 pb-32">
+      <AppHeader title={state.language === 'bn' ? 'কিবলা কম্পাস' : 'Qibla Compass'} showBack />
 
-      {!permissionGranted ? (
-        <div className="flex flex-col items-center space-y-6 py-12">
-          <div className="w-24 h-24 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-            <Compass className="w-12 h-12" />
+      <div className="px-4 py-12 flex flex-col items-center justify-center min-h-[70vh]">
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-2 text-primary font-bold mb-2">
+            <MapPin size={18} />
+            <span>{state.city}, Bangladesh</span>
           </div>
-          {isDesktop ? (
-            <div className="text-center space-y-4">
-              <p className="text-sm text-amber-600 bg-amber-50 p-4 rounded-2xl border border-amber-100">
-                কম্পাস ফিচারটি শুধুমাত্র মোবাইল ডিভাইসে কাজ করে। আপনার স্মার্টফোন থেকে ওয়েবসাইটটি ভিজিট করুন।
-              </p>
-            </div>
-          ) : (
-            <button
-              onClick={startCompass}
-              className="px-8 py-4 bg-emerald-900 text-white rounded-2xl font-bold shadow-xl hover:bg-emerald-800 transition-colors"
-            >
-              কম্পাস চালু করুন
-            </button>
-          )}
-          <p className="text-xs text-gray-400 text-center max-w-[250px]">
-            সঠিক দিক পেতে আপনার ফোনের কম্পাস এবং লোকেশন পারমিশন প্রয়োজন।
-          </p>
+          <h2 className="text-2xl font-bold text-gray-800">কিবলার সঠিক দিক</h2>
+          <p className="text-gray-400 text-sm mt-1">আপনার ফোনটি সমতলে রাখুন</p>
         </div>
-      ) : (
-        <div className="relative w-72 h-72 flex items-center justify-center">
-          {/* Outer Ring */}
-          <div className="absolute inset-0 rounded-full border-4 border-emerald-50 shadow-inner" />
-          
-          {/* Compass Face */}
-          <motion.div
+
+        {/* Compass Container */}
+        <div className="relative w-72 h-72 flex items-center justify-center mb-12">
+          {/* Compass Ring */}
+          <motion.div 
             animate={{ rotate: -heading }}
-            transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-            className="relative w-64 h-64 rounded-full bg-white shadow-2xl flex items-center justify-center"
+            transition={{ type: 'spring', stiffness: 50 }}
+            className="absolute inset-0 w-full h-full border-8 border-gray-100 rounded-full flex items-center justify-center"
           >
-            <div className="absolute top-4 font-bold text-emerald-900">N</div>
-            <div className="absolute bottom-4 font-bold text-gray-300">S</div>
-            <div className="absolute left-4 font-bold text-gray-300">W</div>
-            <div className="absolute right-4 font-bold text-gray-300">E</div>
-            
-            {/* Kaaba Indicator */}
-            {qiblaAngle !== null && (
+            {[0, 90, 180, 270].map(deg => (
               <div 
-                className="absolute inset-0 flex flex-col items-center"
-                style={{ transform: `rotate(${qiblaAngle}deg)` }}
+                key={deg} 
+                className="absolute font-bold text-gray-300"
+                style={{ transform: `rotate(${deg}deg) translateY(-110px)` }}
               >
-                <div className="mt-2 flex flex-col items-center">
-                  <div className="w-8 h-8 bg-emerald-900 rounded-lg flex items-center justify-center text-white shadow-lg">
-                    <Navigation className="w-5 h-5 fill-white" />
-                  </div>
-                  <div className="w-1 h-28 bg-emerald-900/20 rounded-full" />
+                {deg === 0 ? 'N' : deg === 90 ? 'E' : deg === 180 ? 'S' : 'W'}
+              </div>
+            ))}
+            
+            {/* Qibla Indicator on Ring */}
+            <div 
+              className="absolute w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-lg"
+              style={{ transform: `rotate(${qiblaDirection}deg) translateY(-120px)` }}
+            >
+              <Navigation size={16} fill="currentColor" />
+            </div>
+          </motion.div>
+
+          {/* Center Needle */}
+          <div className="relative z-10 flex flex-col items-center">
+            <motion.div 
+              animate={{ rotate: qiblaDirection - heading }}
+              transition={{ type: 'spring', stiffness: 50 }}
+              className={`w-1 h-40 rounded-full transition-colors duration-500 ${isAligned ? 'bg-primary' : 'bg-gray-300'}`}
+            >
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-colors duration-500 ${isAligned ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
+                  <Compass size={24} />
                 </div>
               </div>
-            )}
-            
-            <Compass className="w-12 h-12 text-emerald-100" />
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
-      )}
 
-      {error && (
-        <Card className="bg-rose-50 border-rose-100 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-rose-600 mt-0.5" />
-          <p className="text-sm text-rose-900">{error}</p>
-        </Card>
-      )}
-
-      <div className="w-full space-y-4">
-        <Card className="bg-emerald-900 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-emerald-200 text-xs uppercase tracking-widest">কিবলার দিক</p>
-              <h4 className="text-2xl font-bold">
-                {qiblaAngle !== null ? `${qiblaAngle.toFixed(1)}°` : '--'} 
-                {qiblaAngle !== null && (qiblaAngle > 180 ? ' পশ্চিম' : ' পূর্ব')}
-              </h4>
+        {/* Status Info */}
+        <div className="w-full max-w-xs space-y-4">
+          <div className={`p-4 rounded-2xl border-2 flex items-center gap-4 transition-all duration-500 ${isAligned ? 'bg-primary/5 border-primary' : 'bg-white border-gray-100'}`}>
+            <div className={`p-2 rounded-xl ${isAligned ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
+              <Navigation size={20} />
             </div>
-            <div className="w-12 h-12 bg-emerald-800 rounded-2xl flex items-center justify-center">
-              <Navigation 
-                className="w-6 h-6" 
-                style={{ transform: `rotate(${qiblaAngle || 0}deg)` }}
-              />
+            <div className="text-left">
+              <div className={`font-bold ${isAligned ? 'text-primary' : 'text-gray-800'}`}>
+                {isAligned ? 'কিবলা সঠিক আছে' : 'ফোনটি ঘুরান'}
+              </div>
+              <div className="text-xs text-gray-400">অ্যাঙ্গেল: {Math.round(qiblaDirection)}°</div>
             </div>
           </div>
-        </Card>
 
-        <Card className="flex items-start gap-3 bg-amber-50 border-amber-100">
-          <Info className="w-5 h-5 text-amber-600 mt-0.5" />
-          <p className="text-xs text-amber-900 leading-relaxed">
-            সঠিক দিক পেতে আপনার ফোনটি সমতল স্থানে রাখুন এবং ধাতব বস্তু থেকে দূরে থাকুন।
-          </p>
-        </Card>
+          {error && (
+            <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-500 text-sm">
+              <AlertCircle size={18} />
+              <span>{error}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
+
+// Add TypeScript declarations for Math
+declare global {
+  interface Math {
+    toRadians(degrees: number): number;
+    toDegrees(radians: number): number;
+  }
+}

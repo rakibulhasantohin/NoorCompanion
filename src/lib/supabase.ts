@@ -6,7 +6,6 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   global: {
-    // Explicitly use the global fetch to avoid polyfill issues in the iframe environment
-    fetch: (url, options) => globalThis.fetch(url, options),
+    fetch: (url, options) => fetch(url, options),
   },
 });

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Heart, Search, Moon, Sun, Utensils, AlertTriangle, LogOut, Plane, 
-  BookOpen, Star, Droplet, Thermometer, ChevronRight, ArrowLeft 
+  Heart, Search, Moon, Sun, Utensils, AlertTriangle, 
+  Plane, Star, Droplet, ChevronRight, ArrowLeft, Copy, Share2
 } from 'lucide-react';
-import { Card } from '../components/Common';
+import { Card, AppHeader } from '../components/Common';
 import { cn } from '../utils/utils';
 
 const DUA_CATEGORIES = [
@@ -22,23 +22,16 @@ const DUA_ITEMS = [
   {
     category: 'daily',
     title: 'আয়াতুল কুরসি',
-    arabic: 'اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّমَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ',
+    arabic: 'اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْমٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَমَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ',
     pronunciation: 'আল্লাহু লা ইলাহা ইল্লা হুয়াল হাইয়্যুল কাইয়্যুম। লা তা’খুযুহু সিনাতুও ওয়ালা নাউম। লাহূ মা ফিসসামাওয়াতি ওয়ামা ফিল আরয। মান যাল্লাযী ইয়াশফাউ ইনদাহূ ইল্লা বিইযনিহ। ইয়া’লামু মা বাইনা আইদীহিম ওয়ামা খালফাহুম, ওয়ালা ইউহীতূনা বিশাইয়িম মিন ইলমিহী ইল্লা বিমা শা-আ। ওয়াসিআ কুরসিইয়ুহুস সামাওয়াতি ওয়াল আরয, ওয়ালা ইয়াউদুহূ হিফযুহুমা ওয়াহুয়াল আলিয়্যুল আযীম।',
     translation: 'আল্লাহ ছাড়া অন্য কোনো উপাস্য নেই, তিনি চিরঞ্জীব, সবকিছুর ধারক। তাঁকে তন্দ্রা ও নিদ্রা স্পর্শ করে না। আকাশ ও পৃথিবীতে যা কিছু আছে সবই তাঁর। কে আছে এমন, যে তাঁর অনুমতি ছাড়া তাঁর কাছে সুপারিশ করবে? তাদের সামনে ও পেছনে যা কিছু আছে সবই তিনি জানেন। তাঁর জ্ঞানরাজি থেকে তারা কিছুই আয়ত্ত করতে পারে না, কেবল যতটুকু তিনি চান তা ছাড়া। তাঁর কুরসি আকাশ ও পৃথিবীময় পরিব্যাপ্ত। আর এ দুটির রক্ষণাবেক্ষণ তাঁকে ক্লান্ত করে না। তিনি অতি উচ্চ ও মহান।',
   },
   {
     category: 'prayer',
     title: 'দুরুদে ইব্রাহিম',
-    arabic: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِّ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِّ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ اللَّهُمَّ بَارِكْ عَلَى مُحَمَّদٍ وَعَلَى آلِّ مُحَمَّদٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِّ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ',
+    arabic: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِّ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِّ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ মَجِيدٌ اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِّ مُحَمَّদٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِّ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ মَجِيدٌ',
     pronunciation: 'আল্লাহুম্মা সাল্লি আলা মুহাম্মাদিও ওয়া আলা আলি মুহাম্মাদ, কামা সাল্লাইতা আলা ইব্রাহিমা ওয়া আলা আলি ইব্রাহিমা ইন্নাকা হামীদুম মাজীদ। আল্লাহুম্মা বারিক আলা মুহাম্মাদিও ওয়া আলা আলি মুহাম্মাদ, কামা বারাকতা আলা ইব্রাহিমা ওয়া আলা আলি ইব্রাহিমা ইন্নাকা হামীদুম মাজীদ।',
     translation: 'হে আল্লাহ! মুহাম্মদ (সা.) ও তাঁর বংশধরদের ওপর রহমত বর্ষণ করুন, যেমন আপনি ইব্রাহিম (আ.) ও তাঁর বংশধরদের ওপর রহমত বর্ষণ করেছিলেন। নিশ্চয়ই আপনি অতি প্রশংসিত ও মহিমান্বিত। হে আল্লাহ! মুহাম্মদ (সা.) ও তাঁর বংশধরদের ওপর বরকত বর্ষণ করুন, যেমন আপনি ইব্রাহিম (আ.) ও তাঁর বংশধরদের ওপর বরকত বর্ষণ করেছিলেন। নিশ্চয়ই আপনি অতি প্রশংসিত ও মহিমান্বিত।',
-  },
-  {
-    category: 'prayer',
-    title: 'দোয়া কুনুত',
-    arabic: 'اللَّهُمَّ إِنَّا نَسْتَعِينُكَ وَنَسْتَغْفِرُكَ وَنُؤْمِنُ بِكَ وَنَتَوَكَّلُ عَلَيْكَ وَنُثْنِي عَلَيْكَ الْخَيْرَ وَنَشْكُرُكَ وَلَا نَكْفُرُكَ وَنَخْلَعُ وَنَتْرُكُ مَنْ يَفْجُرُكَ اللَّهُمَّ إِيَّاكَ نَعْبُدُ وَلَكَ نُصَلِّي وَنَسْجُدُ وَإِلَيْكَ نَسْعَى وَنَحْفِدُ وَنَرْجُو رَحْمَتَكَ وَنَخْشَى عَذَابَكَ إِنَّ عَذَابَكَ بِالْكُفَّارِ مُلْحِقٌ',
-    pronunciation: 'আল্লাহুম্মা ইন্না নাস্তাঈনুকা ওয়া নাস্তাগফিরুকা ওয়া নু’মিনু বিকা ওয়া নাতাওয়াককালু আলাইকা ওয়া নুছনী আলাইকাল খাইরা ওয়া নাশকুরুকা ওয়ালা নাকফুরুকা ওয়া নাখলাউ ওয়া নাতরুকু মাই ইয়াফজুরুকা। আল্লাহুম্মা ইয়্যাকা না’বুদু ওয়ালাকা নুসল্লী ওয়া নাসজুদু ওয়া ইলাইকা নাসআ ওয়া নাহফিদু ওয়া নারজু রাহমাতাকা ওয়া নাখশা আযাবাকা ইন্না আযাবাকা বিল কুফফারি মুলহিক।',
-    translation: 'হে আল্লাহ! আমরা আপনারই সাহায্য চাই, আপনারই নিকট ক্ষমা চাই, আপনারই ওপর ঈমান রাখি, আপনারই ওপর ভরসা করি এবং আপনারই উত্তম প্রশংসা করি। আমরা আপনার শোকর আদায় করি, আপনার না-শোকরি করি না। যারা আপনার নাফরমানি করে, আমরা তাদের সাথে সম্পর্ক ছিন্ন করি ও তাদের পরিত্যাগ করি। হে আল্লাহ! আমরা আপনারই ইবাদত করি, আপনারই জন্য নামাজ পড়ি ও সেজদা করি। আপনারই দিকে আমরা ধাবিত হই এবং আপনারই খিদমতে উপস্থিত হই। আমরা আপনার রহমতের আশা করি এবং আপনার আজাবকে ভয় করি। নিশ্চয়ই আপনার আজাব কাফেরদের গ্রাস করবে।',
   },
   {
     category: 'food',
@@ -62,25 +55,11 @@ const DUA_ITEMS = [
     translation: 'হে আল্লাহ! আপনারই নামে আমি মৃত্যুবরণ করছি (ঘুমাচ্ছি) এবং আপনারই নামে জীবিত হব (জাগব)।',
   },
   {
-    category: 'sleep',
-    title: 'ঘুম থেকে ওঠার দোয়া',
-    arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',
-    pronunciation: 'আলহামদুলিল্লাহিল্লাযী আহইয়ানা বা’দা মা আমাতানা ওয়া ইলাইহিন নুশূর।',
-    translation: 'সকল প্রশংসা আল্লাহর জন্য, যিনি আমাদের মৃত্যুর (ঘুমের) পর পুনরায় জীবিত করলেন এবং তাঁরই দিকে আমাদের ফিরে যেতে হবে।',
-  },
-  {
     category: 'danger',
     title: 'বিপদ মুক্তির দোয়া (ইউনুস আ.)',
     arabic: 'لَا إِلَهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ',
     pronunciation: 'লা ইলাহা ইল্লা আনতা সুবহানাকা ইন্নী কুনতু মিনায যালিমীন।',
     translation: 'আপনি ছাড়া কোনো উপাস্য নেই, আপনি পবিত্র। নিশ্চয়ই আমি জালেমদের অন্তর্ভুক্ত ছিলাম।',
-  },
-  {
-    category: 'daily',
-    title: 'ঘর থেকে বের হওয়ার দোয়া',
-    arabic: 'بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
-    pronunciation: 'বিসমিল্লাহি তাওয়াককালতু আলাল্লাহি লা হাওলা ওয়ালা কুওয়াতা ইল্লা বিল্লাহ।',
-    translation: 'আল্লাহর নামে (বের হচ্ছি), আল্লাহর ওপরই ভরসা করলাম। আল্লাহর সাহায্য ছাড়া গুনাহ থেকে বাঁচার এবং নেক কাজ করার কোনো শক্তি নেই।',
   },
 ];
 
@@ -97,50 +76,42 @@ export const Duas = () => {
   if (selectedCategory) {
     const category = DUA_CATEGORIES.find(c => c.id === selectedCategory);
     return (
-      <div className="pb-24 px-4 pt-4 space-y-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
-        <button 
-          onClick={() => setSelectedCategory(null)}
-          className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold mb-4"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>ফিরে যান</span>
-        </button>
+      <div className="min-h-screen bg-gray-50 pb-32">
+        <AppHeader title={category?.name || 'দোয়া'} showBack />
 
-        <div className="flex items-center gap-3 mb-6">
-          <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm", category?.color)}>
-            {category && <category.icon className="w-6 h-6" />}
-          </div>
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white">{category?.name}</h2>
-        </div>
-
-        <div className="space-y-4">
+        <div className="px-4 py-6 space-y-6">
           {filteredDuas.map((item, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
+              className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-6"
             >
-              <Card className="p-6 space-y-4 dark:bg-gray-800 dark:border-gray-700 border-none shadow-xl shadow-emerald-900/5">
-                <h3 className="font-bold text-emerald-900 dark:text-emerald-400 border-b border-gray-50 dark:border-gray-700 pb-3">{item.title}</h3>
-                <p className="text-right font-serif text-2xl text-gray-800 dark:text-gray-200 leading-loose" dir="rtl">
-                  {item.arabic}
-                </p>
-                <div className="space-y-3">
-                  <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl p-4">
-                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold tracking-widest mb-1">উচ্চারণ</p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                      {item.pronunciation}
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 dark:bg-gray-900/40 rounded-2xl p-4">
-                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">অনুবাদ</p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed italic">
-                      {item.translation}
-                    </p>
-                  </div>
+              <div className="flex items-center justify-between border-b border-gray-50 pb-3">
+                <h3 className="font-bold text-primary">{item.title}</h3>
+                <div className="flex items-center gap-3 text-gray-300">
+                  <button className="hover:text-primary transition-colors"><Copy size={18} /></button>
+                  <button className="hover:text-primary transition-colors"><Share2 size={18} /></button>
                 </div>
-              </Card>
+              </div>
+              <p className="text-right font-serif text-2xl text-gray-800 leading-loose" dir="rtl">
+                {item.arabic}
+              </p>
+              <div className="space-y-3">
+                <div className="bg-primary/5 rounded-2xl p-4">
+                  <p className="text-[10px] text-primary uppercase font-bold tracking-widest mb-1">উচ্চারণ</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {item.pronunciation}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-2xl p-4">
+                  <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">অনুবাদ</p>
+                  <p className="text-sm text-gray-700 leading-relaxed italic">
+                    {item.translation}
+                  </p>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -149,10 +120,11 @@ export const Duas = () => {
   }
 
   return (
-    <div className="pb-24 space-y-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
-      <div className="bg-white dark:bg-gray-900 px-4 pt-6 pb-6 space-y-6 border-b border-gray-100 dark:border-gray-800">
-        <h2 className="text-3xl font-black text-gray-900 dark:text-white">দোয়া</h2>
-        
+    <div className="min-h-screen bg-gray-50 pb-32">
+      <AppHeader title="দোয়া ও জিকির" showBack />
+
+      <div className="px-4 py-6 space-y-6">
+        {/* Search */}
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
@@ -160,24 +132,23 @@ export const Duas = () => {
             placeholder="দোয়া খুঁজুন..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl py-4 pl-12 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all dark:text-white"
+            className="w-full bg-white border border-gray-100 rounded-2xl py-4 pl-12 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
         </div>
-      </div>
 
-      <div className="px-4">
+        {/* Categories Grid */}
         <div className="grid grid-cols-2 gap-4">
           {DUA_CATEGORIES.map((cat) => (
             <motion.div
               key={cat.id}
               whileTap={{ scale: 0.95 }}
               onClick={() => setSelectedCategory(cat.id)}
-              className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all"
+              className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all"
             >
               <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm", cat.color)}>
                 <cat.icon className="w-8 h-8" />
               </div>
-              <span className="font-bold text-gray-800 dark:text-gray-200 text-center">
+              <span className="font-bold text-gray-800 text-center">
                 {cat.name}
               </span>
             </motion.div>

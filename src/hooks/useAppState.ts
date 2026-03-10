@@ -5,6 +5,8 @@ interface AppState {
   language: 'bn' | 'en';
   theme: 'light' | 'dark';
   city: string;
+  location: { lat: number; lng: number } | null;
+  onboardingComplete: boolean;
   bookmarks: number[];
   tasbihCount: number;
   lastReadSurah: number | null;
@@ -20,6 +22,8 @@ const DEFAULT_STATE: AppState = {
   language: 'bn',
   theme: 'light',
   city: 'Dhaka',
+  location: { lat: 23.8103, lng: 90.4125 },
+  onboardingComplete: false,
   bookmarks: [],
   tasbihCount: 0,
   lastReadSurah: null,

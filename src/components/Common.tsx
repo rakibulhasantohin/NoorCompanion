@@ -1,41 +1,38 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
-import { Home, BookOpen, Clock, Compass, Settings, Heart, Plus, Camera, Search, User, Hand, Building2, Columns, LayoutGrid, ChevronRight } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Home, BookOpen, Clock, Compass, Settings, LayoutGrid, ChevronLeft } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../utils/utils';
-
 import { useAppState } from '../hooks/useAppState';
 
-export const AppHeader = () => {
+export const AppHeader = ({ title, showBack = false }: { title?: string, showBack?: boolean }) => {
+  const navigate = useNavigate();
   const { state } = useAppState();
   const isBn = state.language === 'bn';
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white dark:bg-gray-900 px-4 py-3 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
-      <div className="flex items-center gap-2">
-        <div className="w-10 h-10 bg-emerald-700 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-700/20">
-          <Building2 className="w-6 h-6 text-white" />
-        </div>
-        <h1 className="text-2xl font-black text-emerald-900 dark:text-emerald-100 tracking-tight">
-          {isBn ? 'দ্বীন' : 'Deen'}
+    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md px-4 py-4 flex items-center justify-between border-b border-gray-100">
+      <div className="flex items-center gap-3">
+        {showBack ? (
+          <button 
+            onClick={() => navigate(-1)}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <ChevronLeft size={24} className="text-gray-700" />
+          </button>
+        ) : (
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+            <BookOpen className="w-6 h-6 text-white" />
+          </div>
+        )}
+        <h1 className="text-xl font-bold text-gray-800 tracking-tight">
+          {title || (isBn ? 'নূর কম্প্যানিয়ন' : 'Noor Companion')}
         </h1>
       </div>
-      <div className="flex items-center gap-4">
-        <button className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
-          <Search className="w-6 h-6" />
+      <div className="flex items-center gap-2">
+        <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+          <Settings size={22} onClick={() => navigate('/settings')} />
         </button>
-        <Link to="/settings" className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 border-2 border-emerald-50 dark:border-emerald-800 overflow-hidden flex items-center justify-center">
-          {state.profileImage ? (
-            <img 
-              src={state.profileImage} 
-              alt="Profile" 
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer" 
-            />
-          ) : (
-            <User className="w-6 h-6 text-emerald-700 dark:text-emerald-400" />
-          )}
-        </Link>
       </div>
     </header>
   );
@@ -49,30 +46,40 @@ export const BottomNav = () => {
   const navItems = [
     { icon: Home, label: isBn ? 'হোম' : 'Home', path: '/' },
     { icon: BookOpen, label: isBn ? 'কুরআন' : 'Quran', path: '/quran' },
-    { icon: LayoutGrid, label: isBn ? 'দোয়া' : 'Dua', path: '/duas' },
-    { icon: Building2, label: isBn ? 'হজ' : 'Hajj', path: '/hajj' },
-    { icon: Columns, label: isBn ? '৫টি স্তম্ভ' : '5 Pillars', path: '/pillars' },
+    { icon: Clock, label: isBn ? 'নামাজ' : 'Prayer', path: '/prayer-times' },
+    { icon: Compass, label: isBn ? 'কিবলা' : 'Qibla', path: '/qibla' },
+    { icon: Settings, label: isBn ? 'সেটিংস' : 'Settings', path: '/settings' },
   ];
 
+  // Hide bottom nav on onboarding
+  if (!state.onboardingComplete) return null;
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 px-2 py-2 flex justify-around items-center pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-      {navItems.map((item) => {
-        const isActive = location.pathname === item.path;
-        return (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={cn(
-              "flex flex-col items-center gap-1 px-4 py-1.5 rounded-2xl transition-all duration-300",
-              isActive ? "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30" : "text-gray-400 dark:text-gray-500"
-            )}
-          >
-            <item.icon className={cn("w-6 h-6", isActive && "stroke-[2.5px]")} />
-            <span className={cn("text-[10px] font-bold", isActive ? "opacity-100" : "opacity-80")}>{item.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md">
+      <nav className="bg-white/90 backdrop-blur-xl border border-white/20 px-4 py-3 flex justify-around items-center rounded-3xl shadow-2xl shadow-black/10">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "flex flex-col items-center gap-1 transition-all duration-300 relative",
+                isActive ? "text-primary" : "text-gray-400 hover:text-gray-600"
+              )}
+            >
+              <item.icon className={cn("w-6 h-6", isActive && "stroke-[2.5px]")} />
+              {isActive && (
+                <motion.div 
+                  layoutId="active-dot"
+                  className="absolute -bottom-1.5 w-1 h-1 bg-primary rounded-full"
+                />
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
   );
 };
 
@@ -80,7 +87,7 @@ export const Card = ({ children, className, ...props }: { children: React.ReactN
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
-    className={cn("bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-sm border border-gray-100 dark:border-gray-700", className)}
+    className={cn("bg-white rounded-3xl p-4 shadow-sm border border-gray-100", className)}
     {...props}
   >
     {children}
@@ -89,9 +96,9 @@ export const Card = ({ children, className, ...props }: { children: React.ReactN
 
 export const SectionTitle = ({ title, actionLabel, onAction }: { title: string, actionLabel?: string, onAction?: () => void }) => (
   <div className="flex items-center justify-between mb-3 px-1">
-    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{title}</h2>
+    <h2 className="text-lg font-bold text-gray-800">{title}</h2>
     {actionLabel && (
-      <button onClick={onAction} className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+      <button onClick={onAction} className="text-primary text-sm font-medium">
         {actionLabel}
       </button>
     )}
