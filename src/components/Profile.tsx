@@ -8,7 +8,7 @@ import { getBengaliNumber } from '../utils/utils';
 import { useNavigate } from 'react-router-dom';
 
 export const ProfileSection = () => {
-  const { state, user, updateState, manualSync } = useAppState();
+  const { state, user, updateState } = useAppState();
   const navigate = useNavigate();
   const [syncing, setSyncing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -30,12 +30,12 @@ export const ProfileSection = () => {
 
   const handleManualSync = async () => {
     setSyncing(true);
-    await manualSync();
+    // manualSync(); // Removed
     setTimeout(() => setSyncing(false), 1000);
   };
 
   const handleSave = () => {
-    updateState(editData, true);
+    updateState(editData);
     setIsEditing(false);
   };
 

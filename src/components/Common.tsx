@@ -48,7 +48,7 @@ export const BottomNav = () => {
     { icon: BookOpen, label: isBn ? 'কুরআন' : 'Quran', path: '/quran' },
     { icon: HandHelping, label: isBn ? 'দোয়া' : 'Dua', path: '/duas' },
     { icon: Building2, label: isBn ? 'হজ' : 'Hajj', path: '/hajj' },
-    { icon: User, label: isBn ? 'প্রোফাইল' : 'Profile', path: '/profile' },
+    { icon: SettingsIcon, label: isBn ? 'সেটিংস' : 'Settings', path: '/settings' },
   ];
 
   // Hide bottom nav on onboarding

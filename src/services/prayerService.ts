@@ -23,6 +23,10 @@ export const getPrayerTimes = (lat: number, lng: number, date: Date = new Date()
   const params = CalculationMethod.Karachi();
   params.madhab = Madhab.Hanafi;
   
+  // Adjustments for Bangladesh (Islamic Foundation)
+  params.adjustments.fajr = -2;
+  params.adjustments.maghrib = 1;
+  
   const prayerTimes = new PrayerTimes(coordinates, date, params);
   const sunnahTimes = new SunnahTimes(prayerTimes);
 
@@ -101,7 +105,7 @@ export const getPrayerTimes = (lat: number, lng: number, date: Date = new Date()
     maghrib,
     sunrise,
     sunset,
-    imsak: addMinutes(fajr, -10),
+    imsak: fajr,
     current: times[currentIdx],
     next: times[nextIdx],
   };

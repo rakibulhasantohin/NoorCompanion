@@ -7,7 +7,7 @@ export interface District {
 }
 
 export const DISTRICTS: District[] = [
-  { id: 'dhaka', name: 'Dhaka', bnName: 'ঢাকা', lat: 23.8103, lng: 90.4125 },
+  { id: 'dhaka', name: 'Dhaka', bnName: 'ঢাকা', lat: 23.7289, lng: 90.3944 },
   { id: 'chattogram', name: 'Chattogram', bnName: 'চট্টগ্রাম', lat: 22.3569, lng: 91.7832 },
   { id: 'rajshahi', name: 'Rajshahi', bnName: 'রাজশাহী', lat: 24.3745, lng: 88.6042 },
   { id: 'khulna', name: 'Khulna', bnName: 'খুলনা', lat: 22.8456, lng: 89.5403 },

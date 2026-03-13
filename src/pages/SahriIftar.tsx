@@ -18,8 +18,8 @@ export const SahriIftar: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const lat = state.location?.lat || 23.8103;
-  const lng = state.location?.lng || 90.4125;
+  const lat = state.location?.lat || 23.7289;
+  const lng = state.location?.lng || 90.3944;
 
   const formatCountdown = (target: Date) => {
     const diff = differenceInSeconds(target, now);

@@ -4,6 +4,30 @@ import { Globe, MapPin, Navigation, ChevronRight, Check } from 'lucide-react';
 import { useAppState } from '../../hooks/useAppState';
 import { DISTRICTS, District } from '../../utils/districts';
 
+const findNearestDistrict = (lat: number, lng: number): District => {
+  let nearest = DISTRICTS[0];
+  let minDistance = Infinity;
+
+  const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const p = 0.017453292519943295;
+    const c = Math.cos;
+    const a = 0.5 - c((lat2 - lat1) * p)/2 + 
+            c(lat1 * p) * c(lat2 * p) * 
+            (1 - c((lon2 - lon1) * p))/2;
+    return 12742 * Math.asin(Math.sqrt(a));
+  };
+
+  DISTRICTS.forEach(district => {
+    const dist = distance(lat, lng, district.lat, district.lng);
+    if (dist < minDistance) {
+      minDistance = dist;
+      nearest = district;
+    }
+  });
+
+  return nearest;
+};
+
 export const Onboarding: React.FC = () => {
   const { state, updateState } = useAppState();
   const [step, setStep] = useState(1);
@@ -27,12 +51,13 @@ export const Onboarding: React.FC = () => {
       setIsLocating(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          const nearest = findNearestDistrict(position.coords.latitude, position.coords.longitude);
           updateState({
             location: {
               lat: position.coords.latitude,
               lng: position.coords.longitude,
             },
-            city: selectedLang === 'bn' ? 'বর্তমান অবস্থান' : 'Current Location',
+            city: nearest.bnName,
             onboardingComplete: true,
           });
           setIsLocating(false);
@@ -72,8 +97,8 @@ export const Onboarding: React.FC = () => {
           >
             <div className="w-48 h-48 mb-8 relative">
               <img 
-                src="https://picsum.photos/seed/noor-welcome/400/400" 
-                alt="Welcome" 
+                src="https://images.unsplash.com/photo-1584286595398-a59f21d313f5?auto=format&fit=crop&w=400&q=80" 
+                alt="Islamic Calligraphy" 
                 className="w-full h-full object-cover rounded-full border-4 border-primary/20 shadow-2xl"
                 referrerPolicy="no-referrer"
               />
@@ -147,8 +172,8 @@ export const Onboarding: React.FC = () => {
           >
             <div className="w-48 h-48 mb-8 relative">
               <img 
-                src="https://picsum.photos/seed/noor-location/400/400" 
-                alt="Location" 
+                src="https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&w=400&q=80" 
+                alt="Islamic Architecture" 
                 className="w-full h-full object-cover rounded-full border-4 border-primary/20 shadow-2xl"
                 referrerPolicy="no-referrer"
               />

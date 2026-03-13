@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
 
 interface AppState {
   language: 'bn' | 'en';
@@ -22,7 +21,7 @@ const DEFAULT_STATE: AppState = {
   language: 'bn',
   theme: 'light',
   city: 'Dhaka',
-  location: { lat: 23.8103, lng: 90.4125 },
+  location: { lat: 23.7289, lng: 90.3944 },
   onboardingComplete: false,
   bookmarks: [],
   tasbihCount: 0,
@@ -36,84 +35,46 @@ const DEFAULT_STATE: AppState = {
 };
 
 export function useAppState() {
+  const [userEmail, setUserEmail] = useState<string | null>(() => {
+    return localStorage.getItem('noor_current_user');
+  });
+
+  const getStateKey = (email: string | null) => {
+    return email ? `noor_state_${email}` : 'noor_companion_state';
+  };
+
   const [state, setState] = useState<AppState>(() => {
-    const saved = localStorage.getItem('noor_companion_state');
+    const email = localStorage.getItem('noor_current_user');
+    const saved = localStorage.getItem(getStateKey(email));
     return saved ? JSON.parse(saved) : DEFAULT_STATE;
   });
 
-  const [user, setUser] = useState<any>(null);
-
+  // When user changes, load their specific state
   useEffect(() => {
-    localStorage.setItem('noor_companion_state', JSON.stringify(state));
-  }, [state]);
+    const handleUserChange = () => {
+      const email = localStorage.getItem('noor_current_user');
+      setUserEmail(email);
+      const saved = localStorage.getItem(getStateKey(email));
+      if (saved) {
+        setState(JSON.parse(saved));
+      } else {
+        // If new user, maybe keep some settings but reset personal data
+        setState({ ...DEFAULT_STATE, onboardingComplete: state.onboardingComplete });
+      }
+    };
 
-  // Supabase Auth & Sync
+    window.addEventListener('auth_changed', handleUserChange);
+    return () => window.removeEventListener('auth_changed', handleUserChange);
+  }, [state.onboardingComplete]);
+
+  // Save state whenever it changes
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id);
-    });
+    localStorage.setItem(getStateKey(userEmail), JSON.stringify(state));
+  }, [state, userEmail]);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('state')
-        .eq('id', userId)
-        .single();
-
-      if (data && data.state) {
-        setState(data.state);
-      } else if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching profile:', error);
-      }
-    } catch (err) {
-      console.error('Sync error:', err);
-    }
+  const updateState = (updates: Partial<AppState>) => {
+    setState((prev) => ({ ...prev, ...updates }));
   };
 
-  const syncToSupabase = async (newState: AppState, force = false) => {
-    if (!user) return;
-    
-    const now = new Date();
-    const lastBackupDate = newState.lastBackup ? new Date(newState.lastBackup) : null;
-    const isOneDayApart = !lastBackupDate || (now.getTime() - lastBackupDate.getTime() > 24 * 60 * 60 * 1000);
-
-    if (force || isOneDayApart) {
-      try {
-        const stateWithTimestamp = { ...newState, lastBackup: now.toISOString() };
-        await supabase
-          .from('user_profiles')
-          .upsert({ id: user.id, state: stateWithTimestamp, updated_at: now });
-        
-        if (isOneDayApart) {
-          setState(stateWithTimestamp);
-        }
-      } catch (err) {
-        console.error('Sync to Supabase error:', err);
-      }
-    }
-  };
-
-  const updateState = (updates: Partial<AppState>, forceSync = false) => {
-    setState((prev) => {
-      const newState = { ...prev, ...updates };
-      syncToSupabase(newState, forceSync);
-      return newState;
-    });
-  };
-
-  const manualSync = () => {
-    syncToSupabase(state, true);
-  };
-
-  return { state, updateState, user, manualSync };
+  return { state, updateState, user: userEmail ? { email: userEmail } : null };
 }

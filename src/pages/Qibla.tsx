@@ -12,8 +12,8 @@ export const Qibla: React.FC = () => {
 
   useEffect(() => {
     // Calculate Qibla direction from current location
-    const lat = state.location?.lat || 23.8103;
-    const lng = state.location?.lng || 90.4125;
+    const lat = state.location?.lat || 23.7289;
+    const lng = state.location?.lng || 90.3944;
     
     // Kaaba coordinates
     const kaabaLat = 21.4225;
