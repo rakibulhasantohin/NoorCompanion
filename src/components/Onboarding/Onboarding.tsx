@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Globe, MapPin, Navigation, ChevronRight, Check } from 'lucide-react';
+import { Globe, MapPin, ChevronRight, Check } from 'lucide-react';
 import { useAppState } from '../../hooks/useAppState';
 import { DISTRICTS, District } from '../../utils/districts';
 
@@ -32,8 +32,6 @@ export const Onboarding: React.FC = () => {
   const { state, updateState } = useAppState();
   const [step, setStep] = useState(1);
   const [selectedLang, setSelectedLang] = useState<'bn' | 'en'>(state.language);
-  const [showDistrictModal, setShowDistrictModal] = useState(false);
-  const [isLocating, setIsLocating] = useState(false);
 
   const handleLanguageSelect = (lang: 'bn' | 'en') => {
     setSelectedLang(lang);
@@ -46,42 +44,12 @@ export const Onboarding: React.FC = () => {
     }
   };
 
-  const handleUseGPS = () => {
-    if (navigator.geolocation) {
-      setIsLocating(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const nearest = findNearestDistrict(position.coords.latitude, position.coords.longitude);
-          updateState({
-            location: {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            },
-            city: nearest.bnName,
-            onboardingComplete: true,
-          });
-          setIsLocating(false);
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          setIsLocating(false);
-          // Fallback to district selection if GPS fails
-          setShowDistrictModal(true);
-        },
-        { timeout: 10000, enableHighAccuracy: true }
-      );
-    } else {
-      setShowDistrictModal(true);
-    }
-  };
-
   const handleDistrictSelect = (district: District) => {
     updateState({
       location: { lat: district.lat, lng: district.lng },
       city: district.bnName,
       onboardingComplete: true,
     });
-    setShowDistrictModal(false);
   };
 
   return (
