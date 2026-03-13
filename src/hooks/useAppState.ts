@@ -63,8 +63,17 @@ export function useAppState() {
       }
     };
 
+    const handleStateChange = (e: Event) => {
+      const customEvent = e as CustomEvent<AppState>;
+      setState(customEvent.detail);
+    };
+
     window.addEventListener('auth_changed', handleUserChange);
-    return () => window.removeEventListener('auth_changed', handleUserChange);
+    window.addEventListener('app_state_changed', handleStateChange);
+    return () => {
+      window.removeEventListener('auth_changed', handleUserChange);
+      window.removeEventListener('app_state_changed', handleStateChange);
+    };
   }, [state.onboardingComplete]);
 
   // Save state whenever it changes
@@ -73,7 +82,12 @@ export function useAppState() {
   }, [state, userEmail]);
 
   const updateState = (updates: Partial<AppState>) => {
-    setState((prev) => ({ ...prev, ...updates }));
+    setState((prev) => {
+      const newState = { ...prev, ...updates };
+      localStorage.setItem(getStateKey(userEmail), JSON.stringify(newState));
+      window.dispatchEvent(new CustomEvent('app_state_changed', { detail: newState }));
+      return newState;
+    });
   };
 
   return { state, updateState, user: userEmail ? { email: userEmail } : null };

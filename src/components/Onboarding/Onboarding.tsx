@@ -36,11 +36,11 @@ export const Onboarding: React.FC = () => {
 
   const handleLanguageSelect = (lang: 'bn' | 'en') => {
     setSelectedLang(lang);
+    updateState({ language: lang });
   };
 
   const nextStep = () => {
     if (step === 1) {
-      updateState({ language: selectedLang });
       setStep(2);
     }
   };
@@ -57,8 +57,12 @@ export const Onboarding: React.FC = () => {
         city: selectedDistrict.bnName,
         onboardingComplete: true,
       });
+      // Force navigation to home page to ensure clean state
+      window.location.href = '/';
     }
   };
+
+  const isBn = selectedLang === 'bn';
 
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-6 overflow-hidden">
@@ -89,10 +93,10 @@ export const Onboarding: React.FC = () => {
             </div>
             
             <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
-              নূর কম্প্যানিয়ন
+              {isBn ? 'নূর কম্প্যানিয়ন' : 'Noor Companion'}
             </h1>
             <p className="text-gray-500 mb-10 text-center">
-              আপনার দ্বীনি সফরের বিশ্বস্ত সঙ্গী
+              {isBn ? 'আপনার দ্বীনি সফরের বিশ্বস্ত সঙ্গী' : 'Your trusted companion for the Deeni journey'}
             </p>
 
             <div className="w-full space-y-4 mb-12">
@@ -134,7 +138,7 @@ export const Onboarding: React.FC = () => {
               onClick={nextStep}
               className="w-full btn-primary py-4 text-lg shadow-xl shadow-primary/30"
             >
-              পরবর্তী <ChevronRight size={20} />
+              {isBn ? 'পরবর্তী' : 'Next'} <ChevronRight size={20} />
             </button>
           </motion.div>
         )}
@@ -165,10 +169,10 @@ export const Onboarding: React.FC = () => {
             </div>
             
             <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center shrink-0">
-              লোকেশন সেট করুন
+              {isBn ? 'লোকেশন সেট করুন' : 'Set Location'}
             </h1>
             <p className="text-gray-500 mb-6 text-center px-4 shrink-0">
-              সঠিক নামাজের সময়সূচী পেতে আপনার জেলা নির্বাচন করুন।
+              {isBn ? 'সঠিক নামাজের সময়সূচী পেতে আপনার জেলা নির্বাচন করুন।' : 'Select your district to get accurate prayer times.'}
             </p>
 
             <div className="w-full flex-1 overflow-hidden flex flex-col bg-gray-50 rounded-3xl border border-gray-100">
@@ -180,7 +184,7 @@ export const Onboarding: React.FC = () => {
                     className="w-full p-4 text-left hover:bg-white rounded-xl flex items-center justify-between group transition-colors"
                   >
                     <span className="font-medium text-gray-700 group-hover:text-primary">
-                      {district.bnName} ({district.name})
+                      {isBn ? district.bnName : district.name}
                     </span>
                     <ChevronRight size={18} className="text-gray-300 group-hover:text-primary" />
                   </button>
@@ -213,12 +217,12 @@ export const Onboarding: React.FC = () => {
             </div>
             
             <h1 className="text-3xl font-bold text-gray-900 mb-4 text-center">
-              আলহামদুলিল্লাহ!
+              {isBn ? 'আলহামদুলিল্লাহ!' : 'Alhamdulillah!'}
             </h1>
             <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 mb-10 w-full text-center">
-              <p className="text-gray-500 mb-2">আপনার বর্তমান জেলা</p>
+              <p className="text-gray-500 mb-2">{isBn ? 'আপনার বর্তমান জেলা' : 'Your current district'}</p>
               <p className="text-2xl font-bold text-primary">
-                {selectedDistrict.bnName}
+                {isBn ? selectedDistrict.bnName : selectedDistrict.name}
               </p>
             </div>
 
@@ -226,7 +230,7 @@ export const Onboarding: React.FC = () => {
               onClick={completeOnboarding}
               className="w-full btn-primary py-4 text-lg shadow-xl shadow-primary/30"
             >
-              হোমপেজে যান <ChevronRight size={20} className="ml-2 inline" />
+              {isBn ? 'হোমপেজে যান' : 'Go to Homepage'} <ChevronRight size={20} className="ml-2 inline" />
             </button>
           </motion.div>
         )}
