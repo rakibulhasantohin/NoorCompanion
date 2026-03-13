@@ -168,9 +168,9 @@ export const Onboarding: React.FC = () => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="w-full max-w-md flex flex-col items-center"
+            className="w-full max-w-md flex flex-col items-center h-[80vh]"
           >
-            <div className="w-48 h-48 mb-8 relative">
+            <div className="w-32 h-32 mb-6 relative shrink-0">
               <img 
                 src="https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&w=400&q=80" 
                 alt="Islamic Architecture" 
@@ -180,98 +180,26 @@ export const Onboarding: React.FC = () => {
               <motion.div 
                 animate={{ y: [0, -10, 0] }}
                 transition={{ repeat: Infinity, duration: 2 }}
-                className="absolute -bottom-2 -right-2 bg-primary text-white p-4 rounded-2xl shadow-lg"
+                className="absolute -bottom-2 -right-2 bg-primary text-white p-3 rounded-2xl shadow-lg"
               >
-                <MapPin size={28} />
+                <MapPin size={24} />
               </motion.div>
             </div>
             
-            <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center shrink-0">
               লোকেশন সেট করুন
             </h1>
-            <p className="text-gray-500 mb-10 text-center px-4">
-              সঠিক নামাজের সময়সূচী পেতে আপনার বর্তমান অবস্থান বা জেলা নির্বাচন করুন।
+            <p className="text-gray-500 mb-6 text-center px-4 shrink-0">
+              সঠিক নামাজের সময়সূচী পেতে আপনার জেলা নির্বাচন করুন।
             </p>
 
-            <div className="w-full space-y-4">
-              <button
-                onClick={handleUseGPS}
-                disabled={isLocating}
-                className={`w-full p-6 rounded-3xl bg-primary text-white flex items-center gap-4 shadow-xl shadow-primary/20 active:scale-95 transition-all ${isLocating ? 'opacity-70 cursor-not-allowed' : ''}`}
-              >
-                <div className="bg-white/20 p-3 rounded-2xl">
-                  {isLocating ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                    >
-                      <Navigation size={24} />
-                    </motion.div>
-                  ) : (
-                    <Navigation size={24} />
-                  )}
-                </div>
-                <div className="text-left">
-                  <div className="font-bold text-lg">
-                    {isLocating ? 'লোকেশন খোঁজা হচ্ছে...' : 'বর্তমান অবস্থান'}
-                  </div>
-                  <div className="text-sm opacity-80">GPS এর মাধ্যমে অটোমেটিক সেট করুন</div>
-                </div>
-              </button>
-
-              <div className="flex items-center gap-4 py-4">
-                <div className="flex-1 h-px bg-gray-200"></div>
-                <span className="text-gray-400 text-sm font-medium">অথবা</span>
-                <div className="flex-1 h-px bg-gray-200"></div>
-              </div>
-
-              <button
-                onClick={() => setShowDistrictModal(true)}
-                className="w-full p-6 rounded-3xl border-2 border-gray-100 flex items-center gap-4 hover:border-primary/30 active:scale-95 transition-all bg-white"
-              >
-                <div className="bg-gray-100 p-3 rounded-2xl">
-                  <MapPin size={24} className="text-gray-500" />
-                </div>
-                <div className="text-left">
-                  <div className="font-bold text-lg text-gray-800">জেলা নির্বাচন করুন</div>
-                  <div className="text-sm text-gray-500">তালিকা থেকে আপনার জেলা বেছে নিন</div>
-                </div>
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* District Selection Modal */}
-      <AnimatePresence>
-        {showDistrictModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-black/50 flex items-end sm:items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col max-h-[80vh]"
-            >
-              <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="text-xl font-bold">জেলা নির্বাচন করুন</h2>
-                <button 
-                  onClick={() => setShowDistrictModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  বন্ধ করুন
-                </button>
-              </div>
-              <div className="overflow-y-auto p-2">
+            <div className="w-full flex-1 overflow-hidden flex flex-col bg-gray-50 rounded-3xl border border-gray-100">
+              <div className="overflow-y-auto p-2 flex-1">
                 {DISTRICTS.map((district) => (
                   <button
                     key={district.id}
                     onClick={() => handleDistrictSelect(district)}
-                    className="w-full p-4 text-left hover:bg-gray-50 rounded-xl flex items-center justify-between group"
+                    className="w-full p-4 text-left hover:bg-white rounded-xl flex items-center justify-between group transition-colors"
                   >
                     <span className="font-medium text-gray-700 group-hover:text-primary">
                       {district.bnName} ({district.name})
@@ -280,7 +208,7 @@ export const Onboarding: React.FC = () => {
                   </button>
                 ))}
               </div>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
