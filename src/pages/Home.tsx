@@ -14,19 +14,37 @@ import moment from 'moment-hijri';
 import { cn } from '../utils/utils';
 
 export const Home: React.FC = () => {
-  const { state } = useAppState();
+  const { state, user } = useAppState();
   const navigate = useNavigate();
   const [now, setNow] = useState(new Date());
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    if (user?.email) {
+      const usersStr = localStorage.getItem('noor_users') || '{}';
+      const users = JSON.parse(usersStr);
+      if (users[user.email] && users[user.email].photo) {
+        setProfilePhoto(users[user.email].photo);
+      } else {
+        setProfilePhoto(null);
+      }
+    } else {
+      setProfilePhoto(null);
+    }
+  }, [user]);
+
   const lat = state.location?.lat || 23.7289;
   const lng = state.location?.lng || 90.3944;
   const prayerData = getPrayerTimes(lat, lng, now);
   const forbiddenTimes = getForbiddenTimes(lat, lng, now);
+
+  const currentForbiddenTime = forbiddenTimes.find(t => isAfter(now, t.start) && isBefore(now, t.end));
+  const isForbidden = !!currentForbiddenTime;
 
   const formatCountdown = (target: Date) => {
     const diff = differenceInSeconds(target, now);
@@ -86,8 +104,12 @@ export const Home: React.FC = () => {
         <div>
           <h1 className="text-xl font-bold text-gray-800">নূর কম্প্যানিয়ন</h1>
         </div>
-        <button onClick={() => navigate('/settings')} className="p-2 bg-white rounded-full shadow-sm text-gray-500">
-          <Settings size={24} />
+        <button onClick={() => navigate('/profile')} className="w-10 h-10 bg-white rounded-full shadow-sm text-gray-500 overflow-hidden border-2 border-primary/10 flex items-center justify-center">
+          {state.profileImage || profilePhoto ? (
+            <img src={state.profileImage || profilePhoto || ''} alt="Profile" className="w-full h-full object-cover" />
+          ) : (
+            <User size={20} />
+          )}
         </button>
       </div>
 
@@ -112,32 +134,45 @@ export const Home: React.FC = () => {
       <motion.div 
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-primary text-white p-6 rounded-3xl shadow-xl shadow-primary/20 mb-4 relative overflow-hidden"
+        className={cn(
+          "text-white p-6 rounded-3xl shadow-xl mb-4 relative overflow-hidden transition-colors duration-500",
+          isForbidden ? "bg-rose-500 shadow-rose-500/20" : "bg-primary shadow-primary/20"
+        )}
       >
         <div className="relative z-10">
-          <div className="text-sm opacity-90 mb-1">বর্তমান ওয়াক্ত</div>
+          <div className="text-sm opacity-90 mb-1">
+            {isForbidden ? 'নিষিদ্ধ সময়' : 'বর্তমান ওয়াক্ত'}
+          </div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold">{prayerData.current?.bnName}</h2>
+              <h2 className="text-2xl font-bold">
+                {isForbidden ? currentForbiddenTime?.bnName : prayerData.current?.bnName}
+              </h2>
             </div>
             <div className="text-xl font-medium">
-              {prayerData.current?.formattedTime} - {prayerData.current?.endTime ? format(prayerData.current.endTime, 'p') : prayerData.next?.formattedTime}
+              {isForbidden 
+                ? `${format(currentForbiddenTime!.start, 'p')} - ${format(currentForbiddenTime!.end, 'p')}`
+                : `${prayerData.current?.formattedTime} - ${prayerData.current?.endTime ? format(prayerData.current.endTime, 'p') : prayerData.next?.formattedTime}`
+              }
             </div>
           </div>
           <div className="text-sm font-medium mb-4">
-            সময় বাকি: {prayerData.next && formatCountdownBn(prayerData.next.time)}
+            {isForbidden 
+              ? `সময় বাকি: ${formatCountdownBn(currentForbiddenTime!.end)}`
+              : `সময় বাকি: ${prayerData.next && formatCountdownBn(prayerData.next.time)}`
+            }
           </div>
           <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
             <motion.div 
               initial={{ width: 0 }}
-              animate={{ width: '65%' }}
+              animate={{ width: isForbidden ? '100%' : '65%' }}
               className="h-full bg-white rounded-full"
             ></motion.div>
           </div>
         </div>
         <div className="absolute -right-8 -bottom-8 opacity-10">
-          <Moon size={160} />
+          {isForbidden ? <Sun size={160} /> : <Moon size={160} />}
         </div>
       </motion.div>
 
@@ -171,16 +206,16 @@ export const Home: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center gap-6">
             <span className="text-sm text-gray-400 font-medium">সাহরী শেষ</span>
-            <span className="text-xl font-bold">{format(countdownInfo.imsak, 'p')}</span>
+            <span className="text-base font-bold">{format(countdownInfo.imsak, 'p')}</span>
           </div>
           <div className="flex items-center gap-6">
             <span className="text-sm text-gray-400 font-medium">ইফতার</span>
-            <span className="text-xl font-bold">{format(countdownInfo.maghrib, 'p')}</span>
+            <span className="text-base font-bold">{format(countdownInfo.maghrib, 'p')}</span>
           </div>
         </div>
         <div className="text-right">
           <div className="text-xs text-gray-400 mb-2 font-medium">{countdownInfo.label}</div>
-          <div className="text-3xl font-mono font-bold tracking-tighter text-white">
+          <div className="text-2xl font-mono font-bold tracking-tighter text-white">
             {formatCountdown(countdownInfo.target)}
           </div>
         </div>
