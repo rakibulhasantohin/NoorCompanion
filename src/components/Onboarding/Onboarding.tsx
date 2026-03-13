@@ -73,9 +73,9 @@ export const Onboarding: React.FC = () => {
           >
             <div className="w-48 h-48 mb-8 relative">
               <img 
-                src="https://images.unsplash.com/photo-1584286595398-a59f21d313f5?auto=format&fit=crop&w=400&q=80" 
-                alt="Islamic Calligraphy" 
-                className="w-full h-full object-cover rounded-full border-4 border-primary/20 shadow-2xl"
+                src="https://storage.googleapis.com/a1aa/image/e7uX3e2o1R5YF1e5xY2k6w9s8v4m7t1q0p3n6b9c2d5f8a1e.jpg" 
+                alt="Noor Companion Logo" 
+                className="w-full h-full object-cover rounded-full border-4 border-primary/20 shadow-2xl bg-white"
                 referrerPolicy="no-referrer"
               />
               <motion.div 
