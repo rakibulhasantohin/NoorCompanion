@@ -74,14 +74,9 @@ export const Onboarding: React.FC = () => {
             <div className="w-48 h-48 mb-8 relative">
               <div className="w-full h-full rounded-full border-4 border-primary/20 shadow-2xl bg-white flex items-center justify-center overflow-hidden">
                 <img 
-                  src="https://storage.googleapis.com/a1aa/image/e7uX3e2o1R5YF1e5xY2k6w9s8v4m7t1q0p3n6b9c2d5f8a1e.jpg" 
+                  src="/logo.svg" 
                   alt="Noor Companion Logo" 
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = 'https://images.unsplash.com/photo-1584286595398-a59f21d313f5?auto=format&fit=crop&w=400&q=80';
-                  }}
+                  className="w-full h-full object-contain p-2"
                 />
               </div>
               <motion.div 
@@ -155,14 +150,9 @@ export const Onboarding: React.FC = () => {
             <div className="w-32 h-32 mb-6 relative shrink-0">
               <div className="w-full h-full rounded-full border-4 border-primary/20 shadow-2xl bg-white flex items-center justify-center overflow-hidden">
                 <img 
-                  src="https://storage.googleapis.com/a1aa/image/e7uX3e2o1R5YF1e5xY2k6w9s8v4m7t1q0p3n6b9c2d5f8a1e.jpg" 
+                  src="/logo.svg" 
                   alt="Noor Companion Logo" 
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = 'https://images.unsplash.com/photo-1604871000636-074fa5117945?auto=format&fit=crop&w=400&q=80';
-                  }}
+                  className="w-full h-full object-contain p-2"
                 />
               </div>
               <motion.div 
