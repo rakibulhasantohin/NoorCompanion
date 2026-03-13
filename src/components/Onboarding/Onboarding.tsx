@@ -32,6 +32,7 @@ export const Onboarding: React.FC = () => {
   const { state, updateState } = useAppState();
   const [step, setStep] = useState(1);
   const [selectedLang, setSelectedLang] = useState<'bn' | 'en'>(state.language);
+  const [selectedDistrict, setSelectedDistrict] = useState<District | null>(null);
 
   const handleLanguageSelect = (lang: 'bn' | 'en') => {
     setSelectedLang(lang);
@@ -45,11 +46,18 @@ export const Onboarding: React.FC = () => {
   };
 
   const handleDistrictSelect = (district: District) => {
-    updateState({
-      location: { lat: district.lat, lng: district.lng },
-      city: district.bnName,
-      onboardingComplete: true,
-    });
+    setSelectedDistrict(district);
+    setStep(3);
+  };
+
+  const completeOnboarding = () => {
+    if (selectedDistrict) {
+      updateState({
+        location: { lat: selectedDistrict.lat, lng: selectedDistrict.lng },
+        city: selectedDistrict.bnName,
+        onboardingComplete: true,
+      });
+    }
   };
 
   return (
@@ -177,6 +185,47 @@ export const Onboarding: React.FC = () => {
                 ))}
               </div>
             </div>
+          </motion.div>
+        )}
+
+        {step === 3 && selectedDistrict && (
+          <motion.div
+            key="step3"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            className="w-full max-w-md flex flex-col items-center justify-center h-full"
+          >
+            <div className="w-32 h-32 mb-8 relative">
+              <div className="w-full h-full bg-emerald-100 rounded-full flex items-center justify-center border-4 border-emerald-500/20 shadow-2xl">
+                <MapPin size={48} className="text-emerald-600" />
+              </div>
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3, type: "spring" }}
+                className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-3 rounded-2xl shadow-lg"
+              >
+                <Check size={24} />
+              </motion.div>
+            </div>
+            
+            <h1 className="text-3xl font-bold text-gray-900 mb-4 text-center">
+              আলহামদুলিল্লাহ!
+            </h1>
+            <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100 mb-10 w-full text-center">
+              <p className="text-gray-500 mb-2">আপনার বর্তমান জেলা</p>
+              <p className="text-2xl font-bold text-primary">
+                {selectedDistrict.bnName}
+              </p>
+            </div>
+
+            <button
+              onClick={completeOnboarding}
+              className="w-full btn-primary py-4 text-lg shadow-xl shadow-primary/30"
+            >
+              হোমপেজে যান <ChevronRight size={20} className="ml-2 inline" />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
