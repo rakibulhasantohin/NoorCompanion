@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ChevronLeft, Moon, Clock, MapPin } from 'lucide-react';
+import { ChevronLeft, MapPin } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
 import { getSahriIftarRange, getPrayerTimes } from '../services/prayerService';
 import { format, differenceInSeconds, addDays, isAfter, isBefore, addMinutes } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import moment from 'moment-hijri';
+import { useTranslation } from '../hooks/useTranslation';
 
 export const SahriIftar: React.FC = () => {
   const { state } = useAppState();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [now, setNow] = useState(new Date());
   
@@ -20,8 +22,6 @@ export const SahriIftar: React.FC = () => {
 
   const lat = state.location?.lat || 23.7289;
   const lng = state.location?.lng || 90.3944;
-
-  const isBn = state.language === 'bn';
 
   const formatCountdown = (target: Date) => {
     const diff = differenceInSeconds(target, now);
@@ -38,12 +38,12 @@ export const SahriIftar: React.FC = () => {
     const sahriTime = today.imsak;
 
     if (isBefore(now, sahriTime)) {
-      return { label: isBn ? 'সাহরির সময় বাকি' : 'Time until Sahri', target: sahriTime, imsak: today.imsak, maghrib: today.maghrib };
+      return { label: t('sahriTimeRemaining'), target: sahriTime, imsak: today.imsak, maghrib: today.maghrib };
     } else if (isBefore(now, iftarTime)) {
-      return { label: isBn ? 'ইফতারের সময় বাকি' : 'Time until Iftar', target: iftarTime, imsak: today.imsak, maghrib: today.maghrib };
+      return { label: t('iftarTimeRemaining'), target: iftarTime, imsak: today.imsak, maghrib: today.maghrib };
     } else {
       const tomorrow = getPrayerTimes(lat, lng, addDays(now, 1));
-      return { label: isBn ? 'সাহরির সময় বাকি' : 'Time until Sahri', target: tomorrow.imsak, imsak: tomorrow.imsak, maghrib: tomorrow.maghrib };
+      return { label: t('sahriTimeRemaining'), target: tomorrow.imsak, imsak: tomorrow.imsak, maghrib: tomorrow.maghrib };
     }
   })();
 
@@ -60,20 +60,14 @@ export const SahriIftar: React.FC = () => {
     });
 
   const getBengaliNumber = (n: number | string): string => {
-    if (!isBn) return n.toString();
     const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
     return n.toString().replace(/\d/g, (d) => bengaliDigits[parseInt(d)]);
   };
 
-  const hijriMonthNamesBn = [
+  const hijriMonthNames = [
     'মুহররম', 'সফর', 'রবিউল আউয়াল', 'রবিউস সানি', 'জামাদিউল আউয়াল', 'জামাদিউস সানি',
     'রজব', 'শাবান', 'রমজান', 'শাওয়াল', 'জিলকদ', 'জিলহজ'
   ];
-  const hijriMonthNamesEn = [
-    'Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 'Jumada al-Awwal', 'Jumada al-Thani',
-    'Rajab', 'Sha\'ban', 'Ramadan', 'Shawwal', 'Dhu al-Qi\'dah', 'Dhu al-Hijjah'
-  ];
-  const hijriMonthNames = isBn ? hijriMonthNamesBn : hijriMonthNamesEn;
 
   const groups: { monthName: string, year: string, items: any[] }[] = [];
   let currentMonthKey = "";
@@ -104,11 +98,11 @@ export const SahriIftar: React.FC = () => {
           >
             <ChevronLeft size={24} />
           </button>
-          <h1 className="text-xl font-bold text-gray-800">{isBn ? 'সাহরী ও ইফতারের সময়সূচী' : 'Sahri & Iftar Times'}</h1>
+          <h1 className="text-xl font-bold text-gray-800">{t('sahriIftarSchedule')}</h1>
         </div>
         <div className="bg-gray-100 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-medium text-gray-600">
           <MapPin size={14} />
-          <span>{state.city === 'Dhaka' ? (isBn ? 'বাংলাদেশ' : 'Bangladesh') : state.city}</span>
+          <span>{state.city === 'Dhaka' ? t('bangladesh') : state.city}</span>
         </div>
       </div>
 
@@ -116,11 +110,11 @@ export const SahriIftar: React.FC = () => {
       <div className="bg-slate-800 text-white p-6 rounded-[32px] mb-8 flex items-center justify-between shadow-lg">
         <div className="space-y-4">
           <div className="flex items-center gap-6">
-            <span className="text-sm text-gray-400 font-medium">{isBn ? 'সাহরী শেষ' : 'Sahri Ends'}</span>
+            <span className="text-sm text-gray-400 font-medium">{t('sahriEnds')}</span>
             <span className="text-xl font-bold">{format(countdownInfo.imsak, 'p')}</span>
           </div>
           <div className="flex items-center gap-6">
-            <span className="text-sm text-gray-400 font-medium">{isBn ? 'ইফতার' : 'Iftar'}</span>
+            <span className="text-sm text-gray-400 font-medium">{t('iftar')}</span>
             <span className="text-xl font-bold">{format(countdownInfo.maghrib, 'p')}</span>
           </div>
         </div>
@@ -143,8 +137,8 @@ export const SahriIftar: React.FC = () => {
 
             <div className="space-y-3">
               {group.items.map((item, idx) => {
-                const dayName = format(item.date, 'EEEE', isBn ? { locale: bn } : undefined);
-                const dateStr = format(item.date, 'd MMMM', isBn ? { locale: bn } : undefined);
+                const dayName = format(item.date, 'EEEE', { locale: bn });
+                const dateStr = format(item.date, 'd MMMM', { locale: bn });
                 const ramadanDay = moment(item.date).format('iD');
                 
                 return (
@@ -167,11 +161,11 @@ export const SahriIftar: React.FC = () => {
                     
                     <div className="flex gap-8">
                       <div className="text-center">
-                        <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">{isBn ? 'সাহরী শেষ' : 'Sahri'}</div>
+                        <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">{t('sahriEnds')}</div>
                         <div className="text-sm font-bold text-gray-800">{format(item.imsak, 'p')}</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">{isBn ? 'ইফতার' : 'Iftar'}</div>
+                        <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">{t('iftar')}</div>
                         <div className="text-sm font-bold text-gray-800">{format(item.maghrib, 'p')}</div>
                       </div>
                     </div>

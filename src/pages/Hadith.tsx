@@ -1,51 +1,53 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Search, Book, Copy, Share2, ChevronRight } from 'lucide-react';
-import { Card, AppHeader } from '../components/Common';
+import { Search, Book, Copy, Share2 } from 'lucide-react';
+import { AppHeader } from '../components/Common';
 import { cn } from '../utils/utils';
-
-const HADITH_COLLECTIONS = [
-  { id: 'bukhari', name: 'সহিহ বুখারী', count: '৭৫৬৩', color: 'bg-emerald-50 text-emerald-600' },
-  { id: 'muslim', name: 'সহিহ মুসলিম', count: '৭৪৫৩', color: 'bg-blue-50 text-blue-600' },
-  { id: 'tirmidhi', name: 'সুনানে তিরমিজী', count: '৩৯৫৬', color: 'bg-amber-50 text-amber-600' },
-  { id: 'nasai', name: 'সুনানে নাসাঈ', count: '৫৭৫৮', color: 'bg-rose-50 text-rose-600' },
-  { id: 'abu-dawud', name: 'সুনানে আবু দাউদ', count: '৫২৭৪', color: 'bg-purple-50 text-purple-600' },
-  { id: 'ibn-majah', name: 'সুনানে ইবনে মাজাহ', count: '৪৩৪১', color: 'bg-indigo-50 text-indigo-600' },
-];
-
-const MOCK_HADITHS = [
-  {
-    collection: 'bukhari',
-    id: 1,
-    title: 'নিয়ত সম্পর্কিত হাদিস',
-    arabic: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى',
-    translation: 'নিশ্চয়ই সকল কাজ নিয়তের ওপর নির্ভরশীল। আর প্রত্যেক ব্যক্তি তাই পাবে যার সে নিয়ত করবে।',
-    narrator: 'উমর ইবনুল খাত্তাব (রা.)',
-    reference: 'সহিহ বুখারী, হাদিস নং ১',
-  },
-  {
-    collection: 'bukhari',
-    id: 2,
-    title: 'কুরআন শিক্ষা',
-    arabic: 'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ',
-    translation: 'তোমাদের মধ্যে সর্বোত্তম ব্যক্তি সেই যে নিজে কুরআন শিখে এবং অন্যকে শেখায়।',
-    narrator: 'উসমান ইবনে আফফান (রা.)',
-    reference: 'সহিহ বুখারী, হাদিস নং ৫০২৭',
-  },
-  {
-    collection: 'muslim',
-    id: 1,
-    title: 'পবিত্রতা ঈমানের অঙ্গ',
-    arabic: 'الطُّهُورُ شَطْرُ الإِيمَانِ',
-    translation: 'পবিত্রতা ঈমানের অর্ধেক।',
-    narrator: 'আবু মালেক আল-আশআরী (রা.)',
-    reference: 'সহিহ মুসলিম, হাদিস নং ২২৩',
-  },
-];
+import { useTranslation } from '../hooks/useTranslation';
 
 export const Hadith = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('bukhari');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const HADITH_COLLECTIONS = [
+    { id: 'bukhari', name: t('bukhari'), count: '৭৫৬৩', color: 'bg-emerald-50 text-emerald-600' },
+    { id: 'muslim', name: t('muslim'), count: '৭৪৫৩', color: 'bg-blue-50 text-blue-600' },
+    { id: 'tirmidhi', name: t('tirmidhi'), count: '৩৯৫৬', color: 'bg-amber-50 text-amber-600' },
+    { id: 'nasai', name: t('nasai'), count: '৫৭৫৮', color: 'bg-rose-50 text-rose-600' },
+    { id: 'abu-dawud', name: t('abuDawud'), count: '৫২৭৪', color: 'bg-purple-50 text-purple-600' },
+    { id: 'ibn-majah', name: t('ibnMajah'), count: '৪৩৪১', color: 'bg-indigo-50 text-indigo-600' },
+  ];
+
+  const MOCK_HADITHS = [
+    {
+      collection: 'bukhari',
+      id: 1,
+      title: 'নিয়ত সম্পর্কিত হাদিস',
+      arabic: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى',
+      translation: 'নিশ্চয়ই সকল কাজ নিয়তের ওপর নির্ভরশীল। আর প্রত্যেক ব্যক্তি তাই পাবে যার সে নিয়ত করবে।',
+      narrator: 'উমর ইবনুল খাত্তাব (রা.)',
+      reference: 'সহিহ বুখারী, হাদিস নং ১',
+    },
+    {
+      collection: 'bukhari',
+      id: 2,
+      title: 'কুরআন শিক্ষা',
+      arabic: 'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ',
+      translation: 'তোমাদের মধ্যে সর্বোত্তম ব্যক্তি সেই যে নিজে কুরআন শিখে এবং অন্যকে শেখায়।',
+      narrator: 'উসমান ইবনে আফফান (রা.)',
+      reference: 'সহিহ বুখারী, হাদিস নং ৫০২৭',
+    },
+    {
+      collection: 'muslim',
+      id: 1,
+      title: 'পবিত্রতা ঈমানের অঙ্গ',
+      arabic: 'الطُّهُورُ شَطْرُ الإِيمَانِ',
+      translation: 'পবিত্রতা ঈমানের অর্ধেক।',
+      narrator: 'আবু মালেক আল-আশআরী (রা.)',
+      reference: 'সহিহ মুসলিম, হাদিস নং ২২৩',
+    },
+  ];
 
   const filteredHadiths = MOCK_HADITHS.filter(h => 
     h.collection === activeTab && 
@@ -54,7 +56,7 @@ export const Hadith = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-32">
-      <AppHeader title="হাদিস শরীফ" showBack />
+      <AppHeader title={t('hadithSharif')} showBack />
 
       <div className="px-4 py-6 space-y-6">
         {/* Search */}
@@ -62,7 +64,7 @@ export const Hadith = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="হাদিস খুঁজুন..."
+            placeholder={t('searchHadith')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white border border-gray-100 rounded-2xl py-4 pl-12 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
@@ -84,7 +86,7 @@ export const Hadith = () => {
             >
               <span className="text-sm font-bold mb-1">{col.name}</span>
               <span className={`text-[10px] ${activeTab === col.id ? 'text-white/80' : 'text-gray-400'}`}>
-                {col.count} টি হাদিস
+                {col.count} {t('hadithCount')}
               </span>
             </button>
           ))}
@@ -113,13 +115,13 @@ export const Hadith = () => {
                 </p>
                 <div className="space-y-3">
                   <div className="bg-gray-50 rounded-2xl p-4">
-                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">অনুবাদ</p>
+                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">{t('translation')}</p>
                     <p className="text-sm text-gray-700 leading-relaxed">
                       {hadith.translation}
                     </p>
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-gray-400 font-bold uppercase tracking-widest px-1">
-                    <span>বর্ণনায়: {hadith.narrator}</span>
+                    <span>{t('narrator')}: {hadith.narrator}</span>
                     <span>{hadith.reference}</span>
                   </div>
                 </div>
@@ -128,7 +130,7 @@ export const Hadith = () => {
           ) : (
             <div className="text-center py-20 text-gray-400">
               <Book size={48} className="mx-auto mb-4 opacity-20" />
-              <p>এই ক্যাটাগরিতে কোনো হাদিস পাওয়া যায়নি</p>
+              <p>{t('noHadithFound')}</p>
             </div>
           )}
         </div>

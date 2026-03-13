@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RotateCcw, Plus, Settings, ChevronDown } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
+import { useTranslation } from '../hooks/useTranslation';
 import { AppHeader } from '../components/Common';
 import confetti from 'canvas-confetti';
 
 export const Tasbih: React.FC = () => {
   const { state, updateState } = useAppState();
+  const { t } = useTranslation();
   const [count, setCount] = useState(state.tasbihCount);
   const [target, setTarget] = useState(33);
   const [showTargets, setShowTargets] = useState(false);
@@ -38,7 +40,7 @@ export const Tasbih: React.FC = () => {
   };
 
   const resetCount = () => {
-    if (window.confirm('আপনি কি গণনা রিসেট করতে চান?')) {
+    if (window.confirm(t('resetConfirm'))) {
       setCount(0);
     }
   };
@@ -47,7 +49,7 @@ export const Tasbih: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-32">
-      <AppHeader title={state.language === 'bn' ? 'তাসবিহ' : 'Tasbih'} showBack />
+      <AppHeader title={t('tasbih')} showBack />
 
       <div className="px-4 py-12 flex flex-col items-center justify-center min-h-[70vh]">
         {/* Target Selector */}
@@ -56,7 +58,7 @@ export const Tasbih: React.FC = () => {
             onClick={() => setShowTargets(!showTargets)}
             className="bg-white px-6 py-2 rounded-full shadow-sm border border-gray-100 flex items-center gap-2 text-gray-600 font-bold"
           >
-            <span>লক্ষ্য: {target}</span>
+            <span>{t('target')}: {target}</span>
             <ChevronDown size={18} className={`transition-transform ${showTargets ? 'rotate-180' : ''}`} />
           </button>
           
@@ -116,7 +118,7 @@ export const Tasbih: React.FC = () => {
             >
               {count}
             </motion.div>
-            <div className="text-gray-400 font-bold uppercase tracking-widest text-xs mt-2">Total Count</div>
+            <div className="text-gray-400 font-bold uppercase tracking-widest text-xs mt-2">{t('totalCount')}</div>
           </div>
         </div>
 

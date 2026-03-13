@@ -1,15 +1,14 @@
 import React from 'react';
 import { AppHeader } from '../components/Common';
 import { ProfileSection } from '../components/Profile';
-import { useAppState } from '../hooks/useAppState';
+import { useTranslation } from '../hooks/useTranslation';
 
 export const ProfilePage: React.FC = () => {
-  const { state } = useAppState();
-  const isBn = state.language === 'bn';
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-gray-50 pb-32">
-      <AppHeader title={isBn ? 'প্রোফাইল' : 'Profile'} showBack />
+      <AppHeader title={t('profile')} showBack />
       <div className="px-4 py-6">
         <ProfileSection />
       </div>

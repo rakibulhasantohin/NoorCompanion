@@ -153,7 +153,7 @@ export const Settings: React.FC = () => {
               {section.items.map((item, i) => (
                 <div 
                   key={i}
-                  onClick={item.onClick}
+                  onClick={() => item.onClick?.()}
                   className={`p-4 flex items-center justify-between hover:bg-gray-50 transition-all cursor-pointer ${
                     i !== section.items.length - 1 ? 'border-b border-gray-50' : ''
                   }`}

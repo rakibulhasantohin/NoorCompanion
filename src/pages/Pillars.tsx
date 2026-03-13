@@ -4,27 +4,30 @@ import {
   Heart, Star, Moon, Building2, Hand, 
   ChevronRight, BookOpen, GraduationCap 
 } from 'lucide-react';
-import { Card, AppHeader } from '../components/Common';
+import { AppHeader } from '../components/Common';
 import { cn } from '../utils/utils';
-
-const PILLARS = [
-  { id: 'shahada', name: 'কালিমা', icon: Hand, color: 'text-blue-600 bg-blue-50', desc: 'আল্লাহ ছাড়া কোনো ইলাহ নেই' },
-  { id: 'namaz', name: 'নামাজ', icon: Building2, color: 'text-purple-600 bg-purple-50', desc: 'দৈনিক ৫ ওয়াক্ত নামাজ' },
-  { id: 'roza', name: 'রোজা', icon: Moon, color: 'text-emerald-600 bg-emerald-50', desc: 'রমজান মাসে রোজা রাখা' },
-  { id: 'zakat', name: 'যাকাত', icon: Heart, color: 'text-rose-600 bg-rose-50', desc: 'সম্পদের নির্দিষ্ট অংশ দান' },
-  { id: 'hajj', name: 'হজ্জ', icon: Star, color: 'text-amber-600 bg-amber-50', desc: 'সামর্থ্য থাকলে হজ্জ করা' },
-];
+import { useTranslation } from '../hooks/useTranslation';
 
 export const Pillars = () => {
+  const { t } = useTranslation();
+
+  const PILLARS = [
+    { id: 'shahada', name: t('shahada'), icon: Hand, color: 'text-blue-600 bg-blue-50', desc: t('shahadaDesc') },
+    { id: 'namaz', name: t('namaz'), icon: Building2, color: 'text-purple-600 bg-purple-50', desc: t('namazDesc') },
+    { id: 'roza', name: t('roza'), icon: Moon, color: 'text-emerald-600 bg-emerald-50', desc: t('rozaDesc') },
+    { id: 'zakat', name: t('zakat'), icon: Heart, color: 'text-rose-600 bg-rose-50', desc: t('zakatDesc') },
+    { id: 'hajj', name: t('hajj'), icon: Star, color: 'text-amber-600 bg-amber-50', desc: t('hajjDesc') },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 pb-32">
-      <AppHeader title="ইসলামের ৫টি স্তম্ভ" showBack />
+      <AppHeader title={t('fivePillars')} showBack />
 
       <div className="px-4 py-6 space-y-6">
         <div className="bg-primary rounded-3xl p-8 text-white text-center space-y-4 shadow-xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl" />
-          <h2 className="text-3xl font-bold mb-2">ইসলামের ৫টি স্তম্ভ</h2>
-          <p className="text-white/80 text-sm">ইসলামের বুনিয়াদী শিক্ষা ও পালনীয় বিধান</p>
+          <h2 className="text-3xl font-bold mb-2">{t('fivePillars')}</h2>
+          <p className="text-white/80 text-sm">{t('pillarsGuide')}</p>
         </div>
 
         <div className="space-y-4">
@@ -55,14 +58,14 @@ export const Pillars = () => {
             <div className="p-2 bg-white/20 backdrop-blur-md rounded-xl text-white">
               <GraduationCap className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold">নামাজ শিক্ষা</h3>
+            <h3 className="text-xl font-bold">{t('namazEducation')}</h3>
           </div>
           <p className="text-sm text-white/80 leading-relaxed mb-6">
-            নামাজ ইসলামের দ্বিতীয় স্তম্ভ। নামাজের সঠিক নিয়ম, দোয়া ও সূরাগুলো শিখুন আমাদের এই বিশেষ গাইড থেকে।
+            {t('namazEducationDesc')}
           </p>
           <button className="w-full bg-white text-primary py-3 rounded-2xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-all">
             <BookOpen className="w-4 h-4" />
-            শুরু করুন
+            {t('startNow')}
           </button>
         </div>
       </div>

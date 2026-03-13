@@ -3,9 +3,11 @@ import { motion } from 'motion/react';
 import { Compass, Navigation, MapPin, AlertCircle } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
 import { AppHeader } from '../components/Common';
+import { useTranslation } from '../hooks/useTranslation';
 
 export const Qibla: React.FC = () => {
   const { state } = useAppState();
+  const { t } = useTranslation();
   const [heading, setHeading] = useState(0);
   const [qiblaDirection, setQiblaDirection] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -38,13 +40,13 @@ export const Qibla: React.FC = () => {
     if (window.DeviceOrientationEvent) {
       window.addEventListener('deviceorientation', handleOrientation, true);
     } else {
-      setError('আপনার ডিভাইসে কম্পাস সাপোর্ট নেই।');
+      setError(t('noCompassSupport'));
     }
 
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation);
     };
-  }, [state.location]);
+  }, [state.location, t]);
 
   // Helper functions for math
   Math.toRadians = (degrees: number) => degrees * (Math.PI / 180);
@@ -54,7 +56,7 @@ export const Qibla: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-32">
-      <AppHeader title={state.language === 'bn' ? 'কিবলা কম্পাস' : 'Qibla Compass'} showBack />
+      <AppHeader title={t('qiblaCompass')} showBack />
 
       <div className="px-4 py-12 flex flex-col items-center justify-center min-h-[70vh]">
         <div className="text-center mb-12">
@@ -62,8 +64,8 @@ export const Qibla: React.FC = () => {
             <MapPin size={18} />
             <span>{state.city}, Bangladesh</span>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">কিবলার সঠিক দিক</h2>
-          <p className="text-gray-400 text-sm mt-1">আপনার ফোনটি সমতলে রাখুন</p>
+          <h2 className="text-2xl font-bold text-gray-800">{t('qiblaDirection')}</h2>
+          <p className="text-gray-400 text-sm mt-1">{t('phoneFlat')}</p>
         </div>
 
         {/* Compass Container */}
@@ -117,7 +119,7 @@ export const Qibla: React.FC = () => {
             </div>
             <div className="text-left">
               <div className={`font-bold ${isAligned ? 'text-primary' : 'text-gray-800'}`}>
-                {isAligned ? 'কিবলা সঠিক আছে' : 'ফোনটি ঘুরান'}
+                {isAligned ? t('qiblaAligned') : t('rotatePhone')}
               </div>
               <div className="text-xs text-gray-400">অ্যাঙ্গেল: {Math.round(qiblaDirection)}°</div>
             </div>

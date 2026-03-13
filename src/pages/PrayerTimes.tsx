@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Calendar, MapPin, ChevronLeft, ChevronRight, Bell, BellOff, Clock } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
+import { useTranslation } from '../hooks/useTranslation';
 import { getPrayerTimes } from '../services/prayerService';
 import { format, addDays, subDays, isSameDay } from 'date-fns';
 import { AppHeader } from '../components/Common';
@@ -9,6 +10,7 @@ import { cn } from '../utils/utils';
 
 export const PrayerTimes: React.FC = () => {
   const { state, updateState } = useAppState();
+  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [now, setNow] = useState(new Date());
 
@@ -23,17 +25,13 @@ export const PrayerTimes: React.FC = () => {
   
   const isToday = isSameDay(selectedDate, new Date());
 
-  const isBn = state.language === 'bn';
-
   const toggleAlarm = () => {
     updateState({ prayerAlarms: !state.prayerAlarms });
   };
 
-  const forbiddenTimes = getForbiddenTimes(lat, lng, selectedDate);
-
   return (
     <div className="min-h-screen bg-gray-50 pb-32">
-      <AppHeader title={isBn ? 'নামাজের সময়সূচী' : 'Prayer Times'} showBack />
+      <AppHeader title={t('prayerTimes')} showBack />
 
       <div className="px-4 py-6">
         {/* Date Selector */}
@@ -47,13 +45,9 @@ export const PrayerTimes: React.FC = () => {
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-2 text-primary font-bold">
               <Calendar size={18} />
-              <span>
-                {isBn 
-                  ? new Intl.DateTimeFormat('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' }).format(selectedDate)
-                  : format(selectedDate, "dd MMMM',' yyyy")}
-              </span>
+              <span>{format(selectedDate, "dd MMMM',' yyyy")}</span>
             </div>
-            {isToday && <span className="text-[10px] text-primary font-bold uppercase tracking-widest mt-1">{isBn ? 'আজ' : 'Today'}</span>}
+            {isToday && <span className="text-[10px] text-primary font-bold uppercase tracking-widest mt-1">{t('today')}</span>}
           </div>
           <button 
             onClick={() => setSelectedDate(addDays(selectedDate, 1))}
@@ -67,7 +61,7 @@ export const PrayerTimes: React.FC = () => {
         <div className="flex items-center justify-between mb-6 px-2">
           <div className="flex items-center gap-2 text-gray-500 text-sm">
             <MapPin size={16} />
-            <span>{state.city === 'Dhaka' ? (isBn ? 'বাংলাদেশ' : 'Bangladesh') : state.city}</span>
+            <span>{state.city}, Bangladesh</span>
           </div>
           <button 
             onClick={toggleAlarm}
@@ -76,7 +70,7 @@ export const PrayerTimes: React.FC = () => {
             }`}
           >
             {state.prayerAlarms ? <Bell size={14} /> : <BellOff size={14} />}
-            {isBn ? (state.prayerAlarms ? 'অ্যালার্ম অন' : 'অ্যালার্ম অফ') : (state.prayerAlarms ? 'Alarm On' : 'Alarm Off')}
+            {state.prayerAlarms ? t('alarmOn') : t('alarmOff')}
           </button>
         </div>
 
@@ -100,7 +94,7 @@ export const PrayerTimes: React.FC = () => {
                   "font-bold text-sm",
                   p.isCurrent && isToday ? "text-primary" : "text-gray-700"
                 )}>
-                  {isBn ? p.bnName : p.name}
+                  {state.language === 'bn' ? p.bnName : p.name}
                 </div>
               </div>
               
@@ -124,16 +118,18 @@ export const PrayerTimes: React.FC = () => {
 
         {/* Forbidden Times Section */}
         <div className="mt-10">
-          <h3 className="text-gray-400 font-bold text-xs uppercase tracking-widest mb-4 px-2">{isBn ? 'নিষিদ্ধ সময়' : 'Forbidden Times'}</h3>
+          <h3 className="text-gray-400 font-bold text-xs uppercase tracking-widest mb-4 px-2">{t('forbiddenTimes')}</h3>
           <div className="bg-rose-50 border border-rose-100 rounded-3xl p-6 space-y-4">
-            {forbiddenTimes.map((t, i) => (
-              <div key={i} className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">{isBn ? t.bnName : t.name}</span>
-                <span className="font-bold text-rose-500">
-                  {format(t.start, 'p')} - {format(t.end, 'p')}
-                </span>
+            {getPrayerTimes(lat, lng, selectedDate).times.filter(prayerTime => prayerTime.name === 'Sunrise').map(prayerTime => (
+              <div key="sunrise" className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">{t('sunrise')}</span>
+                <span className="font-bold text-rose-500">{prayerTime.formattedTime}</span>
               </div>
             ))}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">{t('sunset')}</span>
+              <span className="font-bold text-rose-500">{format(prayerData.sunset, 'p')}</span>
+            </div>
           </div>
         </div>
       </div>
