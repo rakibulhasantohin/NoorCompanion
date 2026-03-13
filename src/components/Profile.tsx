@@ -5,8 +5,11 @@ import { useAppState } from '../hooks/useAppState';
 import { supabase } from '../lib/supabase';
 import { getBengaliNumber } from '../utils/utils';
 
+import { useNavigate } from 'react-router-dom';
+
 export const ProfileSection = () => {
   const { state, user, updateState, manualSync } = useAppState();
+  const navigate = useNavigate();
   const [syncing, setSyncing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
@@ -97,12 +100,20 @@ export const ProfileSection = () => {
               </div>
             )}
           </div>
-          <button 
-            onClick={openEdit}
-            className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-emerald-600 transition-colors"
-          >
-            <Edit2 className="w-5 h-5" />
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={openEdit}
+              className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-emerald-600 transition-colors"
+            >
+              <Edit2 className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={() => navigate('/settings')}
+              className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-emerald-600 transition-colors"
+            >
+              <SettingsIcon className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-3">

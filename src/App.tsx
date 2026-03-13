@@ -14,6 +14,9 @@ import { Duas } from './pages/Duas';
 import { Hadith } from './pages/Hadith';
 import { Hajj } from './pages/Hajj';
 import { Pillars } from './pages/Pillars';
+import { SahriIftar } from './pages/SahriIftar';
+
+import { ProfilePage } from './pages/ProfilePage';
 
 import { useAppState } from './hooks/useAppState';
 import { Onboarding } from './components/Onboarding/Onboarding';
@@ -34,6 +37,8 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
       case '/prayer-times': return isBn ? 'নামাজের সময়' : 'Prayer Times';
       case '/tasbih': return isBn ? 'তাসবিহ' : 'Tasbih';
       case '/qibla': return isBn ? 'কিবলা' : 'Qibla';
+      case '/sahri-iftar': return isBn ? 'সাহরী ও ইফতার' : 'Sahri & Iftar';
+      case '/profile': return isBn ? 'প্রোফাইল' : 'Profile';
       case '/settings': return isBn ? 'সেটিংস' : 'Settings';
       default: return isBn ? 'নূর কম্প্যানিয়ন' : 'Noor Companion';
     }
@@ -82,11 +87,13 @@ export default function App() {
           <Route path="/tasbih" element={<Tasbih />} />
           <Route path="/qibla" element={<Qibla />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/surahs" element={<Surahs />} />
           <Route path="/duas" element={<Duas />} />
           <Route path="/hadith" element={<Hadith />} />
           <Route path="/hajj" element={<Hajj />} />
           <Route path="/pillars" element={<Pillars />} />
+          <Route path="/sahri-iftar" element={<SahriIftar />} />
         </Routes>
       </PageWrapper>
     </Router>

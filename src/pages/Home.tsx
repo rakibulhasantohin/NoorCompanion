@@ -7,9 +7,11 @@ import {
   User, Bell, Share2, Facebook, Users
 } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
-import { getPrayerTimes, getForbiddenTimes } from '../services/prayerService';
-import { format, differenceInSeconds } from 'date-fns';
+import { getPrayerTimes, getForbiddenTimes, getSahriIftarRange } from '../services/prayerService';
+import { format, differenceInSeconds, addDays, isAfter, isBefore, addMinutes } from 'date-fns';
+import { bn } from 'date-fns/locale';
 import moment from 'moment-hijri';
+import { cn } from '../utils/utils';
 
 export const Home: React.FC = () => {
   const { state } = useAppState();
@@ -49,10 +51,26 @@ export const Home: React.FC = () => {
   const hijriDate = moment().format('iD iMMMM iYYYY');
   const bengaliDate = new Intl.DateTimeFormat('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
 
+  const countdownInfo = (() => {
+    const today = getPrayerTimes(lat, lng, now);
+    const iftarTime = today.maghrib;
+    const sahriTime = today.imsak;
+    const iftarWithBuffer = addMinutes(iftarTime, 10);
+
+    if (isBefore(now, sahriTime)) {
+      return { label: 'সাহরির সময় বাকি', target: sahriTime, imsak: today.imsak, maghrib: today.maghrib };
+    } else if (isBefore(now, iftarTime)) {
+      return { label: 'ইফতারের সময় বাকি', target: iftarTime, imsak: today.imsak, maghrib: today.maghrib };
+    } else {
+      const tomorrow = getPrayerTimes(lat, lng, addDays(now, 1));
+      return { label: 'সাহরির সময় বাকি', target: tomorrow.imsak, imsak: tomorrow.imsak, maghrib: tomorrow.maghrib };
+    }
+  })();
+
   const features = [
     { id: 'prayer', name: 'নামাজের সময়সূচী', icon: <Clock className="text-teal-500" />, path: '/prayer-times' },
     { id: 'quran', name: 'আল-কুরআন', icon: <Book className="text-emerald-500" />, path: '/quran' },
-    { id: 'ramadan', name: 'সাহরী-ইফতার', icon: <Moon className="text-indigo-500" />, path: '/prayer-times' },
+    { id: 'ramadan', name: 'সাহরী-ইফতার', icon: <Moon className="text-indigo-500" />, path: '/sahri-iftar' },
     { id: 'tasbih', name: 'তাসবিহ', icon: <Heart className="text-rose-500" />, path: '/tasbih' },
     { id: 'qibla', name: 'কিবলা কম্পাস', icon: <Compass className="text-amber-500" />, path: '/qibla' },
     { id: 'names', name: 'আসমা-উল-হুসনা', icon: <span className="text-xl font-bold text-blue-500">الله</span>, path: '/settings' },
@@ -66,7 +84,7 @@ export const Home: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">ইবাদাহ - নামাজের সময়সূচি ও কুরআন</h1>
+          <h1 className="text-xl font-bold text-gray-800">নূর কম্প্যানিয়ন</h1>
         </div>
         <button onClick={() => navigate('/settings')} className="p-2 bg-white rounded-full shadow-sm text-gray-500">
           <Settings size={24} />
@@ -101,14 +119,14 @@ export const Home: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold">{prayerData.current.bnName}</h2>
+              <h2 className="text-2xl font-bold">{prayerData.current?.bnName}</h2>
             </div>
             <div className="text-xl font-medium">
-              {prayerData.current.formattedTime} - {prayerData.current.endTime ? format(prayerData.current.endTime, 'h:mm a') : prayerData.next.formattedTime}
+              {prayerData.current?.formattedTime} - {prayerData.current?.endTime ? format(prayerData.current.endTime, 'p') : prayerData.next?.formattedTime}
             </div>
           </div>
           <div className="text-sm font-medium mb-4">
-            সময় বাকি: {formatCountdownBn(prayerData.next.time)}
+            সময় বাকি: {prayerData.next && formatCountdownBn(prayerData.next.time)}
           </div>
           <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
             <motion.div 
@@ -127,40 +145,43 @@ export const Home: React.FC = () => {
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
           <div className="text-xs text-gray-400 mb-1">পরবর্তী নামাজ</div>
-          <div className="font-bold text-gray-800">{prayerData.next.bnName}</div>
-          <div className="text-sm text-gray-500 mt-2">{prayerData.next.formattedTime}</div>
+          <div className="font-bold text-gray-800">{prayerData.next?.bnName}</div>
+          <div className="text-sm text-gray-500 mt-2">{prayerData.next?.formattedTime}</div>
         </div>
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-around">
           <div className="flex flex-col items-center">
             <Sun size={20} className="text-amber-500 mb-1" />
             <div className="text-[10px] text-gray-400">সূর্যোদয়</div>
-            <div className="text-xs font-bold text-gray-700">{format(prayerData.sunrise, 'h:mm a')}</div>
+            <div className="text-xs font-bold text-gray-700">{format(prayerData.sunrise, 'p')}</div>
           </div>
           <div className="w-px h-8 bg-gray-100"></div>
           <div className="flex flex-col items-center">
             <Moon size={20} className="text-indigo-500 mb-1" />
             <div className="text-[10px] text-gray-400">সূর্যাস্ত</div>
-            <div className="text-xs font-bold text-gray-700">{format(prayerData.sunset, 'h:mm a')}</div>
+            <div className="text-xs font-bold text-gray-700">{format(prayerData.sunset, 'p')}</div>
           </div>
         </div>
       </div>
 
       {/* Sahri & Iftar Card */}
-      <div className="bg-slate-700 text-white p-5 rounded-3xl mb-8 flex items-center justify-between">
-        <div className="space-y-3">
-          <div className="flex items-center gap-8">
-            <span className="text-sm opacity-70">সাহরী শেষ</span>
-            <span className="font-bold">{format(prayerData.imsak, 'h:mm a')}</span>
+      <div 
+        onClick={() => navigate('/sahri-iftar')}
+        className="bg-slate-800 text-white p-6 rounded-[32px] mb-8 flex items-center justify-between shadow-lg cursor-pointer active:scale-[0.98] transition-all"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-6">
+            <span className="text-sm text-gray-400 font-medium">সাহরী শেষ</span>
+            <span className="text-xl font-bold">{format(countdownInfo.imsak, 'p')}</span>
           </div>
-          <div className="flex items-center gap-8">
-            <span className="text-sm opacity-70">ইফতার</span>
-            <span className="font-bold">{format(prayerData.maghrib, 'h:mm a')}</span>
+          <div className="flex items-center gap-6">
+            <span className="text-sm text-gray-400 font-medium">ইফতার</span>
+            <span className="text-xl font-bold">{format(countdownInfo.maghrib, 'p')}</span>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-xs opacity-70 mb-1">সাহরির সময় বাকি</div>
-          <div className="text-xl font-mono font-bold tracking-wider">
-            {formatCountdown(prayerData.imsak)}
+          <div className="text-xs text-gray-400 mb-2 font-medium">{countdownInfo.label}</div>
+          <div className="text-3xl font-mono font-bold tracking-tighter text-white">
+            {formatCountdown(countdownInfo.target)}
           </div>
         </div>
       </div>
@@ -191,7 +212,7 @@ export const Home: React.FC = () => {
             <div key={i} className="flex items-center justify-between text-sm">
               <span className="text-gray-500">{t.bnName}</span>
               <span className="font-bold text-gray-700">
-                {format(t.start, 'h:mm a')} - {format(t.end, 'h:mm a')}
+                {format(t.start, 'p')} - {format(t.end, 'p')}
               </span>
             </div>
           ))}

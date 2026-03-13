@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Home, BookOpen, Clock, Compass, Settings, LayoutGrid, ChevronLeft } from 'lucide-react';
+import { Home, BookOpen, HandHelping, Building2, User, Settings as SettingsIcon, ChevronLeft } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../utils/utils';
 import { useAppState } from '../hooks/useAppState';
@@ -31,7 +31,7 @@ export const AppHeader = ({ title, showBack = false }: { title?: string, showBac
       </div>
       <div className="flex items-center gap-2">
         <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-          <Settings size={22} onClick={() => navigate('/settings')} />
+          <SettingsIcon size={22} onClick={() => navigate('/settings')} />
         </button>
       </div>
     </header>
@@ -46,35 +46,40 @@ export const BottomNav = () => {
   const navItems = [
     { icon: Home, label: isBn ? 'হোম' : 'Home', path: '/' },
     { icon: BookOpen, label: isBn ? 'কুরআন' : 'Quran', path: '/quran' },
-    { icon: Clock, label: isBn ? 'নামাজ' : 'Prayer', path: '/prayer-times' },
-    { icon: Compass, label: isBn ? 'কিবলা' : 'Qibla', path: '/qibla' },
-    { icon: Settings, label: isBn ? 'সেটিংস' : 'Settings', path: '/settings' },
+    { icon: HandHelping, label: isBn ? 'দোয়া' : 'Dua', path: '/duas' },
+    { icon: Building2, label: isBn ? 'হজ' : 'Hajj', path: '/hajj' },
+    { icon: User, label: isBn ? 'প্রোফাইল' : 'Profile', path: '/profile' },
   ];
 
   // Hide bottom nav on onboarding
   if (!state.onboardingComplete) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md">
-      <nav className="bg-white/90 backdrop-blur-xl border border-white/20 px-4 py-3 flex justify-around items-center rounded-3xl shadow-2xl shadow-black/10">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 pb-safe">
+      <nav className="max-w-md mx-auto px-2 py-2 flex justify-around items-end">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={cn(
-                "flex flex-col items-center gap-1 transition-all duration-300 relative",
-                isActive ? "text-primary" : "text-gray-400 hover:text-gray-600"
-              )}
+              className="flex flex-col items-center gap-1 transition-all duration-300 min-w-[64px]"
             >
-              <item.icon className={cn("w-6 h-6", isActive && "stroke-[2.5px]")} />
-              {isActive && (
-                <motion.div 
-                  layoutId="active-dot"
-                  className="absolute -bottom-1.5 w-1 h-1 bg-primary rounded-full"
-                />
-              )}
+              <div className={cn(
+                "w-16 h-10 flex items-center justify-center rounded-3xl transition-all duration-300",
+                isActive ? "bg-primary/10" : "bg-transparent"
+              )}>
+                <item.icon className={cn(
+                  "w-6 h-6 transition-colors duration-300",
+                  isActive ? "text-primary fill-primary/20" : "text-gray-800"
+                )} />
+              </div>
+              <span className={cn(
+                "text-[11px] font-bold transition-colors duration-300",
+                isActive ? "text-primary" : "text-gray-500"
+              )}>
+                {item.label}
+              </span>
             </Link>
           );
         })}

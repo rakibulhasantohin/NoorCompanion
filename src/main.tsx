@@ -5,9 +5,17 @@ import './index.css';
 
 // Fix for "Cannot set property fetch of #<Window> which has only a getter"
 // This can happen when libraries try to polyfill fetch in environments where it's read-only.
-if (typeof window !== 'undefined' && !window.fetch) {
-  // If fetch is missing, we might have a problem, but if it's there and read-only, 
-  // we just want to make sure we don't try to overwrite it elsewhere.
+try {
+  const descriptor = Object.getOwnPropertyDescriptor(window, 'fetch');
+  if (descriptor && !descriptor.writable && descriptor.configurable) {
+    Object.defineProperty(window, 'fetch', {
+      value: window.fetch,
+      writable: true,
+      configurable: true
+    });
+  }
+} catch (e) {
+  console.warn('Could not make fetch writable:', e);
 }
 
 /*

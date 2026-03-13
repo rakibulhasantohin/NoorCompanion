@@ -5,6 +5,7 @@ import { useAppState } from '../hooks/useAppState';
 import { getPrayerTimes } from '../services/prayerService';
 import { format, addDays, subDays, isSameDay } from 'date-fns';
 import { AppHeader } from '../components/Common';
+import { cn } from '../utils/utils';
 
 export const PrayerTimes: React.FC = () => {
   const { state, updateState } = useAppState();
@@ -42,7 +43,7 @@ export const PrayerTimes: React.FC = () => {
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-2 text-primary font-bold">
               <Calendar size={18} />
-              <span>{format(selectedDate, 'dd MMMM, yyyy')}</span>
+              <span>{format(selectedDate, "dd MMMM',' yyyy")}</span>
             </div>
             {isToday && <span className="text-[10px] text-primary font-bold uppercase tracking-widest mt-1">Today</span>}
           </div>
@@ -76,34 +77,38 @@ export const PrayerTimes: React.FC = () => {
           {prayerData.times.map((p, i) => (
             <motion.div
               key={p.name}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className={`p-5 rounded-3xl flex items-center justify-between transition-all ${
+              className={cn(
+                "p-4 rounded-xl flex items-center justify-between border-2 transition-all",
                 p.isCurrent && isToday
-                  ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]' 
-                  : 'bg-white border border-gray-100 text-gray-700'
-              }`}
+                  ? "border-primary bg-primary/5 shadow-sm"
+                  : "border-teal-400 bg-white"
+              )}
             >
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                  p.isCurrent && isToday ? 'bg-white/20' : 'bg-gray-50'
-                }`}>
-                  <Clock size={24} className={p.isCurrent && isToday ? 'text-white' : 'text-primary'} />
-                </div>
-                <div>
-                  <div className={`font-bold ${p.isCurrent && isToday ? 'text-white' : 'text-gray-800'}`}>
-                    {state.language === 'bn' ? p.bnName : p.name}
-                  </div>
-                  {p.isCurrent && isToday && (
-                    <div className="text-[10px] font-bold uppercase tracking-widest opacity-80">Current</div>
-                  )}
+              <div className="flex-1">
+                <div className={cn(
+                  "font-bold text-sm",
+                  p.isCurrent && isToday ? "text-primary" : "text-gray-700"
+                )}>
+                  {state.language === 'bn' ? p.bnName : p.name}
                 </div>
               </div>
-              <div className="text-right">
-                <div className={`text-lg font-bold ${p.isCurrent && isToday ? 'text-white' : 'text-gray-900'}`}>
-                  {p.formattedTime}
+              
+              <div className="flex-[2] text-center">
+                <div className="text-sm text-gray-500 font-medium">
+                  {p.endTime 
+                    ? `${p.formattedTime} - ${format(p.endTime, 'p')}`
+                    : p.formattedTime
+                  }
                 </div>
+              </div>
+
+              <div className="flex-1 flex justify-end">
+                <button className="text-gray-400 hover:text-primary transition-colors">
+                  <BellOff size={18} />
+                </button>
               </div>
             </motion.div>
           ))}
@@ -121,7 +126,7 @@ export const PrayerTimes: React.FC = () => {
             ))}
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-500">সূর্যাস্ত (সন্ধ্যা)</span>
-              <span className="font-bold text-rose-500">{format(prayerData.sunset, 'h:mm a')}</span>
+              <span className="font-bold text-rose-500">{format(prayerData.sunset, 'p')}</span>
             </div>
           </div>
         </div>
