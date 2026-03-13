@@ -19,6 +19,8 @@ export const Home: React.FC = () => {
   const [now, setNow] = useState(new Date());
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   
+  const isBn = state.language === 'bn';
+
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
@@ -46,6 +48,19 @@ export const Home: React.FC = () => {
   const currentForbiddenTime = forbiddenTimes.find(t => isAfter(now, t.start) && isBefore(now, t.end));
   const isForbidden = !!currentForbiddenTime;
 
+  const currentPrayerProgress = (() => {
+    if (isForbidden && currentForbiddenTime) {
+      const total = differenceInSeconds(currentForbiddenTime.end, currentForbiddenTime.start);
+      const elapsed = differenceInSeconds(now, currentForbiddenTime.start);
+      return Math.min(100, Math.max(0, (elapsed / total) * 100));
+    } else if (prayerData.current && prayerData.current.endTime) {
+      const total = differenceInSeconds(prayerData.current.endTime, prayerData.current.time);
+      const elapsed = differenceInSeconds(now, prayerData.current.time);
+      return Math.min(100, Math.max(0, (elapsed / total) * 100));
+    }
+    return 0;
+  })();
+
   const formatCountdown = (target: Date) => {
     const diff = differenceInSeconds(target, now);
     if (diff <= 0) return '00:00:00';
@@ -55,46 +70,54 @@ export const Home: React.FC = () => {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const formatCountdownBn = (target: Date) => {
+  const formatCountdownText = (target: Date) => {
     const diff = differenceInSeconds(target, now);
-    if (diff <= 0) return '০০:০০:০০';
+    if (diff <= 0) return isBn ? '০০:০০:০০' : '00:00:00';
     const h = Math.floor(diff / 3600);
     const m = Math.floor((diff % 3600) / 60);
-    const s = diff % 60;
     
-    const toBn = (n: number) => n.toString().split('').map(d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]).join('').padStart(2, '০');
-    return `${toBn(h)} ঘণ্টা ${toBn(m)} মিনিট`;
+    if (isBn) {
+      const toBn = (n: number) => n.toString().split('').map(d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]).join('').padStart(2, '০');
+      return `${toBn(h)} ঘণ্টা ${toBn(m)} মিনিট`;
+    }
+    return `${h.toString().padStart(2, '0')} hr ${m.toString().padStart(2, '0')} min`;
   };
 
   const hijriDate = moment().format('iD iMMMM iYYYY');
-  const bengaliDate = new Intl.DateTimeFormat('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' }).format(now);
+  const localDate = isBn 
+    ? new Intl.DateTimeFormat('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' }).format(now)
+    : format(now, 'dd MMMM yyyy');
 
   const countdownInfo = (() => {
     const today = getPrayerTimes(lat, lng, now);
     const iftarTime = today.maghrib;
     const sahriTime = today.imsak;
-    const iftarWithBuffer = addMinutes(iftarTime, 10);
 
     if (isBefore(now, sahriTime)) {
-      return { label: 'সাহরির সময় বাকি', target: sahriTime, imsak: today.imsak, maghrib: today.maghrib };
+      const yesterday = getPrayerTimes(lat, lng, addDays(now, -1));
+      return { label: isBn ? 'সাহরির সময় বাকি' : 'Time until Sahri', target: sahriTime, start: yesterday.maghrib, imsak: today.imsak, maghrib: today.maghrib };
     } else if (isBefore(now, iftarTime)) {
-      return { label: 'ইফতারের সময় বাকি', target: iftarTime, imsak: today.imsak, maghrib: today.maghrib };
+      return { label: isBn ? 'ইফতারের সময় বাকি' : 'Time until Iftar', target: iftarTime, start: today.imsak, imsak: today.imsak, maghrib: today.maghrib };
     } else {
       const tomorrow = getPrayerTimes(lat, lng, addDays(now, 1));
-      return { label: 'সাহরির সময় বাকি', target: tomorrow.imsak, imsak: tomorrow.imsak, maghrib: tomorrow.maghrib };
+      return { label: isBn ? 'সাহরির সময় বাকি' : 'Time until Sahri', target: tomorrow.imsak, start: today.maghrib, imsak: tomorrow.imsak, maghrib: tomorrow.maghrib };
     }
   })();
 
+  const totalDuration = differenceInSeconds(countdownInfo.target, countdownInfo.start);
+  const elapsedDuration = differenceInSeconds(now, countdownInfo.start);
+  const progressPercentage = Math.min(100, Math.max(0, (elapsedDuration / totalDuration) * 100));
+
   const features = [
-    { id: 'prayer', name: 'নামাজের সময়সূচী', icon: <Clock className="text-teal-500" />, path: '/prayer-times' },
-    { id: 'quran', name: 'আল-কুরআন', icon: <Book className="text-emerald-500" />, path: '/quran' },
-    { id: 'ramadan', name: 'সাহরী-ইফতার', icon: <Moon className="text-indigo-500" />, path: '/sahri-iftar' },
-    { id: 'tasbih', name: 'তাসবিহ', icon: <Heart className="text-rose-500" />, path: '/tasbih' },
-    { id: 'qibla', name: 'কিবলা কম্পাস', icon: <Compass className="text-amber-500" />, path: '/qibla' },
-    { id: 'names', name: 'আসমা-উল-হুসনা', icon: <span className="text-xl font-bold text-blue-500">الله</span>, path: '/settings' },
-    { id: 'khutba', name: 'জুমুআর খুতবা', icon: <MessageSquare className="text-cyan-500" />, path: '/' },
-    { id: 'waz', name: 'ওয়াজ', icon: <Play className="text-purple-500" />, path: '/' },
-    { id: 'live', name: 'লাইভ', icon: <Radio className="text-red-500" />, path: '/' },
+    { id: 'prayer', name: isBn ? 'নামাজের সময়সূচী' : 'Prayer Times', icon: <Clock className="text-teal-500" />, path: '/prayer-times' },
+    { id: 'quran', name: isBn ? 'আল-কুরআন' : 'Al-Quran', icon: <Book className="text-emerald-500" />, path: '/quran' },
+    { id: 'ramadan', name: isBn ? 'সাহরী-ইফতার' : 'Sahri-Iftar', icon: <Moon className="text-indigo-500" />, path: '/sahri-iftar' },
+    { id: 'tasbih', name: isBn ? 'তাসবিহ' : 'Tasbih', icon: <Heart className="text-rose-500" />, path: '/tasbih' },
+    { id: 'qibla', name: isBn ? 'কিবলা কম্পাস' : 'Qibla Compass', icon: <Compass className="text-amber-500" />, path: '/qibla' },
+    { id: 'names', name: isBn ? 'আসমা-উল-হুসনা' : 'Asma-ul-Husna', icon: <span className="text-xl font-bold text-blue-500">الله</span>, path: '/settings' },
+    { id: 'khutba', name: isBn ? 'জুমুআর খুতবা' : 'Jumu\'ah Khutbah', icon: <MessageSquare className="text-cyan-500" />, path: '/' },
+    { id: 'waz', name: isBn ? 'ওয়াজ' : 'Waz', icon: <Play className="text-purple-500" />, path: '/' },
+    { id: 'live', name: isBn ? 'লাইভ' : 'Live', icon: <Radio className="text-red-500" />, path: '/' },
   ];
 
   return (
@@ -102,7 +125,7 @@ export const Home: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">নূর কম্প্যানিয়ন</h1>
+          <h1 className="text-xl font-bold text-gray-800">{isBn ? 'নূর কম্প্যানিয়ন' : 'Noor Companion'}</h1>
         </div>
         <button onClick={() => navigate('/profile')} className="w-10 h-10 bg-white rounded-full shadow-sm text-gray-500 overflow-hidden border-2 border-primary/10 flex items-center justify-center">
           {state.profileImage || profilePhoto ? (
@@ -121,12 +144,12 @@ export const Home: React.FC = () => {
             <ChevronRight size={14} />
           </div>
           <div className="text-gray-400 text-xs mt-1">
-            {format(now, 'dd MMMM yyyy')} | {bengaliDate}
+            {format(now, 'dd MMMM yyyy')} | {localDate}
           </div>
         </div>
         <div className="bg-gray-100 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-medium text-gray-600">
           <MapPin size={14} />
-          <span>{state.city === 'Dhaka' ? 'বাংলাদেশ' : state.city}</span>
+          <span>{state.city === 'Dhaka' ? (isBn ? 'বাংলাদেশ' : 'Bangladesh') : state.city}</span>
         </div>
       </div>
 
@@ -141,13 +164,13 @@ export const Home: React.FC = () => {
       >
         <div className="relative z-10">
           <div className="text-sm opacity-90 mb-1">
-            {isForbidden ? 'নিষিদ্ধ সময়' : 'বর্তমান ওয়াক্ত'}
+            {isForbidden ? (isBn ? 'নিষিদ্ধ সময়' : 'Forbidden Time') : (isBn ? 'বর্তমান ওয়াক্ত' : 'Current Prayer')}
           </div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
               <h2 className="text-2xl font-bold">
-                {isForbidden ? currentForbiddenTime?.bnName : prayerData.current?.bnName}
+                {isForbidden ? (isBn ? currentForbiddenTime?.bnName : currentForbiddenTime?.name) : (isBn ? prayerData.current?.bnName : prayerData.current?.name)}
               </h2>
             </div>
             <div className="text-xl font-medium">
@@ -159,14 +182,14 @@ export const Home: React.FC = () => {
           </div>
           <div className="text-sm font-medium mb-4">
             {isForbidden 
-              ? `সময় বাকি: ${formatCountdownBn(currentForbiddenTime!.end)}`
-              : `সময় বাকি: ${prayerData.next && formatCountdownBn(prayerData.next.time)}`
+              ? `${isBn ? 'সময় বাকি:' : 'Time left:'} ${formatCountdownText(currentForbiddenTime!.end)}`
+              : `${isBn ? 'সময় বাকি:' : 'Time left:'} ${prayerData.next && formatCountdownText(prayerData.next.time)}`
             }
           </div>
           <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
             <motion.div 
               initial={{ width: 0 }}
-              animate={{ width: isForbidden ? '100%' : '65%' }}
+              animate={{ width: `${currentPrayerProgress}%` }}
               className="h-full bg-white rounded-full"
             ></motion.div>
           </div>
@@ -179,20 +202,20 @@ export const Home: React.FC = () => {
       {/* Next Prayer Card */}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
-          <div className="text-xs text-gray-400 mb-1">পরবর্তী নামাজ</div>
-          <div className="font-bold text-gray-800">{prayerData.next?.bnName}</div>
+          <div className="text-xs text-gray-400 mb-1">{isBn ? 'পরবর্তী নামাজ' : 'Next Prayer'}</div>
+          <div className="font-bold text-gray-800">{isBn ? prayerData.next?.bnName : prayerData.next?.name}</div>
           <div className="text-sm text-gray-500 mt-2">{prayerData.next?.formattedTime}</div>
         </div>
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-around">
           <div className="flex flex-col items-center">
             <Sun size={20} className="text-amber-500 mb-1" />
-            <div className="text-[10px] text-gray-400">সূর্যোদয়</div>
+            <div className="text-[10px] text-gray-400">{isBn ? 'সূর্যোদয়' : 'Sunrise'}</div>
             <div className="text-xs font-bold text-gray-700">{format(prayerData.sunrise, 'p')}</div>
           </div>
           <div className="w-px h-8 bg-gray-100"></div>
           <div className="flex flex-col items-center">
             <Moon size={20} className="text-indigo-500 mb-1" />
-            <div className="text-[10px] text-gray-400">সূর্যাস্ত</div>
+            <div className="text-[10px] text-gray-400">{isBn ? 'সূর্যাস্ত' : 'Sunset'}</div>
             <div className="text-xs font-bold text-gray-700">{format(prayerData.sunset, 'p')}</div>
           </div>
         </div>
@@ -201,23 +224,49 @@ export const Home: React.FC = () => {
       {/* Sahri & Iftar Card */}
       <div 
         onClick={() => navigate('/sahri-iftar')}
-        className="bg-slate-800 text-white p-6 rounded-[32px] mb-8 flex items-center justify-between shadow-lg cursor-pointer active:scale-[0.98] transition-all"
+        className="bg-slate-800 text-white p-6 rounded-[32px] mb-8 shadow-lg cursor-pointer active:scale-[0.98] transition-all relative overflow-hidden"
       >
-        <div className="space-y-4">
-          <div className="flex items-center gap-6">
-            <span className="text-sm text-gray-400 font-medium">সাহরী শেষ</span>
-            <span className="text-base font-bold">{format(countdownInfo.imsak, 'p')}</span>
+        <div className="flex items-center justify-between mb-6 relative z-10">
+          <div className="space-y-3">
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
+                <Sun size={16} className="text-amber-400" />
+              </div>
+              <div>
+                <div className="text-xs text-gray-400 font-medium">{isBn ? 'সাহরী শেষ' : 'Sahri Ends'}</div>
+                <div className="text-sm font-bold">{format(countdownInfo.imsak, 'p')}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
+                <Moon size={16} className="text-indigo-400" />
+              </div>
+              <div>
+                <div className="text-xs text-gray-400 font-medium">{isBn ? 'ইফতার' : 'Iftar'}</div>
+                <div className="text-sm font-bold">{format(countdownInfo.maghrib, 'p')}</div>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-6">
-            <span className="text-sm text-gray-400 font-medium">ইফতার</span>
-            <span className="text-base font-bold">{format(countdownInfo.maghrib, 'p')}</span>
+          <div className="text-right">
+            <div className="text-xs text-gray-400 mb-2 font-medium">{countdownInfo.label}</div>
+            <div className="text-2xl font-mono font-bold tracking-tighter text-white">
+              {formatCountdown(countdownInfo.target)}
+            </div>
           </div>
         </div>
-        <div className="text-right">
-          <div className="text-xs text-gray-400 mb-2 font-medium">{countdownInfo.label}</div>
-          <div className="text-2xl font-mono font-bold tracking-tighter text-white">
-            {formatCountdown(countdownInfo.target)}
-          </div>
+        
+        {/* Progress Bar */}
+        <div className="relative z-10 w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercentage}%` }}
+            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full"
+          />
+        </div>
+        
+        {/* Background Decoration */}
+        <div className="absolute -right-6 -top-6 opacity-5">
+          <Moon size={120} />
         </div>
       </div>
 
@@ -241,11 +290,13 @@ export const Home: React.FC = () => {
 
       {/* Forbidden Times */}
       <div className="bg-rose-50 border border-rose-100 rounded-3xl p-6 mb-8">
-        <h3 className="text-center text-rose-400 font-bold mb-4 text-sm uppercase tracking-wider">আজকের নিষিদ্ধ সময়সমূহ</h3>
+        <h3 className="text-center text-rose-400 font-bold mb-4 text-sm uppercase tracking-wider">
+          {isBn ? 'আজকের নিষিদ্ধ সময়সমূহ' : 'Today\'s Forbidden Times'}
+        </h3>
         <div className="space-y-4">
           {forbiddenTimes.map((t, i) => (
             <div key={i} className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">{t.bnName}</span>
+              <span className="text-gray-500">{isBn ? t.bnName : t.name}</span>
               <span className="font-bold text-gray-700">
                 {format(t.start, 'p')} - {format(t.end, 'p')}
               </span>
@@ -262,11 +313,11 @@ export const Home: React.FC = () => {
               <Facebook size={18} />
             </div>
             <div className="text-left">
-              <div className="text-xs text-gray-500">অ্যাপ সম্পর্কিত সকল আপডেট পেতে</div>
-              <div className="text-sm font-bold text-gray-700">আমাদের ফেসবুক পেজ ফলো করুন।</div>
+              <div className="text-xs text-gray-500">{isBn ? 'অ্যাপ সম্পর্কিত সকল আপডেট পেতে' : 'To get all app updates'}</div>
+              <div className="text-sm font-bold text-gray-700">{isBn ? 'আমাদের ফেসবুক পেজ ফলো করুন।' : 'Follow our Facebook page.'}</div>
             </div>
           </div>
-          <div className="bg-blue-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">Follow</div>
+          <div className="bg-blue-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">{isBn ? 'ফলো' : 'Follow'}</div>
         </button>
 
         <button className="w-full p-4 bg-white border border-teal-100 rounded-2xl flex items-center justify-between group">
@@ -275,11 +326,11 @@ export const Home: React.FC = () => {
               <Users size={18} />
             </div>
             <div className="text-left">
-              <div className="text-xs text-gray-500">অ্যাপ সম্পর্কে আপনার মতামত জানাতে</div>
-              <div className="text-sm font-bold text-gray-700">আমাদের ফেসবুক গ্রুপে জয়েন করুন।</div>
+              <div className="text-xs text-gray-500">{isBn ? 'অ্যাপ সম্পর্কে আপনার মতামত জানাতে' : 'To share your feedback'}</div>
+              <div className="text-sm font-bold text-gray-700">{isBn ? 'আমাদের ফেসবুক গ্রুপে জয়েন করুন।' : 'Join our Facebook group.'}</div>
             </div>
           </div>
-          <div className="bg-teal-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">Join</div>
+          <div className="bg-teal-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">{isBn ? 'জয়েন' : 'Join'}</div>
         </button>
       </div>
 

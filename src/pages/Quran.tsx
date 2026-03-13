@@ -19,22 +19,25 @@ export const Quran = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const isBn = state.language === 'bn';
+
   const fetchSurahData = async (surahId: number) => {
     setLoading(true);
     setError(null);
     setAyahs([]);
     try {
-      const response = await globalThis.fetch(`https://api.alquran.cloud/v1/surah/${surahId}/editions/quran-uthmani,bn.bengali`);
+      const edition = isBn ? 'quran-uthmani,bn.bengali' : 'quran-uthmani,en.asad';
+      const response = await globalThis.fetch(`https://api.alquran.cloud/v1/surah/${surahId}/editions/${edition}`);
       const data = await response.json();
       
       if (data.code === 200 && data.data.length >= 2) {
         const arabicAyahs = data.data[0].ayahs;
-        const bengaliAyahs = data.data[1].ayahs;
+        const translationAyahs = data.data[1].ayahs;
         
         const combinedAyahs = arabicAyahs.map((ayah: any, index: number) => ({
           id: ayah.numberInSurah,
           arabic: ayah.text,
-          translation: bengaliAyahs[index].text,
+          translation: translationAyahs[index].text,
         }));
         
         setAyahs(combinedAyahs);
@@ -44,7 +47,7 @@ export const Quran = () => {
       }
     } catch (err) {
       console.error('Error fetching surah:', err);
-      setError('সূরা লোড করতে সমস্যা হয়েছে। দয়া করে ইন্টারনেট কানেকশন চেক করুন।');
+      setError(isBn ? 'সূরা লোড করতে সমস্যা হয়েছে। দয়া করে ইন্টারনেট কানেকশন চেক করুন।' : 'Failed to load Surah. Please check your internet connection.');
     } finally {
       setLoading(false);
     }
@@ -81,9 +84,9 @@ export const Quran = () => {
               <ArrowLeft size={24} className="text-gray-700" />
             </button>
             <div>
-              <h1 className="text-lg font-bold text-gray-800">{selectedSurah.nameBn}</h1>
+              <h1 className="text-lg font-bold text-gray-800">{isBn ? selectedSurah.nameBn : selectedSurah.name}</h1>
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                {selectedSurah.revelationType === 'Meccan' ? 'মাক্কী' : 'মাদানী'} • {selectedSurah.totalAyahs} আয়াত
+                {selectedSurah.revelationType === 'Meccan' ? (isBn ? 'মাক্কী' : 'Meccan') : (isBn ? 'মাদানী' : 'Medinan')} • {selectedSurah.totalAyahs} {isBn ? 'আয়াত' : 'Ayahs'}
               </p>
             </div>
           </div>
@@ -96,16 +99,16 @@ export const Quran = () => {
           <div className="bg-primary rounded-3xl p-8 text-white text-center space-y-4 shadow-xl relative overflow-hidden mb-8">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
             <div className="text-4xl font-serif mb-2">{selectedSurah.nameAr}</div>
-            <div className="text-xl font-bold">{selectedSurah.meaningBn}</div>
+            <div className="text-xl font-bold">{isBn ? selectedSurah.meaningBn : selectedSurah.meaningEn}</div>
             <div className="w-24 h-px bg-white/30 mx-auto"></div>
-            <div className="text-sm opacity-80">বিসমিল্লাহির রাহমানির রাহিম</div>
+            <div className="text-sm opacity-80">{isBn ? 'বিসমিল্লাহির রাহমানির রাহিম' : 'Bismillahir Rahmanir Rahim'}</div>
           </div>
 
           <div className="space-y-6">
             {loading ? (
               <div className="text-center py-20">
                 <RefreshCw className="w-10 h-10 text-primary animate-spin mx-auto mb-4" />
-                <p className="text-gray-500">সূরা লোড হচ্ছে...</p>
+                <p className="text-gray-500">{isBn ? 'সূরা লোড হচ্ছে...' : 'Loading Surah...'}</p>
               </div>
             ) : error ? (
               <div className="text-center py-12 bg-white rounded-3xl p-6 border border-red-100">
@@ -115,7 +118,7 @@ export const Quran = () => {
                   onClick={() => fetchSurahData(selectedSurah.id)}
                   className="mt-4 px-6 py-2 bg-primary text-white rounded-xl font-bold"
                 >
-                  আবার চেষ্টা করুন
+                  {isBn ? 'আবার চেষ্টা করুন' : 'Try Again'}
                 </button>
               </div>
             ) : ayahs.length > 0 ? (
@@ -150,14 +153,14 @@ export const Quran = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-32">
-      <AppHeader title={state.language === 'bn' ? 'আল-কুরআন' : 'Al-Quran'} showBack />
+      <AppHeader title={isBn ? 'আল-কুরআন' : 'Al-Quran'} showBack />
 
       {/* Tabs */}
       <div className="bg-white px-4 py-2 sticky top-[64px] z-40 border-b border-gray-100 overflow-x-auto scrollbar-hide flex gap-2">
         {[
-          { id: 'surah', label: 'সূরা' },
-          { id: 'para', label: 'পারা' },
-          { id: 'bookmarks', label: 'বুকমার্ক' },
+          { id: 'surah', label: isBn ? 'সূরা' : 'Surah' },
+          { id: 'para', label: isBn ? 'পারা' : 'Juz' },
+          { id: 'bookmarks', label: isBn ? 'বুকমার্ক' : 'Bookmarks' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -180,7 +183,7 @@ export const Quran = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="সূরা খুঁজুন (নাম বা নম্বর)..."
+            placeholder={isBn ? "সূরা খুঁজুন (নাম বা নম্বর)..." : "Search Surah (Name or Number)..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white border border-gray-100 rounded-2xl py-4 pl-12 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
@@ -201,15 +204,15 @@ export const Quran = () => {
                   {surah.id}
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-800">{surah.nameBn}</h4>
+                  <h4 className="font-bold text-gray-800">{isBn ? surah.nameBn : surah.name}</h4>
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                    {surah.revelationType === 'Meccan' ? 'মাক্কী' : 'মাদানী'} • {surah.totalAyahs} আয়াত
+                    {surah.revelationType === 'Meccan' ? (isBn ? 'মাক্কী' : 'Meccan') : (isBn ? 'মাদানী' : 'Medinan')} • {surah.totalAyahs} {isBn ? 'আয়াত' : 'Ayahs'}
                   </p>
                 </div>
               </div>
               <div className="text-right">
                 <p className="text-xl font-serif text-primary">{surah.nameAr}</p>
-                <p className="text-[10px] text-gray-400">{surah.meaningBn}</p>
+                <p className="text-[10px] text-gray-400">{isBn ? surah.meaningBn : surah.meaningEn}</p>
               </div>
             </motion.div>
           ))}
@@ -217,7 +220,7 @@ export const Quran = () => {
           {activeTab === 'bookmarks' && bookmarkedSurahs.length === 0 && (
             <div className="text-center py-20 text-gray-400">
               <Star size={48} className="mx-auto mb-4 opacity-20" />
-              <p>কোনো বুকমার্ক করা সূরা নেই</p>
+              <p>{isBn ? 'কোনো বুকমার্ক করা সূরা নেই' : 'No bookmarked Surahs'}</p>
             </div>
           )}
         </div>

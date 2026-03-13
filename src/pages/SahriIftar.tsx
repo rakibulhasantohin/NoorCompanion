@@ -21,6 +21,8 @@ export const SahriIftar: React.FC = () => {
   const lat = state.location?.lat || 23.7289;
   const lng = state.location?.lng || 90.3944;
 
+  const isBn = state.language === 'bn';
+
   const formatCountdown = (target: Date) => {
     const diff = differenceInSeconds(target, now);
     if (diff <= 0) return '00:00:00';
@@ -36,12 +38,12 @@ export const SahriIftar: React.FC = () => {
     const sahriTime = today.imsak;
 
     if (isBefore(now, sahriTime)) {
-      return { label: 'সাহরির সময় বাকি', target: sahriTime, imsak: today.imsak, maghrib: today.maghrib };
+      return { label: isBn ? 'সাহরির সময় বাকি' : 'Time until Sahri', target: sahriTime, imsak: today.imsak, maghrib: today.maghrib };
     } else if (isBefore(now, iftarTime)) {
-      return { label: 'ইফতারের সময় বাকি', target: iftarTime, imsak: today.imsak, maghrib: today.maghrib };
+      return { label: isBn ? 'ইফতারের সময় বাকি' : 'Time until Iftar', target: iftarTime, imsak: today.imsak, maghrib: today.maghrib };
     } else {
       const tomorrow = getPrayerTimes(lat, lng, addDays(now, 1));
-      return { label: 'সাহরির সময় বাকি', target: tomorrow.imsak, imsak: tomorrow.imsak, maghrib: tomorrow.maghrib };
+      return { label: isBn ? 'সাহরির সময় বাকি' : 'Time until Sahri', target: tomorrow.imsak, imsak: tomorrow.imsak, maghrib: tomorrow.maghrib };
     }
   })();
 
@@ -58,14 +60,20 @@ export const SahriIftar: React.FC = () => {
     });
 
   const getBengaliNumber = (n: number | string): string => {
+    if (!isBn) return n.toString();
     const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
     return n.toString().replace(/\d/g, (d) => bengaliDigits[parseInt(d)]);
   };
 
-  const hijriMonthNames = [
+  const hijriMonthNamesBn = [
     'মুহররম', 'সফর', 'রবিউল আউয়াল', 'রবিউস সানি', 'জামাদিউল আউয়াল', 'জামাদিউস সানি',
     'রজব', 'শাবান', 'রমজান', 'শাওয়াল', 'জিলকদ', 'জিলহজ'
   ];
+  const hijriMonthNamesEn = [
+    'Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 'Jumada al-Awwal', 'Jumada al-Thani',
+    'Rajab', 'Sha\'ban', 'Ramadan', 'Shawwal', 'Dhu al-Qi\'dah', 'Dhu al-Hijjah'
+  ];
+  const hijriMonthNames = isBn ? hijriMonthNamesBn : hijriMonthNamesEn;
 
   const groups: { monthName: string, year: string, items: any[] }[] = [];
   let currentMonthKey = "";
@@ -96,11 +104,11 @@ export const SahriIftar: React.FC = () => {
           >
             <ChevronLeft size={24} />
           </button>
-          <h1 className="text-xl font-bold text-gray-800">সাহরী ও ইফতারের সময়সূচী</h1>
+          <h1 className="text-xl font-bold text-gray-800">{isBn ? 'সাহরী ও ইফতারের সময়সূচী' : 'Sahri & Iftar Times'}</h1>
         </div>
         <div className="bg-gray-100 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-medium text-gray-600">
           <MapPin size={14} />
-          <span>{state.city === 'Dhaka' ? 'বাংলাদেশ' : state.city}</span>
+          <span>{state.city === 'Dhaka' ? (isBn ? 'বাংলাদেশ' : 'Bangladesh') : state.city}</span>
         </div>
       </div>
 
@@ -108,11 +116,11 @@ export const SahriIftar: React.FC = () => {
       <div className="bg-slate-800 text-white p-6 rounded-[32px] mb-8 flex items-center justify-between shadow-lg">
         <div className="space-y-4">
           <div className="flex items-center gap-6">
-            <span className="text-sm text-gray-400 font-medium">সাহরী শেষ</span>
+            <span className="text-sm text-gray-400 font-medium">{isBn ? 'সাহরী শেষ' : 'Sahri Ends'}</span>
             <span className="text-xl font-bold">{format(countdownInfo.imsak, 'p')}</span>
           </div>
           <div className="flex items-center gap-6">
-            <span className="text-sm text-gray-400 font-medium">ইফতার</span>
+            <span className="text-sm text-gray-400 font-medium">{isBn ? 'ইফতার' : 'Iftar'}</span>
             <span className="text-xl font-bold">{format(countdownInfo.maghrib, 'p')}</span>
           </div>
         </div>
@@ -135,8 +143,8 @@ export const SahriIftar: React.FC = () => {
 
             <div className="space-y-3">
               {group.items.map((item, idx) => {
-                const dayName = format(item.date, 'EEEE', { locale: bn });
-                const dateStr = format(item.date, 'd MMMM', { locale: bn });
+                const dayName = format(item.date, 'EEEE', isBn ? { locale: bn } : undefined);
+                const dateStr = format(item.date, 'd MMMM', isBn ? { locale: bn } : undefined);
                 const ramadanDay = moment(item.date).format('iD');
                 
                 return (
@@ -159,11 +167,11 @@ export const SahriIftar: React.FC = () => {
                     
                     <div className="flex gap-8">
                       <div className="text-center">
-                        <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">সাহরী শেষ</div>
+                        <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">{isBn ? 'সাহরী শেষ' : 'Sahri'}</div>
                         <div className="text-sm font-bold text-gray-800">{format(item.imsak, 'p')}</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">ইফতার</div>
+                        <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">{isBn ? 'ইফতার' : 'Iftar'}</div>
                         <div className="text-sm font-bold text-gray-800">{format(item.maghrib, 'p')}</div>
                       </div>
                     </div>
