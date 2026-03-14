@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Mail, Lock, X, LogIn, UserPlus } from 'lucide-react';
+import { Mail, Lock, X, LogIn, UserPlus, Phone, User, Calendar } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
+import { auth, db } from '../firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { cn } from '../utils/utils';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -12,41 +16,61 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const { state } = useAppState();
   const isBn = state.language === 'bn';
   const [isLogin, setIsLogin] = useState(true);
+  const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!email || !password) {
-      setError(isBn ? 'সব তথ্য পূরণ করুন' : 'Please fill all fields');
-      return;
-    }
-
-    const usersStr = localStorage.getItem('noor_users') || '{}';
-    const users = JSON.parse(usersStr);
-
-    if (isLogin) {
-      if (users[email] && users[email].password === password) {
-        // Success
-        localStorage.setItem('noor_current_user', email);
-        window.dispatchEvent(new Event('auth_changed'));
+    try {
+      if (isLogin) {
+        let loginEmail = email;
+        if (loginMethod === 'phone') {
+          // Validate phone number
+          if (!phoneNumber.startsWith('01') || phoneNumber.length !== 11) {
+            setError(isBn ? 'সঠিক বাংলাদেশি মোবাইল নাম্বার দিন' : 'Enter a valid Bangladeshi phone number');
+            return;
+          }
+          loginEmail = `${phoneNumber}@noor.com`;
+        }
+        await signInWithEmailAndPassword(auth, loginEmail, password);
         onClose();
       } else {
-        setError(isBn ? 'ইমেইল বা পাসওয়ার্ড ভুল' : 'Invalid email or password');
+        // Registration
+        if (!phoneNumber.startsWith('01') || phoneNumber.length !== 11) {
+          setError(isBn ? 'সঠিক বাংলাদেশি মোবাইল নাম্বার দিন' : 'Enter a valid Bangladeshi phone number');
+          return;
+        }
+
+        // Use email if provided, otherwise use phone alias
+        const regEmail = email || `${phoneNumber}@noor.com`;
+
+        const userCredential = await createUserWithEmailAndPassword(auth, regEmail, password);
+        const user = userCredential.user;
+
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          fullName,
+          dateOfBirth,
+          email: email || null,
+          phoneNumber,
+          createdAt: new Date().toISOString()
+        });
+        onClose();
       }
-    } else {
-      if (users[email]) {
-        setError(isBn ? 'এই ইমেইলটি ইতিমধ্যে ব্যবহৃত' : 'Email already in use');
+    } catch (err: any) {
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        setError(isBn ? 'ভুল ইমেইল/ফোন অথবা পাসওয়ার্ড' : 'Invalid email/phone or password');
+      } else if (err.code === 'auth/email-already-in-use') {
+        setError(isBn ? 'এই ইমেইল/ফোন দিয়ে ইতিমধ্যে অ্যাকাউন্ট খোলা আছে' : 'Email/Phone already in use');
       } else {
-        // Register
-        users[email] = { password, photo: null };
-        localStorage.setItem('noor_users', JSON.stringify(users));
-        localStorage.setItem('noor_current_user', email);
-        window.dispatchEvent(new Event('auth_changed'));
-        onClose();
+        setError(err.message);
       }
     }
   };
@@ -58,92 +82,111 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm"
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl"
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            className="bg-white rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl"
           >
-            <div className="p-6 relative">
+            <div className="p-8 relative">
               <button 
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200"
+                className="absolute top-6 right-6 p-2 bg-gray-50 rounded-full text-gray-400 hover:bg-gray-100 transition-colors"
               >
                 <X size={20} />
               </button>
 
-              <div className="text-center mb-6 mt-4">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
-                  {isLogin ? <LogIn size={32} /> : <UserPlus size={32} />}
+              <div className="text-center mb-8">
+                <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-4 text-primary shadow-inner">
+                  {isLogin ? <LogIn size={36} /> : <UserPlus size={36} />}
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">
                   {isLogin ? (isBn ? 'লগইন করুন' : 'Login') : (isBn ? 'রেজিস্ট্রেশন করুন' : 'Register')}
                 </h2>
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="text-sm text-gray-500 mt-1">
                   {isLogin 
-                    ? (isBn ? 'আপনার অ্যাকাউন্টে প্রবেশ করুন' : 'Access your account')
-                    : (isBn ? 'নতুন অ্যাকাউন্ট তৈরি করুন' : 'Create a new account')}
+                    ? (isBn ? 'আপনার অ্যাকাউন্টে ফিরে যান' : 'Welcome back to your account')
+                    : (isBn ? 'নতুন অ্যাকাউন্ট তৈরি করুন' : 'Create a new account to get started')}
                 </p>
               </div>
 
-              {error && (
-                <div className="bg-rose-50 text-rose-500 p-3 rounded-xl text-sm mb-4 text-center">
-                  {error}
+              {isLogin && (
+                <div className="flex bg-gray-100 p-1 rounded-2xl mb-6">
+                  <button 
+                    onClick={() => setLoginMethod('email')}
+                    className={cn(
+                      "flex-1 py-2 text-xs font-bold rounded-xl transition-all",
+                      loginMethod === 'email' ? "bg-white text-primary shadow-sm" : "text-gray-500"
+                    )}
+                  >
+                    {isBn ? 'ইমেইল' : 'Email'}
+                  </button>
+                  <button 
+                    onClick={() => setLoginMethod('phone')}
+                    className={cn(
+                      "flex-1 py-2 text-xs font-bold rounded-xl transition-all",
+                      loginMethod === 'phone' ? "bg-white text-primary shadow-sm" : "text-gray-500"
+                    )}
+                  >
+                    {isBn ? 'ফোন' : 'Phone'}
+                  </button>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {isBn ? 'ইমেইল' : 'Email'}
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail size={18} className="text-gray-400" />
-                    </div>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                      placeholder="example@gmail.com"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {isBn ? 'পাসওয়ার্ড' : 'Password'}
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock size={18} className="text-gray-400" />
-                    </div>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                      placeholder="••••••••"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full btn-primary py-3 rounded-xl font-bold text-lg mt-2"
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-rose-50 text-rose-500 p-4 rounded-2xl text-xs font-bold mb-6 text-center border border-rose-100"
                 >
+                  {error}
+                </motion.div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {!isLogin && (
+                  <>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'পুরো নাম' : 'Full Name'} required />
+                    </div>
+                    <div className="relative">
+                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" required />
+                    </div>
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'মোবাইল নাম্বার (০১...)' : 'Phone Number (01...)'} required />
+                    </div>
+                  </>
+                )}
+
+                {(isLogin && loginMethod === 'phone') ? (
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'মোবাইল নাম্বার' : 'Phone Number'} required />
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'ইমেইল এড্রেস' : 'Email Address'} required={isLogin || !phoneNumber} />
+                  </div>
+                )}
+
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'পাসওয়ার্ড' : 'Password'} required />
+                </div>
+
+                <button type="submit" className="w-full bg-primary text-white py-4 rounded-2xl font-bold text-lg mt-4 shadow-lg shadow-primary/20 active:scale-95 transition-all">
                   {isLogin ? (isBn ? 'লগইন' : 'Login') : (isBn ? 'রেজিস্টার' : 'Register')}
                 </button>
               </form>
 
-              <div className="mt-6 text-center">
-                <button
-                  onClick={() => { setIsLogin(!isLogin); setError(''); }}
-                  className="text-primary text-sm font-medium hover:underline"
-                >
+              <div className="mt-8 text-center">
+                <button onClick={() => { setIsLogin(!isLogin); setError(''); }} className="text-gray-500 text-sm font-medium hover:text-primary transition-colors">
                   {isLogin 
                     ? (isBn ? 'অ্যাকাউন্ট নেই? নতুন তৈরি করুন' : 'No account? Create one')
                     : (isBn ? 'অ্যাকাউন্ট আছে? লগইন করুন' : 'Have an account? Login')}

@@ -1,6 +1,20 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Home, BookOpen, HandHelping, Building2, User, Settings as SettingsIcon, ChevronLeft } from 'lucide-react';
+import { 
+  Home, 
+  BookOpen, 
+  Sparkles, 
+  Building2, 
+  Settings as SettingsIcon, 
+  ChevronLeft,
+  Clock,
+  Moon,
+  CircleDot,
+  Compass,
+  HandHelping,
+  Book,
+  LayoutGrid
+} from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../utils/utils';
 import { useAppState } from '../hooks/useAppState';
@@ -42,12 +56,38 @@ export const BottomNav = () => {
   const location = useLocation();
   const { state } = useAppState();
   const isBn = state.language === 'bn';
+
+  // Rotation logic: 10 minutes = 600,000 ms
+  const [rotationIndex, setRotationIndex] = React.useState(Math.floor(Date.now() / (10 * 60 * 1000)) % 5);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setRotationIndex(Math.floor(Date.now() / (10 * 60 * 1000)) % 5);
+    }, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, []);
   
+  const setA = [
+    { icon: BookOpen, label: isBn ? 'কুরআন' : 'Quran', path: '/quran' },
+    { icon: Clock, label: isBn ? 'নামাজের সময়' : 'Prayer Times', path: '/prayer-times' },
+    { icon: Moon, label: isBn ? 'সাহরী-ইফতার' : 'Sahri & Iftar', path: '/sahri-iftar' },
+    { icon: CircleDot, label: isBn ? 'তাসবিহ' : 'Tasbih', path: '/tasbih' },
+    { icon: Compass, label: isBn ? 'কিবলা' : 'Qibla', path: '/qibla' },
+  ];
+
+  const setB = [
+    { icon: HandHelping, label: isBn ? 'দোয়া' : 'Dua', path: '/duas' },
+    { icon: Book, label: isBn ? 'হাদিস' : 'Hadith', path: '/hadith' },
+    { icon: LayoutGrid, label: isBn ? 'স্তম্ভ' : 'Pillars', path: '/pillars' },
+    { icon: Building2, label: isBn ? 'হজ' : 'Hajj', path: '/hajj' },
+    { icon: Sparkles, label: isBn ? 'আল্লাহর নাম' : 'Allah Names', path: '/names-of-allah' },
+  ];
+
   const navItems = [
     { icon: Home, label: isBn ? 'হোম' : 'Home', path: '/' },
-    { icon: BookOpen, label: isBn ? 'কুরআন' : 'Quran', path: '/quran' },
-    { icon: HandHelping, label: isBn ? 'দোয়া' : 'Dua', path: '/duas' },
-    { icon: Building2, label: isBn ? 'হজ' : 'Hajj', path: '/hajj' },
+    setA[rotationIndex],
+    { icon: Sparkles, label: isBn ? 'নূর এআই' : 'Noor AI', path: '/ai-assistant' },
+    setB[rotationIndex],
     { icon: SettingsIcon, label: isBn ? 'সেটিংস' : 'Settings', path: '/settings' },
   ];
 
@@ -109,3 +149,50 @@ export const SectionTitle = ({ title, actionLabel, onAction }: { title: string, 
     )}
   </div>
 );
+
+export const ConfirmModal = ({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  title, 
+  message, 
+  confirmLabel = 'Confirm', 
+  cancelLabel = 'Cancel' 
+}: { 
+  isOpen: boolean, 
+  onClose: () => void, 
+  onConfirm: () => void, 
+  title: string, 
+  message: string, 
+  confirmLabel?: string, 
+  cancelLabel?: string 
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-white rounded-3xl p-6 w-full max-w-xs shadow-2xl"
+      >
+        <h3 className="text-lg font-bold text-gray-800 mb-2">{title}</h3>
+        <p className="text-sm text-gray-500 mb-6">{message}</p>
+        <div className="flex gap-3">
+          <button 
+            onClick={onClose}
+            className="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-600 font-bold text-sm active:scale-95 transition-all"
+          >
+            {cancelLabel}
+          </button>
+          <button 
+            onClick={() => { onConfirm(); onClose(); }}
+            className="flex-1 py-3 rounded-2xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-all"
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};

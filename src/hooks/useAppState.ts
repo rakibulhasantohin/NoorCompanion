@@ -1,4 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { auth, db } from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+
+interface Zikir {
+  id: string;
+  arabic: string;
+  pronunciation: {
+    bn: string;
+    en: string;
+  };
+  meaning: {
+    bn: string;
+    en: string;
+  };
+}
 
 interface AppState {
   language: 'bn' | 'en';
@@ -15,6 +31,9 @@ interface AppState {
   lastBackup: string | null;
   fullName: string | null;
   dateOfBirth: string | null;
+  customZikirs: Zikir[];
+  vibrationEnabled: boolean;
+  soundEnabled: boolean;
 }
 
 const DEFAULT_STATE: AppState = {
@@ -32,63 +51,75 @@ const DEFAULT_STATE: AppState = {
   lastBackup: null,
   fullName: null,
   dateOfBirth: null,
+  customZikirs: [],
+  vibrationEnabled: true,
+  soundEnabled: true,
 };
 
 export function useAppState() {
-  const [userEmail, setUserEmail] = useState<string | null>(() => {
-    return localStorage.getItem('noor_current_user');
-  });
+  const [user, setUser] = useState(auth.currentUser);
+  const isInternalUpdate = useRef(false);
 
   const getStateKey = (email: string | null) => {
     return email ? `noor_state_${email}` : 'noor_companion_state';
   };
 
   const [state, setState] = useState<AppState>(() => {
-    const email = localStorage.getItem('noor_current_user');
-    const saved = localStorage.getItem(getStateKey(email));
+    const saved = localStorage.getItem(getStateKey(auth.currentUser?.email || null));
     return saved ? JSON.parse(saved) : DEFAULT_STATE;
   });
 
-  // When user changes, load their specific state
   useEffect(() => {
-    const handleUserChange = () => {
-      const email = localStorage.getItem('noor_current_user');
-      setUserEmail(email);
-      const saved = localStorage.getItem(getStateKey(email));
-      if (saved) {
-        setState(JSON.parse(saved));
-      } else {
-        // If new user, maybe keep some settings but reset personal data
-        setState({ ...DEFAULT_STATE, onboardingComplete: state.onboardingComplete });
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      
+      let userData = {};
+      if (currentUser) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          if (userDoc.exists()) {
+            userData = userDoc.data();
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
       }
-    };
+
+      const saved = localStorage.getItem(getStateKey(currentUser?.email || null));
+      if (saved) {
+        setState(prev => ({ ...JSON.parse(saved), ...userData }));
+      } else {
+        setState(prev => ({ ...DEFAULT_STATE, onboardingComplete: prev.onboardingComplete, ...userData }));
+      }
+    });
 
     const handleStateChange = (e: Event) => {
+      if (isInternalUpdate.current) return;
       const customEvent = e as CustomEvent<AppState>;
       setState(customEvent.detail);
     };
 
-    window.addEventListener('auth_changed', handleUserChange);
     window.addEventListener('app_state_changed', handleStateChange);
     return () => {
-      window.removeEventListener('auth_changed', handleUserChange);
+      unsubscribe();
       window.removeEventListener('app_state_changed', handleStateChange);
     };
-  }, [state.onboardingComplete]);
+  }, []);
 
-  // Save state whenever it changes
+  // Save state whenever it changes and notify other instances
   useEffect(() => {
-    localStorage.setItem(getStateKey(userEmail), JSON.stringify(state));
-  }, [state, userEmail]);
+    localStorage.setItem(getStateKey(user?.email || null), JSON.stringify(state));
+    
+    if (isInternalUpdate.current) {
+      window.dispatchEvent(new CustomEvent('app_state_changed', { detail: state }));
+      isInternalUpdate.current = false;
+    }
+  }, [state, user]);
 
   const updateState = (updates: Partial<AppState>) => {
-    setState((prev) => {
-      const newState = { ...prev, ...updates };
-      localStorage.setItem(getStateKey(userEmail), JSON.stringify(newState));
-      window.dispatchEvent(new CustomEvent('app_state_changed', { detail: newState }));
-      return newState;
-    });
+    isInternalUpdate.current = true;
+    setState((prev) => ({ ...prev, ...updates }));
   };
 
-  return { state, updateState, user: userEmail ? { email: userEmail } : null };
+  return { state, updateState, user };
 }

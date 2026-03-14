@@ -1,0 +1,23 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "fullName": { "type": "string", "description": "User's full name" },
+        "dateOfBirth": { "type": "string", "description": "User's date of birth" },
+        "email": { "type": "string", "description": "User's email" },
+        "phoneNumber": { "type": "string", "description": "User's phone number" }
+      },
+      "required": ["uid", "fullName", "dateOfBirth"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "UserProfile" },
+      "description": "User profile documents"
+    }
+  }
+}

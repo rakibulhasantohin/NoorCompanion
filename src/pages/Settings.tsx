@@ -5,54 +5,30 @@ import {
   HelpCircle, LogOut, ChevronRight, Share2, Star, Camera
 } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
-import { AppHeader } from '../components/Common';
+import { AppHeader, ConfirmModal } from '../components/Common';
 import { AuthModal } from '../components/AuthModal';
+import { auth } from '../firebase';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
 
 export const Settings: React.FC = () => {
-  const { state, updateState, user } = useAppState();
+  const { state, updateState } = useAppState();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [user, setUser] = useState(auth.currentUser);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isBn = state.language === 'bn';
 
   useEffect(() => {
-    if (user?.email) {
-      const usersStr = localStorage.getItem('noor_users') || '{}';
-      const users = JSON.parse(usersStr);
-      if (users[user.email] && users[user.email].photo) {
-        setProfilePhoto(users[user.email].photo);
-      } else {
-        setProfilePhoto(null);
-      }
-    } else {
-      setProfilePhoto(null);
-    }
-  }, [user]);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return unsubscribe;
+  }, []);
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && user?.email) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setProfilePhoto(base64String);
-        
-        // Save to local storage
-        const usersStr = localStorage.getItem('noor_users') || '{}';
-        const users = JSON.parse(usersStr);
-        if (users[user.email]) {
-          users[user.email].photo = base64String;
-          localStorage.setItem('noor_users', JSON.stringify(users));
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('noor_current_user');
-    window.dispatchEvent(new Event('auth_changed'));
+  const handleLogout = async () => {
+    await signOut(auth);
   };
 
   const toggleTheme = () => {
@@ -64,8 +40,19 @@ export const Settings: React.FC = () => {
   };
 
   const resetOnboarding = () => {
-    if (window.confirm(isBn ? 'আপনি কি পুনরায় সেটআপ করতে চান?' : 'Do you want to setup again?')) {
-      updateState({ onboardingComplete: false });
+    updateState({ onboardingComplete: false });
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setProfilePhoto(base64String);
+        updateState({ profileImage: base64String });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -82,7 +69,7 @@ export const Settings: React.FC = () => {
       items: [
         { icon: <Moon size={20} />, label: isBn ? 'ডার্ক মোড' : 'Dark Mode', toggle: true, active: state.theme === 'dark', onToggle: toggleTheme },
         { icon: <Globe size={20} />, label: isBn ? 'ভাষা' : 'Language', value: state.language === 'bn' ? 'বাংলা' : 'English', onClick: toggleLanguage },
-        { icon: <MapPin size={20} />, label: isBn ? 'লোকেশন' : 'Location', value: state.city, onClick: resetOnboarding },
+        { icon: <MapPin size={20} />, label: isBn ? 'লোকেশন' : 'Location', value: state.city, onClick: () => setIsResetModalOpen(true) },
       ]
     },
     {
@@ -128,8 +115,10 @@ export const Settings: React.FC = () => {
           <div className="flex-1">
             {user ? (
               <>
-                <h2 className="text-lg font-bold text-gray-800 truncate">{user.email.split('@')[0]}</h2>
-                <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                <h2 className="text-lg font-bold text-gray-800 truncate">
+                  {state.fullName || (user.email?.split('@')[0] || 'User')}
+                </h2>
+                <p className="text-sm text-gray-500 truncate">{user.email || ''}</p>
               </>
             ) : (
               <>
@@ -204,6 +193,16 @@ export const Settings: React.FC = () => {
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)} 
+      />
+
+      <ConfirmModal 
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+        onConfirm={resetOnboarding}
+        title={isBn ? 'রিসেট নিশ্চিত করুন' : 'Confirm Reset'}
+        message={isBn ? 'আপনি কি পুনরায় সেটআপ করতে চান?' : 'Do you want to setup again?'}
+        confirmLabel={isBn ? 'হ্যাঁ' : 'Yes'}
+        cancelLabel={isBn ? 'না' : 'No'}
       />
     </div>
   );

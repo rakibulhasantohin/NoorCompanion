@@ -15,6 +15,8 @@ import { Hadith } from './pages/Hadith';
 import { Hajj } from './pages/Hajj';
 import { Pillars } from './pages/Pillars';
 import { SahriIftar } from './pages/SahriIftar';
+import { AiAssistant } from './pages/AiAssistant';
+import { NamesOfAllah } from './pages/NamesOfAllah';
 
 import { ProfilePage } from './pages/ProfilePage';
 
@@ -38,6 +40,7 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
       case '/tasbih': return isBn ? 'তাসবিহ' : 'Tasbih';
       case '/qibla': return isBn ? 'কিবলা' : 'Qibla';
       case '/sahri-iftar': return isBn ? 'সাহরী ও ইফতার' : 'Sahri & Iftar';
+      case '/names-of-allah': return isBn ? 'আল্লাহর নাম' : 'Allah Names';
       case '/profile': return isBn ? 'প্রোফাইল' : 'Profile';
       case '/settings': return isBn ? 'সেটিংস' : 'Settings';
       default: return isBn ? 'নূর কম্প্যানিয়ন' : 'Noor Companion';
@@ -94,6 +97,8 @@ export default function App() {
           <Route path="/hajj" element={<Hajj />} />
           <Route path="/pillars" element={<Pillars />} />
           <Route path="/sahri-iftar" element={<SahriIftar />} />
+          <Route path="/ai-assistant" element={<AiAssistant />} />
+          <Route path="/names-of-allah" element={<NamesOfAllah />} />
         </Routes>
       </PageWrapper>
     </Router>

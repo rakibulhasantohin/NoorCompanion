@@ -43,6 +43,9 @@ const translations = {
     target: 'লক্ষ্য',
     totalCount: 'মোট গণনা',
     resetConfirm: 'আপনি কি গণনা রিসেট করতে চান?',
+    resetConfirmTitle: 'রিসেট নিশ্চিত করুন',
+    confirm: 'হ্যাঁ',
+    cancel: 'না',
     // Qibla
     qiblaCompass: 'কিবলা কম্পাস',
     qiblaDirection: 'কিবলার সঠিক দিক',
@@ -107,6 +110,9 @@ const translations = {
     // SahriIftar
     sahriIftarSchedule: 'সাহরী ও ইফতারের সময়সূচী',
     bangladesh: 'বাংলাদেশ',
+    zikirList: 'জিকিরসমূহ',
+    countLabel: 'গণনা',
+    addZikir: 'নতুন জিকির যোগ করুন',
   },
   en: {
     noorCompanion: 'Noor Companion',
@@ -150,6 +156,9 @@ const translations = {
     target: 'Target',
     totalCount: 'Total Count',
     resetConfirm: 'Do you want to reset the count?',
+    resetConfirmTitle: 'Confirm Reset',
+    confirm: 'Yes',
+    cancel: 'No',
     // Qibla
     qiblaCompass: 'Qibla Compass',
     qiblaDirection: 'Correct Qibla Direction',
@@ -214,6 +223,9 @@ const translations = {
     // SahriIftar
     sahriIftarSchedule: 'Sahri and Iftar Schedule',
     bangladesh: 'Bangladesh',
+    zikirList: 'Zikir List',
+    countLabel: 'Count',
+    addZikir: 'Add New Zikir',
   }
 };
 

@@ -16,6 +16,7 @@ import { cn } from '../utils/utils';
 
 export const Home: React.FC = () => {
   const { state, user } = useAppState();
+  const isBn = state.language === 'bn';
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [now, setNow] = useState(new Date());
@@ -110,10 +111,12 @@ export const Home: React.FC = () => {
     { id: 'ramadan', name: 'সাহরী-ইফতার', icon: <Moon className="text-indigo-500" />, path: '/sahri-iftar' },
     { id: 'tasbih', name: 'তাসবিহ', icon: <Heart className="text-rose-500" />, path: '/tasbih' },
     { id: 'qibla', name: 'কিবলা কম্পাস', icon: <Compass className="text-amber-500" />, path: '/qibla' },
-    { id: 'names', name: 'আসমা-উল-হুসনা', icon: <span className="text-xl font-bold text-blue-500">الله</span>, path: '/settings' },
-    { id: 'khutba', name: 'জুমুআর খুতবা', icon: <MessageSquare className="text-cyan-500" />, path: '/' },
-    { id: 'waz', name: 'ওয়াজ', icon: <Play className="text-purple-500" />, path: '/' },
-    { id: 'live', name: 'লাইভ', icon: <Radio className="text-red-500" />, path: '/' },
+    { id: 'duas', name: 'দোয়া ও জিকির', icon: <Heart className="text-pink-500" />, path: '/duas' },
+    { id: 'hadith', name: 'হাদিস শরীফ', icon: <Book className="text-blue-500" />, path: '/hadith' },
+    { id: 'pillars', name: 'ইসলামের স্তম্ভ', icon: <Users className="text-purple-500" />, path: '/pillars' },
+    { id: 'hajj', name: 'হজ্জ ও উমরাহ', icon: <MapPin className="text-amber-500" />, path: '/hajj' },
+    { id: 'names', name: 'আসমা-উল-হুসনা', icon: <span className="text-xl font-bold text-blue-500">الله</span>, path: '/surahs' },
+    { id: 'ai', name: 'নূর এআই', icon: <MessageSquare className="text-cyan-500" />, path: '/ai-assistant' },
   ];
 
   return (
@@ -122,6 +125,10 @@ export const Home: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-gray-800">{t('noorCompanion')}</h1>
+          <p className="text-xs text-gray-500 font-medium">
+            {isBn ? 'আসসালামু আলাইকুম, ' : 'Assalamu Alaikum, '}
+            {state.fullName || (user?.email?.split('@')[0] || (isBn ? 'অতিথি' : 'Guest'))}
+          </p>
         </div>
         <button onClick={() => navigate('/profile')} className="w-10 h-10 bg-white rounded-full shadow-sm text-gray-500 overflow-hidden border-2 border-primary/10 flex items-center justify-center">
           {state.profileImage || profilePhoto ? (
