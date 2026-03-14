@@ -52,6 +52,17 @@ export const AppHeader = ({ title, showBack = false, onBack }: { title?: string,
   );
 };
 
+export const AnimatedRubElHizbIcon = ({ className, size = 24 }: { className?: string, size?: number }) => (
+  <motion.svg 
+    width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}
+    animate={{ rotate: 360 }}
+    transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+  >
+    <rect x="4" y="4" width="16" height="16" rx="2" />
+    <rect x="4" y="4" width="16" height="16" rx="2" transform="rotate(45 12 12)" />
+  </motion.svg>
+);
+
 export const BottomNav = () => {
   const location = useLocation();
   const { state } = useAppState();
@@ -86,7 +97,7 @@ export const BottomNav = () => {
   const navItems = [
     { icon: Home, label: isBn ? 'হোম' : 'Home', path: '/' },
     setA[rotationIndex],
-    { icon: Sparkles, label: isBn ? 'নূর এআই' : 'Noor AI', path: '/ai-assistant' },
+    { icon: AnimatedRubElHizbIcon, label: isBn ? 'নূর এআই' : 'Noor AI', path: '/ai-assistant' },
     setB[rotationIndex],
     { icon: SettingsIcon, label: isBn ? 'সেটিংস' : 'Settings', path: '/settings' },
   ];
