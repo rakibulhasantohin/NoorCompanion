@@ -16,7 +16,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const { state } = useAppState();
   const isBn = state.language === 'bn';
   const [isLogin, setIsLogin] = useState(true);
-  const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email');
+  const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -29,37 +29,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setError('');
 
     try {
-      if (isLogin) {
-        let loginEmail = email;
-        if (loginMethod === 'phone') {
-          // Validate phone number
-          if (!phoneNumber.startsWith('01') || phoneNumber.length !== 11) {
-            setError(isBn ? 'সঠিক বাংলাদেশি মোবাইল নাম্বার দিন' : 'Enter a valid Bangladeshi phone number');
-            return;
-          }
-          loginEmail = `${phoneNumber}@noor.com`;
-        }
-        await signInWithEmailAndPassword(auth, loginEmail, password);
-        onClose();
-      } else {
-        // Registration
+      let authEmail = email;
+      if (authMethod === 'phone') {
         if (!phoneNumber.startsWith('01') || phoneNumber.length !== 11) {
           setError(isBn ? 'সঠিক বাংলাদেশি মোবাইল নাম্বার দিন' : 'Enter a valid Bangladeshi phone number');
           return;
         }
+        authEmail = `${phoneNumber}@noor.com`;
+      }
 
-        // Use email if provided, otherwise use phone alias
-        const regEmail = email || `${phoneNumber}@noor.com`;
-
-        const userCredential = await createUserWithEmailAndPassword(auth, regEmail, password);
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, authEmail, password);
+        onClose();
+      } else {
+        // Registration
+        const userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
         const user = userCredential.user;
 
         await setDoc(doc(db, 'users', user.uid), {
           uid: user.uid,
           fullName,
-          dateOfBirth,
-          email: email || null,
-          phoneNumber,
+          dateOfBirth: dateOfBirth || null,
+          email: authMethod === 'email' ? email : null,
+          phoneNumber: authMethod === 'phone' ? phoneNumber : null,
           createdAt: new Date().toISOString()
         });
         onClose();
@@ -112,28 +104,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 </p>
               </div>
 
-              {isLogin && (
-                <div className="flex bg-gray-100 p-1 rounded-2xl mb-6">
-                  <button 
-                    onClick={() => setLoginMethod('email')}
-                    className={cn(
-                      "flex-1 py-2 text-xs font-bold rounded-xl transition-all",
-                      loginMethod === 'email' ? "bg-white text-primary shadow-sm" : "text-gray-500"
-                    )}
-                  >
-                    {isBn ? 'ইমেইল' : 'Email'}
-                  </button>
-                  <button 
-                    onClick={() => setLoginMethod('phone')}
-                    className={cn(
-                      "flex-1 py-2 text-xs font-bold rounded-xl transition-all",
-                      loginMethod === 'phone' ? "bg-white text-primary shadow-sm" : "text-gray-500"
-                    )}
-                  >
-                    {isBn ? 'ফোন' : 'Phone'}
-                  </button>
-                </div>
-              )}
+              <div className="flex bg-gray-100 p-1 rounded-2xl mb-6">
+                <button 
+                  onClick={() => setAuthMethod('email')}
+                  className={cn(
+                    "flex-1 py-2 text-xs font-bold rounded-xl transition-all",
+                    authMethod === 'email' ? "bg-white text-primary shadow-sm" : "text-gray-500"
+                  )}
+                >
+                  {isBn ? 'ইমেইল' : 'Email'}
+                </button>
+                <button 
+                  onClick={() => setAuthMethod('phone')}
+                  className={cn(
+                    "flex-1 py-2 text-xs font-bold rounded-xl transition-all",
+                    authMethod === 'phone' ? "bg-white text-primary shadow-sm" : "text-gray-500"
+                  )}
+                >
+                  {isBn ? 'ফোন' : 'Phone'}
+                </button>
+              </div>
 
               {error && (
                 <motion.div 
@@ -156,22 +146,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                       <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                       <input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" required />
                     </div>
-                    <div className="relative">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                      <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'মোবাইল নাম্বার (০১...)' : 'Phone Number (01...)'} required />
-                    </div>
                   </>
                 )}
 
-                {(isLogin && loginMethod === 'phone') ? (
+                {authMethod === 'phone' ? (
                   <div className="relative">
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'মোবাইল নাম্বার' : 'Phone Number'} required />
+                    <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'মোবাইল নাম্বার (০১...)' : 'Phone Number (01...)'} required />
                   </div>
                 ) : (
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'ইমেইল এড্রেস' : 'Email Address'} required={isLogin || !phoneNumber} />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'ইমেইল এড্রেস' : 'Email Address'} required />
                   </div>
                 )}
 
