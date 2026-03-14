@@ -18,17 +18,27 @@ try {
   console.warn('Could not make fetch writable:', e);
 }
 
-/*
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(registration => {
       console.log('SW registered: ', registration);
+      
+      // Check for updates on load
+      registration.update();
     }).catch(registrationError => {
       console.log('SW registration failed: ', registrationError);
     });
+
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        console.log('New service worker activated. Reloading...');
+        window.location.reload();
+      }
+    });
   });
 }
-*/
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

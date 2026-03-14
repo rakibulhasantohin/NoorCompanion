@@ -71,7 +71,7 @@ export const AiAssistant: React.FC = () => {
     if (typeof textToSend !== 'string') setInput('');
     setIsLoading(true);
 
-    const response = await getAiResponse(messageText, state.language);
+    const response = await getAiResponse(messageText, state.language, messages);
     const assistantMessage: Message = { role: 'assistant', content: response };
     
     setMessages(prev => [...prev, assistantMessage]);
