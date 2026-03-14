@@ -19,35 +19,15 @@ export const Hadith = () => {
     { id: 'ibn-majah', name: t('ibnMajah'), count: '৪৩৪১', color: 'bg-indigo-50 text-indigo-600' },
   ];
 
-  const MOCK_HADITHS = [
-    {
-      collection: 'bukhari',
-      id: 1,
-      title: 'নিয়ত সম্পর্কিত হাদিস',
-      arabic: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى',
-      translation: 'নিশ্চয়ই সকল কাজ নিয়তের ওপর নির্ভরশীল। আর প্রত্যেক ব্যক্তি তাই পাবে যার সে নিয়ত করবে।',
-      narrator: 'উমর ইবনুল খাত্তাব (রা.)',
-      reference: 'সহিহ বুখারী, হাদিস নং ১',
-    },
-    {
-      collection: 'bukhari',
-      id: 2,
-      title: 'কুরআন শিক্ষা',
-      arabic: 'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ',
-      translation: 'তোমাদের মধ্যে সর্বোত্তম ব্যক্তি সেই যে নিজে কুরআন শিখে এবং অন্যকে শেখায়।',
-      narrator: 'উসমান ইবনে আফফান (রা.)',
-      reference: 'সহিহ বুখারী, হাদিস নং ৫০২৭',
-    },
-    {
-      collection: 'muslim',
-      id: 1,
-      title: 'পবিত্রতা ঈমানের অঙ্গ',
-      arabic: 'الطُّهُورُ شَطْرُ الإِيمَانِ',
-      translation: 'পবিত্রতা ঈমানের অর্ধেক।',
-      narrator: 'আবু মালেক আল-আশআরী (রা.)',
-      reference: 'সহিহ মুসলিম, হাদিস নং ২২৩',
-    },
-  ];
+  const MOCK_HADITHS: Array<{
+    collection: string;
+    id: number;
+    title: string;
+    arabic: string;
+    translation: string;
+    narrator: string;
+    reference: string;
+  }> = [];
 
   const filteredHadiths = MOCK_HADITHS.filter(h => 
     h.collection === activeTab && 
