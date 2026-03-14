@@ -50,6 +50,11 @@ export const ProfileSection = () => {
     }
   };
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(state.fullName || user?.email || 'User')}&background=random`;
+  };
+
   if (!user) {
     return null;
   }
@@ -76,23 +81,28 @@ export const ProfileSection = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-        <div className="flex items-center gap-4 mb-6">
+    <div className="space-y-4">
+      <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
+        <div className="flex items-center gap-4 mb-4">
           <div className="relative">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 overflow-hidden border-2 border-emerald-50">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 overflow-hidden border-2 border-emerald-50">
               {state.profileImage ? (
-                <img src={state.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                <img 
+                  src={state.profileImage} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover" 
+                  onError={handleImageError}
+                />
               ) : (
                 <User className="w-8 h-8" />
               )}
             </div>
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-bold text-gray-900 truncate">
+            <h3 className="text-base font-bold text-gray-900 truncate">
               {state.fullName || user.email?.split('@')[0]}
             </h3>
-            <p className="text-sm text-gray-500 truncate">{user.email}</p>
+            <p className="text-xs text-gray-500 truncate">{user.email}</p>
             {state.dateOfBirth && (
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-0.5">
                 <Calendar className="w-3 h-3" />
@@ -119,16 +129,16 @@ export const ProfileSection = () => {
         <div className="grid grid-cols-3 gap-3">
           {stats.map((stat, i) => (
             <div key={i} className="flex flex-col items-center p-3 rounded-2xl bg-gray-50 border border-gray-100">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 ${stat.color}`}>
-                <stat.icon className="w-5 h-5" />
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center mb-1.5 ${stat.color}`}>
+                <stat.icon className="w-4 h-4" />
               </div>
-              <span className="text-xs text-gray-500 mb-1">{stat.label}</span>
-              <span className="text-sm font-bold text-gray-900">{stat.value}</span>
+              <span className="text-[10px] text-gray-500 mb-0.5">{stat.label}</span>
+              <span className="text-xs font-bold text-gray-900">{stat.value}</span>
             </div>
           ))}
         </div>
 
-        <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between">
+        <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
               <CloudCheck className="w-4 h-4" />
@@ -151,10 +161,10 @@ export const ProfileSection = () => {
         </div>
       </div>
 
-      <div className="bg-emerald-900 rounded-3xl p-6 text-white overflow-hidden relative">
+      <div className="bg-emerald-900 rounded-3xl p-5 text-white overflow-hidden relative">
         <div className="relative z-10">
-          <h4 className="font-bold mb-2">আপনার প্রগ্রেস</h4>
-          <p className="text-emerald-100 text-sm mb-4">আপনি নিয়মিত ইবাদত চালিয়ে যাচ্ছেন। মাশাআল্লাহ!</p>
+          <h4 className="font-bold text-sm mb-1">আপনার প্রগ্রেস</h4>
+          <p className="text-emerald-100 text-xs mb-3">আপনি নিয়মিত ইবাদত চালিয়ে যাচ্ছেন। মাশাআল্লাহ!</p>
           
           <div className="space-y-3">
             <div>
@@ -205,7 +215,12 @@ export const ProfileSection = () => {
                   <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                     <div className="w-24 h-24 rounded-3xl bg-emerald-50 flex items-center justify-center text-emerald-600 overflow-hidden border-2 border-emerald-100">
                       {editData.profileImage ? (
-                        <img src={editData.profileImage} alt="Preview" className="w-full h-full object-cover" />
+                        <img 
+                          src={editData.profileImage} 
+                          alt="Preview" 
+                          className="w-full h-full object-cover" 
+                          onError={handleImageError}
+                        />
                       ) : (
                         <User className="w-10 h-10" />
                       )}

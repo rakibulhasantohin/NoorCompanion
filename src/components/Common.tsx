@@ -19,7 +19,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../utils/utils';
 import { useAppState } from '../hooks/useAppState';
 
-export const AppHeader = ({ title, showBack = false }: { title?: string, showBack?: boolean }) => {
+export const AppHeader = ({ title, showBack = false, onBack }: { title?: string, showBack?: boolean, onBack?: () => void }) => {
   const navigate = useNavigate();
   const { state } = useAppState();
   const isBn = state.language === 'bn';
@@ -29,7 +29,7 @@ export const AppHeader = ({ title, showBack = false }: { title?: string, showBac
       <div className="flex items-center gap-3">
         {showBack ? (
           <button 
-            onClick={() => navigate(-1)}
+            onClick={() => onBack ? onBack() : navigate(-1)}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ChevronLeft size={24} className="text-gray-700" />

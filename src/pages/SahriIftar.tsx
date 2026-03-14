@@ -88,9 +88,9 @@ export const SahriIftar: React.FC = () => {
   });
 
   return (
-    <div className="pb-24 px-4 pt-6 max-w-md mx-auto min-h-screen bg-white">
+    <div className="pb-20 px-4 pt-4 max-w-md mx-auto min-h-screen bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => navigate(-1)}
@@ -107,8 +107,8 @@ export const SahriIftar: React.FC = () => {
       </div>
 
       {/* Countdown Card */}
-      <div className="bg-slate-800 text-white p-6 rounded-[32px] mb-8 flex items-center justify-between shadow-lg">
-        <div className="space-y-4">
+      <div className="bg-slate-800 text-white p-5 rounded-[28px] mb-6 flex items-center justify-between shadow-lg">
+        <div className="space-y-3">
           <div className="flex items-center gap-6">
             <span className="text-sm text-gray-400 font-medium">{t('sahriEnds')}</span>
             <span className="text-xl font-bold">{format(countdownInfo.imsak, 'p')}</span>
@@ -127,9 +127,9 @@ export const SahriIftar: React.FC = () => {
       </div>
 
       {/* List Section grouped by Month */}
-      <div className="space-y-8">
+      <div className="space-y-6">
         {groups.map((group, gIdx) => (
-          <div key={gIdx} className="space-y-4">
+          <div key={gIdx} className="space-y-3">
             {/* Month Header */}
             <div className="bg-[#1A3644] text-white py-3 px-6 rounded-2xl text-center font-bold text-lg shadow-sm">
               {group.monthName} {group.year}

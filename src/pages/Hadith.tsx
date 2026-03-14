@@ -55,10 +55,10 @@ export const Hadith = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <AppHeader title={t('hadithSharif')} showBack />
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-4 space-y-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -78,9 +78,9 @@ export const Hadith = () => {
               key={col.id}
               onClick={() => setActiveTab(col.id)}
               className={cn(
-                "flex flex-col items-start min-w-[140px] p-4 rounded-2xl border transition-all",
+                "flex flex-col items-start min-w-[120px] p-3 rounded-2xl border transition-all",
                 activeTab === col.id 
-                  ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' 
+                  ? 'bg-primary border-primary text-white shadow-md shadow-primary/20' 
                   : 'bg-white border-gray-100 text-gray-600'
               )}
             >
@@ -101,20 +101,20 @@ export const Hadith = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-6"
+                className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-4"
               >
-                <div className="flex items-center justify-between border-b border-gray-50 pb-3">
-                  <h3 className="font-bold text-primary">{hadith.title}</h3>
+                <div className="flex items-center justify-between border-b border-gray-50 pb-2">
+                  <h3 className="font-bold text-primary text-sm">{hadith.title}</h3>
                   <div className="flex items-center gap-3 text-gray-300">
-                    <button className="hover:text-primary transition-colors"><Copy size={18} /></button>
-                    <button className="hover:text-primary transition-colors"><Share2 size={18} /></button>
+                    <button className="hover:text-primary transition-colors"><Copy size={16} /></button>
+                    <button className="hover:text-primary transition-colors"><Share2 size={16} /></button>
                   </div>
                 </div>
-                <p className="text-right font-serif text-2xl text-gray-800 leading-loose" dir="rtl">
+                <p className="text-right font-serif text-xl text-gray-800 leading-relaxed" dir="rtl">
                   {hadith.arabic}
                 </p>
-                <div className="space-y-3">
-                  <div className="bg-gray-50 rounded-2xl p-4">
+                <div className="space-y-2">
+                  <div className="bg-gray-50 rounded-2xl p-3">
                     <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">{t('translation')}</p>
                     <p className="text-sm text-gray-700 leading-relaxed">
                       {hadith.translation}

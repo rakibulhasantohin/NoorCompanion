@@ -7,9 +7,9 @@ export const ProfilePage: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <AppHeader title={t('profile')} showBack />
-      <div className="px-4 py-6">
+      <div className="px-4 py-4">
         <ProfileSection />
       </div>
     </div>

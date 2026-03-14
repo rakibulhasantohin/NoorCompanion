@@ -21,29 +21,29 @@ const SURAH_ITEMS = [
 
 export const Surahs = () => {
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <AppHeader title="গুরুত্বপূর্ণ দোয়া ও সূরা" showBack />
 
-      <div className="px-4 py-6 space-y-6">
-        <div className="space-y-4">
+      <div className="px-4 py-4 space-y-4">
+        <div className="space-y-3">
           {SURAH_ITEMS.map((item) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-6"
+              className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 space-y-4"
             >
-              <div className="flex items-center justify-between border-b border-gray-50 pb-3">
-                <h3 className="font-bold text-primary">{item.title}</h3>
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
+              <div className="flex items-center justify-between border-b border-gray-50 pb-2">
+                <h3 className="font-bold text-primary text-sm">{item.title}</h3>
+                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
                   {item.id}
                 </div>
               </div>
-              <p className="text-right font-serif text-2xl text-gray-800 leading-loose" dir="rtl">
+              <p className="text-right font-serif text-xl text-gray-800 leading-relaxed" dir="rtl">
                 {item.arabic}
               </p>
-              <div className="bg-gray-50 rounded-2xl p-4">
-                <p className="text-xs text-gray-400 uppercase font-bold tracking-widest mb-2">অনুবাদ</p>
+              <div className="bg-gray-50 rounded-2xl p-3">
+                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">অনুবাদ</p>
                 <p className="text-sm text-gray-700 leading-relaxed italic">
                   {item.translation}
                 </p>
@@ -53,17 +53,17 @@ export const Surahs = () => {
         </div>
 
         <Link to="/quran">
-          <div className="bg-primary rounded-3xl p-6 text-white flex items-center justify-between shadow-xl shadow-primary/20">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
-                <BookOpen className="w-6 h-6" />
+          <div className="bg-primary rounded-3xl p-4 text-white flex items-center justify-between shadow-md shadow-primary/20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">
+                <BookOpen className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold">পূর্ণাঙ্গ কুরআন</h4>
-                <p className="text-xs text-white/70">১১৪টি সূরা পড়ুন</p>
+                <h4 className="font-bold text-sm">পূর্ণাঙ্গ কুরআন</h4>
+                <p className="text-[10px] text-white/70">১১৪টি সূরা পড়ুন</p>
               </div>
             </div>
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-5 h-5" />
           </div>
         </Link>
       </div>

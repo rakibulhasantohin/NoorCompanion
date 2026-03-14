@@ -47,23 +47,23 @@ export const AiAssistant: React.FC = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <AppHeader title={isBn ? 'নূর এআই সহকারী' : 'Noor AI Assistant'} showBack />
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center space-y-6 pt-12">
-            <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center text-primary animate-pulse">
-              <Bot size={40} />
+          <div className="flex flex-col items-center justify-center h-full text-center space-y-4 pt-8">
+            <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center text-primary animate-pulse">
+              <Bot size={32} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-800 mb-2">
+              <h2 className="text-lg font-bold text-gray-800 mb-1">
                 {isBn ? 'আস-সালামু আলাইকুম!' : 'As-Salamu Alaykum!'}
               </h2>
-              <p className="text-sm text-gray-500 max-w-xs mx-auto">
+              <p className="text-xs text-gray-500 max-w-xs mx-auto">
                 {isBn 
                   ? 'আমি নূর এআই। আমি আপনাকে ইসলাম সম্পর্কে যেকোনো প্রশ্ন জিজ্ঞাসা করতে সাহায্য করতে পারি।' 
                   : 'I am Noor AI. I can help you with any questions about Islam.'}
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-3 w-full max-w-xs">
+            <div className="grid grid-cols-1 gap-2 w-full max-w-xs">
               {[
                 isBn ? 'কুরআনের গুরুত্ব কী?' : 'What is the importance of Quran?',
                 isBn ? 'নামাজের নিয়মগুলো কী কী?' : 'What are the rules of Prayer?',
@@ -72,7 +72,7 @@ export const AiAssistant: React.FC = () => {
                 <button 
                   key={i}
                   onClick={() => setInput(q)}
-                  className="p-3 bg-white border border-gray-100 rounded-2xl text-xs text-gray-600 hover:border-primary/30 transition-all text-left flex items-center gap-2"
+                  className="p-2.5 bg-white border border-gray-100 rounded-2xl text-xs text-gray-600 hover:border-primary/30 transition-all text-left flex items-center gap-2"
                 >
                   <Sparkles size={14} className="text-primary" />
                   {q}
@@ -99,7 +99,7 @@ export const AiAssistant: React.FC = () => {
               {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
             </div>
             <div className={cn(
-              "p-4 rounded-3xl text-sm leading-relaxed shadow-sm",
+              "p-3 rounded-3xl text-sm leading-relaxed shadow-sm",
               msg.role === 'user' 
                 ? "bg-primary text-white rounded-tr-none" 
                 : "bg-white text-gray-800 border border-gray-100 rounded-tl-none"
@@ -114,7 +114,7 @@ export const AiAssistant: React.FC = () => {
             <div className="w-8 h-8 rounded-full bg-white border border-gray-100 text-primary shadow-sm flex items-center justify-center shrink-0">
               <Bot size={16} />
             </div>
-            <div className="bg-white text-gray-800 border border-gray-100 p-4 rounded-3xl rounded-tl-none shadow-sm">
+            <div className="bg-white text-gray-800 border border-gray-100 p-3 rounded-3xl rounded-tl-none shadow-sm">
               <RefreshCw size={16} className="animate-spin text-primary" />
             </div>
           </div>
@@ -123,7 +123,7 @@ export const AiAssistant: React.FC = () => {
       </div>
 
       {/* Input Area */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-gray-100 max-w-md mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 p-3 bg-white/80 backdrop-blur-md border-t border-gray-100 max-w-md mx-auto">
         <div className="relative flex items-center gap-2">
           <input
             type="text"
@@ -131,17 +131,17 @@ export const AiAssistant: React.FC = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder={isBn ? 'আপনার প্রশ্ন লিখুন...' : 'Type your question...'}
-            className="flex-1 bg-gray-50 border border-gray-100 rounded-2xl py-4 pl-4 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            className="flex-1 bg-gray-50 border border-gray-100 rounded-2xl py-3 pl-4 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
           <button 
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
             className={cn(
-              "absolute right-2 w-10 h-10 rounded-xl flex items-center justify-center transition-all",
-              input.trim() && !isLoading ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-gray-100 text-gray-400"
+              "absolute right-1.5 w-9 h-9 rounded-xl flex items-center justify-center transition-all",
+              input.trim() && !isLoading ? "bg-primary text-white shadow-md shadow-primary/20" : "bg-gray-100 text-gray-400"
             )}
           >
-            <Send size={18} />
+            <Send size={16} />
           </button>
         </div>
       </div>

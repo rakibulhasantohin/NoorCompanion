@@ -30,12 +30,12 @@ export const PrayerTimes: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <AppHeader title={t('prayerTimes')} showBack />
 
-      <div className="px-4 py-6">
+      <div className="px-4 py-4">
         {/* Date Selector */}
-        <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 mb-6 flex items-center justify-between">
+        <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 mb-4 flex items-center justify-between">
           <button 
             onClick={() => setSelectedDate(subDays(selectedDate, 1))}
             className="p-2 hover:bg-gray-50 rounded-full text-gray-400"
@@ -58,7 +58,7 @@ export const PrayerTimes: React.FC = () => {
         </div>
 
         {/* Location Info */}
-        <div className="flex items-center justify-between mb-6 px-2">
+        <div className="flex items-center justify-between mb-4 px-2">
           <div className="flex items-center gap-2 text-gray-500 text-sm">
             <MapPin size={16} />
             <span>{state.city}, Bangladesh</span>
@@ -117,9 +117,9 @@ export const PrayerTimes: React.FC = () => {
         </div>
 
         {/* Forbidden Times Section */}
-        <div className="mt-10">
-          <h3 className="text-gray-400 font-bold text-xs uppercase tracking-widest mb-4 px-2">{t('forbiddenTimes')}</h3>
-          <div className="bg-rose-50 border border-rose-100 rounded-3xl p-6 space-y-4">
+        <div className="mt-6">
+          <h3 className="text-gray-400 font-bold text-xs uppercase tracking-widest mb-3 px-2">{t('forbiddenTimes')}</h3>
+          <div className="bg-rose-50 border border-rose-100 rounded-3xl p-5 space-y-3">
             {getPrayerTimes(lat, lng, selectedDate).times.filter(prayerTime => prayerTime.name === 'Sunrise').map(prayerTime => (
               <div key="sunrise" className="flex items-center justify-between text-sm">
                 <span className="text-gray-500">{t('sunrise')}</span>

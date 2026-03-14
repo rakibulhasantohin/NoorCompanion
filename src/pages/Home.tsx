@@ -119,10 +119,15 @@ export const Home: React.FC = () => {
     { id: 'ai', name: 'নূর এআই', icon: <MessageSquare className="text-cyan-500" />, path: '/ai-assistant' },
   ];
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(state.fullName || user?.email || 'User')}&background=random`;
+  };
+
   return (
-    <div className="pb-24 px-4 pt-6 max-w-md mx-auto">
+    <div className="pb-20 px-4 pt-4 max-w-md mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-xl font-bold text-gray-800">{t('noorCompanion')}</h1>
           <p className="text-xs text-gray-500 font-medium">
@@ -132,7 +137,12 @@ export const Home: React.FC = () => {
         </div>
         <button onClick={() => navigate('/profile')} className="w-10 h-10 bg-white rounded-full shadow-sm text-gray-500 overflow-hidden border-2 border-primary/10 flex items-center justify-center">
           {state.profileImage || profilePhoto ? (
-            <img src={state.profileImage || profilePhoto || ''} alt="Profile" className="w-full h-full object-cover" />
+            <img 
+              src={state.profileImage || profilePhoto || ''} 
+              alt="Profile" 
+              className="w-full h-full object-cover" 
+              onError={handleImageError}
+            />
           ) : (
             <User size={20} />
           )}
@@ -140,7 +150,7 @@ export const Home: React.FC = () => {
       </div>
 
       {/* Date & Location */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex flex-col">
           <div className="flex items-center gap-1 text-primary font-bold text-sm">
             <span>{hijriDate}</span>
@@ -161,7 +171,7 @@ export const Home: React.FC = () => {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className={cn(
-          "text-white p-6 rounded-3xl shadow-xl mb-4 relative overflow-hidden transition-colors duration-500",
+          "text-white p-5 rounded-3xl shadow-xl mb-3 relative overflow-hidden transition-colors duration-500",
           isForbidden ? "bg-rose-500 shadow-rose-500/20" : "bg-primary shadow-primary/20"
         )}
       >
@@ -203,7 +213,7 @@ export const Home: React.FC = () => {
       </motion.div>
 
       {/* Next Prayer Card */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
           <div className="text-xs text-gray-400 mb-1">{t('nextPrayer')}</div>
           <div className="font-bold text-gray-800">{prayerData.next?.bnName}</div>
@@ -227,9 +237,9 @@ export const Home: React.FC = () => {
       {/* Sahri & Iftar Card */}
       <div 
         onClick={() => navigate('/sahri-iftar')}
-        className="bg-slate-800 text-white p-6 rounded-[32px] mb-8 shadow-lg cursor-pointer active:scale-[0.98] transition-all relative overflow-hidden"
+        className="bg-slate-800 text-white p-5 rounded-[28px] mb-6 shadow-lg cursor-pointer active:scale-[0.98] transition-all relative overflow-hidden"
       >
-        <div className="flex items-center justify-between mb-6 relative z-10">
+        <div className="flex items-center justify-between mb-5 relative z-10">
           <div className="space-y-3">
             <div className="flex items-center gap-4">
               <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
@@ -274,7 +284,7 @@ export const Home: React.FC = () => {
       </div>
 
       {/* Features Grid */}
-      <div className="grid grid-cols-3 gap-y-8 gap-x-4 mb-10">
+      <div className="grid grid-cols-3 gap-y-5 gap-x-3 mb-6">
         {features.map((f) => (
           <button 
             key={f.id} 
@@ -292,7 +302,7 @@ export const Home: React.FC = () => {
       </div>
 
       {/* Forbidden Times */}
-      <div className="bg-rose-50 border border-rose-100 rounded-3xl p-6 mb-8">
+      <div className="bg-rose-50 border border-rose-100 rounded-3xl p-5 mb-6">
         <h3 className="text-center text-rose-400 font-bold mb-4 text-sm uppercase tracking-wider">{t('todaysForbiddenTimes')}</h3>
         <div className="space-y-4">
           {forbiddenTimes.map((t, i) => (
@@ -307,7 +317,7 @@ export const Home: React.FC = () => {
       </div>
 
       {/* Social Links */}
-      <div className="space-y-3 mb-8">
+      <div className="space-y-3 mb-6">
         <button className="w-full p-4 bg-white border border-blue-100 rounded-2xl flex items-center justify-between group">
           <div className="flex items-center gap-3">
             <div className="bg-blue-500 p-2 rounded-full text-white">

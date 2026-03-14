@@ -84,12 +84,12 @@ export const Settings: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <AppHeader title={isBn ? 'সেটিংস' : 'Settings'} showBack />
 
-      <div className="px-4 py-6 space-y-8">
+      <div className="px-4 py-4 space-y-6">
         {/* Profile Card */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden">
+        <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden">
           <div 
             className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary relative cursor-pointer group overflow-hidden border-2 border-primary/20"
             onClick={() => user ? fileInputRef.current?.click() : setIsAuthModalOpen(true)}
@@ -136,14 +136,14 @@ export const Settings: React.FC = () => {
 
         {/* Sections */}
         {sections.map((section, idx) => (
-          <div key={idx} className="space-y-3">
+          <div key={idx} className="space-y-2">
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-2">{section.title}</h3>
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
               {section.items.map((item, i) => (
                 <div 
                   key={i}
                   onClick={() => item.onClick?.()}
-                  className={`p-4 flex items-center justify-between hover:bg-gray-50 transition-all cursor-pointer ${
+                  className={`p-3 flex items-center justify-between hover:bg-gray-50 transition-all cursor-pointer ${
                     i !== section.items.length - 1 ? 'border-b border-gray-50' : ''
                   }`}
                 >

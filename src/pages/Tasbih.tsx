@@ -138,39 +138,39 @@ export const Tasbih: React.FC = () => {
   const targets = [33, 99, 100, 1000];
 
   return (
-    <div className="min-h-screen bg-[#f0f9f9] pb-32 relative overflow-hidden">
+    <div className="min-h-screen bg-[#f0f9f9] pb-20 relative overflow-hidden">
       {/* Decorative Background Elements */}
       <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
       <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
       <AppHeader title={t('tasbih')} showBack />
 
-      <div className="px-4 py-8 flex flex-col items-center relative z-10">
+      <div className="px-4 py-4 flex flex-col items-center relative z-10">
         
         {/* Counter Display - Circular */}
-        <div className="relative w-72 h-72 flex items-center justify-center mb-8">
+        <div className="relative w-56 h-56 flex items-center justify-center mb-4">
           {/* Outer Glow */}
           <div className="absolute inset-0 bg-white rounded-full shadow-[0_0_50px_rgba(38,166,154,0.1)]" />
           
           {/* Progress Circle */}
           <svg className="absolute inset-0 w-full h-full -rotate-90">
             <circle
-              cx="144"
-              cy="144"
-              r="130"
+              cx="112"
+              cy="112"
+              r="100"
               fill="none"
               stroke="#e0f2f1"
               strokeWidth="4"
             />
             <motion.circle
-              cx="144"
-              cy="144"
-              r="130"
+              cx="112"
+              cy="112"
+              r="100"
               fill="none"
               stroke="currentColor"
               strokeWidth="6"
-              strokeDasharray="816.8"
-              animate={{ strokeDashoffset: 816.8 - (816.8 * (count % target)) / target }}
+              strokeDasharray="628.3"
+              animate={{ strokeDashoffset: 628.3 - (628.3 * (count % target)) / target }}
               className="text-primary"
               strokeLinecap="round"
               transition={{ type: 'spring', stiffness: 100, damping: 20 }}
@@ -178,35 +178,35 @@ export const Tasbih: React.FC = () => {
           </svg>
 
           {/* Inner Circle Content */}
-          <div className="relative w-60 h-60 bg-white rounded-full shadow-inner flex flex-col items-center justify-center border border-primary/5">
+          <div className="relative w-44 h-44 bg-white rounded-full shadow-inner flex flex-col items-center justify-center border border-primary/5">
             <motion.div 
               key={count}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-7xl font-black text-primary mb-1"
+              className="text-5xl font-black text-primary mb-1"
             >
               {count}
             </motion.div>
-            <div className="text-gray-400 font-bold text-xl">
+            <div className="text-gray-400 font-bold text-lg">
               /{target}
             </div>
           </div>
         </div>
 
         {/* Zikir Display with Navigation */}
-        <div className="w-full max-w-sm bg-white/50 backdrop-blur-sm rounded-[32px] p-6 mb-8 border border-white shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+        <div className="w-full max-w-sm bg-white/50 backdrop-blur-sm rounded-[24px] p-4 mb-6 border border-white shadow-sm">
+          <div className="flex items-center justify-between mb-3">
             <button onClick={prevZikir} className="p-2 text-gray-400 hover:text-primary transition-colors">
               <ChevronLeft size={24} />
             </button>
-            <div className="text-center flex-1 px-4">
-              <div className="text-2xl font-arabic text-gray-800 mb-2 leading-relaxed">
+            <div className="text-center flex-1 px-2">
+              <div className="text-xl font-arabic text-gray-800 mb-1 leading-relaxed">
                 {currentZikir.arabic}
               </div>
-              <div className="text-sm font-bold text-primary mb-1">
+              <div className="text-sm font-bold text-primary mb-0.5">
                 {isBn ? currentZikir.pronunciation.bn : currentZikir.pronunciation.en}
               </div>
-              <div className="text-xs text-gray-500 italic">
+              <div className="text-[10px] text-gray-500 italic line-clamp-2">
                 {isBn ? currentZikir.meaning.bn : currentZikir.meaning.en}
               </div>
             </div>
@@ -319,16 +319,16 @@ export const Tasbih: React.FC = () => {
           
           <button 
             onClick={handleIncrement}
-            className="relative w-40 h-40 bg-primary text-white rounded-full shadow-[0_20px_50px_rgba(38,166,154,0.3)] flex items-center justify-center active:scale-90 transition-all z-10"
+            className="relative w-32 h-32 bg-primary text-white rounded-full shadow-[0_20px_50px_rgba(38,166,154,0.3)] flex items-center justify-center active:scale-90 transition-all z-10"
           >
-            <Plus size={64} strokeWidth={3} />
+            <Plus size={48} strokeWidth={3} />
           </button>
         </div>
 
         {/* Reset Button */}
         <button 
           onClick={() => setIsResetModalOpen(true)}
-          className="mt-12 flex items-center gap-2 text-gray-400 font-bold hover:text-rose-500 transition-colors"
+          className="mt-6 flex items-center gap-2 text-gray-400 font-bold hover:text-rose-500 transition-colors"
         >
           <RotateCcw size={18} />
           <span className="text-sm uppercase tracking-wider">{isBn ? 'রিসেট' : 'Reset'}</span>

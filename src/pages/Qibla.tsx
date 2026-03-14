@@ -55,11 +55,11 @@ export const Qibla: React.FC = () => {
   const isAligned = Math.abs(heading - qiblaDirection) < 5;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <AppHeader title={t('qiblaCompass')} showBack />
 
-      <div className="px-4 py-12 flex flex-col items-center justify-center min-h-[70vh]">
-        <div className="text-center mb-12">
+      <div className="px-4 py-6 flex flex-col items-center justify-center min-h-[70vh]">
+        <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 text-primary font-bold mb-2">
             <MapPin size={18} />
             <span>{state.city}, Bangladesh</span>
@@ -69,7 +69,7 @@ export const Qibla: React.FC = () => {
         </div>
 
         {/* Compass Container */}
-        <div className="relative w-72 h-72 flex items-center justify-center mb-12">
+        <div className="relative w-64 h-64 flex items-center justify-center mb-8">
           {/* Compass Ring */}
           <motion.div 
             animate={{ rotate: -heading }}

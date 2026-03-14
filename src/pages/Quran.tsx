@@ -76,7 +76,7 @@ export const Quran = () => {
 
   if (selectedSurah) {
     return (
-      <div className="min-h-screen bg-gray-50 pb-32">
+      <div className="min-h-screen bg-gray-50 pb-20">
         <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md px-4 py-4 flex items-center justify-between border-b border-gray-100">
           <div className="flex items-center gap-3">
             <button onClick={() => setSelectedSurah(null)} className="p-2 hover:bg-gray-100 rounded-full">
@@ -94,8 +94,8 @@ export const Quran = () => {
           </button>
         </header>
 
-        <div className="px-4 py-6">
-          <div className="bg-primary rounded-3xl p-8 text-white text-center space-y-4 shadow-xl relative overflow-hidden mb-8">
+        <div className="px-4 py-4">
+          <div className="bg-primary rounded-3xl p-6 text-white text-center space-y-3 shadow-xl relative overflow-hidden mb-6">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
             <div className="text-4xl font-serif mb-2">{selectedSurah.nameAr}</div>
             <div className="text-xl font-bold">{selectedSurah.meaningBn}</div>
@@ -103,7 +103,7 @@ export const Quran = () => {
             <div className="text-sm opacity-80">বিসমিল্লাহির রাহমানির রাহিম</div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {loading ? (
               <div className="text-center py-20">
                 <RefreshCw className="w-10 h-10 text-primary animate-spin mx-auto mb-4" />
@@ -151,7 +151,7 @@ export const Quran = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <AppHeader title={t('quran')} showBack />
 
       {/* Tabs */}
@@ -176,7 +176,7 @@ export const Quran = () => {
         ))}
       </div>
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-4 space-y-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
