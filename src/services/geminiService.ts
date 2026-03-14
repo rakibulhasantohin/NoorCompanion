@@ -45,15 +45,21 @@ export const getAiResponse = async (prompt: string, language: 'bn' | 'en' = 'bn'
     return response.text || (language === 'bn' ? "দুঃখিত, আমি উত্তর দিতে পারছি না।" : "Sorry, I cannot answer that.");
   } catch (error: any) {
     console.error("Gemini AI Error:", error);
+    const errorMessage = error?.message || "Unknown error";
     
     if (error?.message?.includes('API key not valid') || error?.status === 400) {
       return language === 'bn' 
         ? "দুঃখিত, আপনার দেওয়া API Key টি সঠিক নয়। দয়া করে সঠিক API Key ব্যবহার করুন।" 
         : "Sorry, the provided API Key is invalid. Please check your API Key.";
     }
+
+    if (error?.status === 429 || errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('RESOURCE_EXHAUSTED')) {
+      return language === 'bn'
+        ? "দুঃখিত, আপনার এপিআই (API) কোটা শেষ হয়ে গেছে (Quota Exceeded)। দয়া করে আপনার Google AI Studio অ্যাকাউন্টে গিয়ে নতুন একটি API Key তৈরি করে ব্যবহার করুন।"
+        : "Sorry, your API quota has been exceeded. Please create and use a new API Key from your Google AI Studio account.";
+    }
     
     // Include the actual error message for debugging
-    const errorMessage = error?.message || "Unknown error";
     return language === 'bn' ? `দুঃখিত, একটি ত্রুটি ঘটেছে: ${errorMessage}` : `Sorry, an error occurred: ${errorMessage}`;
   }
 };

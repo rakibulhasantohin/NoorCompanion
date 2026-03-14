@@ -196,7 +196,7 @@ export const Home: React.FC = () => {
           <div className="text-sm font-medium mb-4">
             {isForbidden 
               ? `সময় বাকি: ${formatCountdownBn(currentForbiddenTime!.end)}`
-              : `সময় বাকি: ${prayerData.next && formatCountdownBn(prayerData.next.time)}`
+              : `সময় বাকি: ${prayerData.current?.endTime && formatCountdownBn(prayerData.current.endTime)}`
             }
           </div>
           <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">

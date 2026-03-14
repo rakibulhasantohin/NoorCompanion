@@ -27,87 +27,120 @@ export const getPrayerTimes = (lat: number, lng: number, date: Date = new Date()
   params.adjustments.fajr = -2;
   params.adjustments.maghrib = 1;
   
-  const prayerTimes = new PrayerTimes(coordinates, date, params);
-  const sunnahTimes = new SunnahTimes(prayerTimes);
-
-  // Standard prayers
-  const fajr = prayerTimes.fajr;
-  const sunrise = prayerTimes.sunrise;
-  const dhuhr = prayerTimes.dhuhr;
-  const asr = prayerTimes.asr;
-  const maghrib = prayerTimes.maghrib;
-  const isha = prayerTimes.isha;
-  const sunset = prayerTimes.sunset;
-
-  // Calculated prayers
-  const tahajjud = sunnahTimes.lastThirdOfTheNight;
-  const ishraq = addMinutes(sunrise, 15);
-  const chasht = addMinutes(sunrise, 45); // Approximate start of Chasht
-  const awwabin = addMinutes(maghrib, 10); // Starts shortly after Maghrib
-
-  const prayerItems = [
-    { id: 'tahajjud', name: 'Tahajjud', bnName: 'তাহাজ্জুদ', time: tahajjud, endTime: addMinutes(fajr, -1) },
-    { id: 'fajr', name: 'Fajr', bnName: 'ফজর', time: fajr, endTime: addMinutes(sunrise, -1) },
-    { id: 'sunrise', name: 'Sunrise', bnName: 'সূর্যোদয়', time: sunrise, isEvent: true },
-    { id: 'ishraq', name: 'Ishraq', bnName: 'ইশরাক', time: ishraq, endTime: addMinutes(ishraq, 30) },
-    { id: 'chasht', name: 'Chasht', bnName: 'চাশত', time: chasht, endTime: addMinutes(dhuhr, -15) },
-    { id: 'dhuhr', name: 'Zuhr', bnName: date.getDay() === 5 ? "জুম'আ" : 'যোহর', time: dhuhr, endTime: addMinutes(asr, -1) },
-    { id: 'asr', name: 'Asr', bnName: 'আসর', time: asr, endTime: addMinutes(sunset, -1) },
-    { id: 'sunset', name: 'Sunset', bnName: 'সূর্যাস্ত', time: sunset, isEvent: true },
-    { id: 'maghrib', name: 'Maghrib', bnName: 'মাগরিব', time: maghrib, endTime: addMinutes(isha, -1) },
-    { id: 'awwabin', name: 'Awwabin', bnName: 'আওয়াবিন', time: awwabin, endTime: addMinutes(isha, -1) },
-    { id: 'isha', name: 'Isha', bnName: 'এশা', time: isha, endTime: addMinutes(tahajjud, -1) },
-  ];
-
-  const times: PrayerTimeInfo[] = prayerItems.map((p) => ({
-    name: p.name,
-    bnName: p.bnName,
-    time: p.time,
-    formattedTime: format(p.time, 'p'),
-    isCurrent: false,
-    isNext: false,
-    endTime: p.endTime,
-  }));
-
-  // Calculate current prayer
-  const now = new Date();
-  let currentIdx = -1;
-
-  for (let i = 0; i < times.length; i++) {
-    const start = times[i].time;
-    const end = times[i].endTime || (i < times.length - 1 ? times[i+1].time : addMinutes(times[0].time, 24 * 60));
+  const generatePrayersForDate = (d: Date) => {
+    const pt = new PrayerTimes(coordinates, d, params);
+    const st = new SunnahTimes(pt);
     
-    if (isAfter(now, start) && isBefore(now, end)) {
-      currentIdx = i;
+    // We need the previous day's SunnahTimes to get today's Tahajjud
+    const prevDay = addDays(d, -1);
+    const prevPt = new PrayerTimes(coordinates, prevDay, params);
+    const prevSt = new SunnahTimes(prevPt);
+
+    const tahajjud = prevSt.lastThirdOfTheNight;
+    const fajr = pt.fajr;
+    const sunrise = pt.sunrise;
+    const ishraq = addMinutes(sunrise, 15);
+    const chasht = addMinutes(sunrise, 45);
+    const dhuhr = pt.dhuhr;
+    const asr = pt.asr;
+    const sunset = pt.sunset;
+    const maghrib = pt.maghrib;
+    const awwabin = addMinutes(maghrib, 10);
+    const isha = pt.isha;
+    const nextTahajjud = st.lastThirdOfTheNight;
+
+    return [
+      { id: 'tahajjud', name: 'Tahajjud', bnName: 'তাহাজ্জুদ', time: tahajjud, endTime: fajr },
+      { id: 'fajr', name: 'Fajr', bnName: 'ফজর', time: fajr, endTime: sunrise },
+      { id: 'sunrise', name: 'Sunrise', bnName: 'সূর্যোদয়', time: sunrise, isEvent: true, endTime: ishraq },
+      { id: 'ishraq', name: 'Ishraq', bnName: 'ইশরাক', time: ishraq, endTime: chasht },
+      { id: 'chasht', name: 'Chasht', bnName: 'চাশত', time: chasht, endTime: dhuhr },
+      { id: 'dhuhr', name: 'Zuhr', bnName: d.getDay() === 5 ? "জুম'আ" : 'যোহর', time: dhuhr, endTime: asr },
+      { id: 'asr', name: 'Asr', bnName: 'আসর', time: asr, endTime: sunset },
+      { id: 'sunset', name: 'Sunset', bnName: 'সূর্যাস্ত', time: sunset, isEvent: true, endTime: maghrib },
+      { id: 'maghrib', name: 'Maghrib', bnName: 'মাগরিব', time: maghrib, endTime: awwabin },
+      { id: 'awwabin', name: 'Awwabin', bnName: 'আওয়াবিন', time: awwabin, endTime: isha },
+      { id: 'isha', name: 'Isha', bnName: 'এশা', time: isha, endTime: nextTahajjud },
+    ];
+  };
+
+  const todayPrayers = generatePrayersForDate(date);
+  
+  // To find current and next, we need a continuous timeline
+  const now = new Date();
+  const yesterdayPrayers = generatePrayersForDate(addDays(now, -1));
+  const nowTodayPrayers = generatePrayersForDate(now);
+  const tomorrowPrayers = generatePrayersForDate(addDays(now, 1));
+  
+  const allPrayers = [...yesterdayPrayers, ...nowTodayPrayers, ...tomorrowPrayers];
+  
+  let currentPrayer = allPrayers[0];
+  let nextPrayer = allPrayers[1];
+  
+  for (let i = 0; i < allPrayers.length - 1; i++) {
+    const start = allPrayers[i].time;
+    const end = allPrayers[i].endTime || allPrayers[i+1].time;
+    
+    if (now.getTime() >= start.getTime() && now.getTime() < end.getTime()) {
+      currentPrayer = allPrayers[i];
+      // Find the next non-event prayer
+      let nextIdx = i + 1;
+      while (nextIdx < allPrayers.length && allPrayers[nextIdx].isEvent) {
+        nextIdx++;
+      }
+      nextPrayer = allPrayers[nextIdx];
       break;
     }
   }
 
-  // Fallback for currentIdx if not found (e.g. exactly at a time)
-  if (currentIdx === -1) {
-    for (let i = times.length - 1; i >= 0; i--) {
-      if (isAfter(now, times[i].time)) {
-        currentIdx = i;
-        break;
-      }
-    }
-  }
-  
-  if (currentIdx === -1) currentIdx = times.length - 1; // Default to Isha if before Tahajjud
+  const times: PrayerTimeInfo[] = todayPrayers.map((p) => ({
+    name: p.name,
+    bnName: p.bnName,
+    time: p.time,
+    formattedTime: format(p.time, 'p'),
+    isCurrent: p.id === currentPrayer.id && p.time.getTime() === currentPrayer.time.getTime(),
+    isNext: p.id === nextPrayer.id && p.time.getTime() === nextPrayer.time.getTime(),
+    endTime: p.endTime,
+  }));
 
-  times[currentIdx].isCurrent = true;
-  const nextIdx = (currentIdx + 1) % times.length;
-  times[nextIdx].isNext = true;
+  // If current or next prayer is not in today's list (e.g. tomorrow's fajr), we still need to return them
+  const currentInfo: PrayerTimeInfo = {
+    name: currentPrayer.name,
+    bnName: currentPrayer.bnName,
+    time: currentPrayer.time,
+    formattedTime: format(currentPrayer.time, 'p'),
+    isCurrent: true,
+    isNext: false,
+    endTime: currentPrayer.endTime,
+  };
+
+  const nextInfo: PrayerTimeInfo = {
+    name: nextPrayer.name,
+    bnName: nextPrayer.bnName,
+    time: nextPrayer.time,
+    formattedTime: format(nextPrayer.time, 'p'),
+    isCurrent: false,
+    isNext: true,
+    endTime: nextPrayer.endTime,
+  };
+
+  // Mark in the list if they match
+  times.forEach(t => {
+    if (t.name === currentInfo.name && t.time.getTime() === currentInfo.time.getTime()) t.isCurrent = true;
+    if (t.name === nextInfo.name && t.time.getTime() === nextInfo.time.getTime()) t.isNext = true;
+  });
+
+  const pt = new PrayerTimes(coordinates, date, params);
 
   return {
     times,
-    fajr,
-    maghrib,
-    sunrise,
-    sunset,
-    imsak: fajr,
-    current: times[currentIdx],
-    next: times[nextIdx],
+    fajr: pt.fajr,
+    maghrib: pt.maghrib,
+    sunrise: pt.sunrise,
+    sunset: pt.sunset,
+    imsak: pt.fajr,
+    current: currentInfo,
+    next: nextInfo,
   };
 };
 
