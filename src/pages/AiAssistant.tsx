@@ -28,15 +28,16 @@ export const AiAssistant: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (textToSend?: string | React.MouseEvent | React.KeyboardEvent) => {
+    const messageText = typeof textToSend === 'string' ? textToSend : input;
+    if (!messageText.trim() || isLoading) return;
 
-    const userMessage: Message = { role: 'user', content: input };
+    const userMessage: Message = { role: 'user', content: messageText };
     setMessages(prev => [...prev, userMessage]);
-    setInput('');
+    if (typeof textToSend !== 'string') setInput('');
     setIsLoading(true);
 
-    const response = await getAiResponse(input, state.language);
+    const response = await getAiResponse(messageText, state.language);
     const assistantMessage: Message = { role: 'assistant', content: response };
     
     setMessages(prev => [...prev, assistantMessage]);
@@ -47,7 +48,7 @@ export const AiAssistant: React.FC = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <AppHeader title={isBn ? 'নূর এআই সহকারী' : 'Noor AI Assistant'} showBack />
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-40">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center space-y-4 pt-8">
             <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center text-primary animate-pulse">
@@ -71,7 +72,7 @@ export const AiAssistant: React.FC = () => {
               ].map((q, i) => (
                 <button 
                   key={i}
-                  onClick={() => setInput(q)}
+                  onClick={() => handleSend(q)}
                   className="p-2.5 bg-white border border-gray-100 rounded-2xl text-xs text-gray-600 hover:border-primary/30 transition-all text-left flex items-center gap-2"
                 >
                   <Sparkles size={14} className="text-primary" />
@@ -123,7 +124,10 @@ export const AiAssistant: React.FC = () => {
       </div>
 
       {/* Input Area */}
-      <div className="fixed bottom-0 left-0 right-0 p-3 bg-white/80 backdrop-blur-md border-t border-gray-100 max-w-md mx-auto">
+      <div 
+        className="fixed left-0 right-0 p-3 bg-white/80 backdrop-blur-md border-t border-gray-100 max-w-md mx-auto z-40"
+        style={{ bottom: 'calc(76px + env(safe-area-inset-bottom))' }}
+      >
         <div className="relative flex items-center gap-2">
           <input
             type="text"
