@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ChevronLeft, MapPin } from 'lucide-react';
+import { ChevronLeft, MapPin, Sun, Moon } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
 import { getSahriIftarRange, getPrayerTimes } from '../services/prayerService';
 import { format, differenceInSeconds, addDays, isAfter, isBefore, addMinutes } from 'date-fns';
@@ -44,6 +44,28 @@ export const SahriIftar: React.FC = () => {
     } else {
       const tomorrow = getPrayerTimes(lat, lng, addDays(now, 1));
       return { label: t('sahriTimeRemaining'), target: tomorrow.imsak, imsak: tomorrow.imsak, maghrib: tomorrow.maghrib };
+    }
+  })();
+
+  const progress = (() => {
+    const today = getPrayerTimes(lat, lng, now);
+    const iftarTime = today.maghrib;
+    const sahriTime = today.imsak;
+    
+    if (isBefore(now, sahriTime)) {
+      const yesterday = getPrayerTimes(lat, lng, addDays(now, -1));
+      const total = differenceInSeconds(sahriTime, yesterday.maghrib);
+      const passed = differenceInSeconds(now, yesterday.maghrib);
+      return Math.min(100, Math.max(0, (passed / total) * 100));
+    } else if (isBefore(now, iftarTime)) {
+      const total = differenceInSeconds(iftarTime, sahriTime);
+      const passed = differenceInSeconds(now, sahriTime);
+      return Math.min(100, Math.max(0, (passed / total) * 100));
+    } else {
+      const tomorrow = getPrayerTimes(lat, lng, addDays(now, 1));
+      const total = differenceInSeconds(tomorrow.imsak, iftarTime);
+      const passed = differenceInSeconds(now, iftarTime);
+      return Math.min(100, Math.max(0, (passed / total) * 100));
     }
   })();
 
@@ -91,14 +113,14 @@ export const SahriIftar: React.FC = () => {
     <div className="pb-20 px-4 pt-4 max-w-md mx-auto min-h-screen bg-white">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <button 
             onClick={() => navigate(-1)}
             className="p-2 bg-gray-50 rounded-full text-gray-600 active:scale-95 transition-all"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={20} />
           </button>
-          <h1 className="text-xl font-bold text-gray-800">{t('sahriIftarSchedule')}</h1>
+          <h1 className="text-lg font-bold text-gray-800">{t('sahriIftarSchedule')}</h1>
         </div>
         <div className="bg-gray-100 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-medium text-gray-600">
           <MapPin size={14} />
@@ -107,22 +129,50 @@ export const SahriIftar: React.FC = () => {
       </div>
 
       {/* Countdown Card */}
-      <div className="bg-slate-800 text-white p-5 rounded-[28px] mb-6 flex items-center justify-between shadow-lg">
-        <div className="space-y-3">
-          <div className="flex items-center gap-6">
-            <span className="text-sm text-gray-400 font-medium">{t('sahriEnds')}</span>
-            <span className="text-xl font-bold">{format(countdownInfo.imsak, 'p')}</span>
+      <div className="bg-[#1A2634] text-white p-6 rounded-[32px] mb-6 shadow-xl relative overflow-hidden">
+        <div className="flex justify-between items-center mb-6">
+          <div className="space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
+                <Sun size={20} className="text-yellow-400" />
+              </div>
+              <div>
+                <div className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{t('sahriEnds')}</div>
+                <div className="text-base font-bold">{format(countdownInfo.imsak, 'p')}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
+                <Moon size={20} className="text-indigo-400" />
+              </div>
+              <div>
+                <div className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{t('iftar')}</div>
+                <div className="text-base font-bold">{format(countdownInfo.maghrib, 'p')}</div>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-6">
-            <span className="text-sm text-gray-400 font-medium">{t('iftar')}</span>
-            <span className="text-xl font-bold">{format(countdownInfo.maghrib, 'p')}</span>
+          
+          <div className="text-right">
+            <div className="text-[10px] text-gray-400 mb-2 font-medium uppercase tracking-wider">{countdownInfo.label}</div>
+            <div className="text-4xl font-mono font-bold tracking-tighter text-white">
+              {formatCountdown(countdownInfo.target)}
+            </div>
           </div>
         </div>
-        <div className="text-right">
-          <div className="text-xs text-gray-400 mb-2 font-medium">{countdownInfo.label}</div>
-          <div className="text-3xl font-mono font-bold tracking-tighter text-white">
-            {formatCountdown(countdownInfo.target)}
-          </div>
+
+        {/* Progress Bar Label */}
+        <div className="flex justify-between text-[10px] text-gray-400 mb-2 font-medium uppercase tracking-wider">
+          <span>{t('sahriEnds')}</span>
+          <span>{t('iftar')}</span>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="h-2.5 bg-white/10 rounded-full overflow-hidden p-0.5">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+          />
         </div>
       </div>
 
@@ -149,24 +199,24 @@ export const SahriIftar: React.FC = () => {
                     key={idx} 
                     className="bg-[#E0F2F1] rounded-2xl p-4 flex items-center justify-between border border-teal-100"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold text-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold text-xs">
                         {getBengaliNumber(ramadanDay)}
                       </div>
                       <div>
-                        <div className="text-xs text-gray-500 font-medium">{dayName}</div>
-                        <div className="text-sm font-bold text-gray-800">{dateStr}</div>
+                        <div className="text-[10px] text-gray-500 font-medium">{dayName}</div>
+                        <div className="text-xs font-bold text-gray-800">{dateStr}</div>
                       </div>
                     </div>
                     
-                    <div className="flex gap-8">
+                    <div className="flex gap-6">
                       <div className="text-center">
-                        <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">{t('sahriEnds')}</div>
-                        <div className="text-sm font-bold text-gray-800">{format(item.imsak, 'p')}</div>
+                        <div className="text-[9px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">{t('sahriEnds')}</div>
+                        <div className="text-xs font-bold text-gray-800">{format(item.imsak, 'p')}</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">{t('iftar')}</div>
-                        <div className="text-sm font-bold text-gray-800">{format(item.maghrib, 'p')}</div>
+                        <div className="text-[9px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">{t('iftar')}</div>
+                        <div className="text-xs font-bold text-gray-800">{format(item.maghrib, 'p')}</div>
                       </div>
                     </div>
                   </motion.div>

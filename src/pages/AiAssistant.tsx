@@ -27,15 +27,15 @@ const AppLogo = ({ className }: { className?: string }) => (
   </div>
 );
 
-// Animated Rub el Hizb for chat bubbles
-const AnimatedRubElHizbIcon = ({ className, size = 24 }: { className?: string, size?: number }) => (
+// Animated logo for chat bubbles and loading
+const AnimatedLogo = ({ className, size = 24 }: { className?: string, size?: number }) => (
   <motion.svg 
-    width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}
+    width={size} height={size} viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}
     animate={{ rotate: 360 }}
     transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
   >
-    <rect x="4" y="4" width="16" height="16" rx="2" />
-    <rect x="4" y="4" width="16" height="16" rx="2" transform="rotate(45 12 12)" />
+    <rect x="4" y="4" width="16" height="16" rx="2" stroke="#10b981" />
+    <rect x="4" y="4" width="16" height="16" rx="2" stroke="#8b5cf6" transform="rotate(45 12 12)" />
   </motion.svg>
 );
 
@@ -108,7 +108,7 @@ export const AiAssistant: React.FC = () => {
         // If we reach the end of the list (10 sets of 3 = 30 items), loop back to 0
         return nextIndex >= Math.ceil(allSuggestions.length / 3) ? 0 : nextIndex;
       });
-    }, 2 * 60 * 1000); // 2 minutes in milliseconds
+    }, 6 * 1000); // 6 seconds in milliseconds
 
     return () => clearInterval(interval);
   }, [allSuggestions.length]);
@@ -205,7 +205,7 @@ export const AiAssistant: React.FC = () => {
                 ? "bg-teal-500 text-white" 
                 : "bg-white border border-gray-200 text-teal-600"
             )}>
-              {msg.role === 'user' ? <User size={16} /> : <AnimatedRubElHizbIcon size={16} />}
+              {msg.role === 'user' ? <User size={16} /> : <AnimatedLogo size={16} />}
             </div>
             <div className={cn(
               "p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm",
@@ -225,7 +225,7 @@ export const AiAssistant: React.FC = () => {
             className="flex items-end gap-2 max-w-[85%]"
           >
             <div className="w-8 h-8 rounded-full bg-white border border-gray-200 text-teal-600 shadow-sm flex items-center justify-center shrink-0 mb-1">
-              <AnimatedRubElHizbIcon size={16} />
+              <AnimatedLogo size={16} />
             </div>
             <div className="bg-white text-gray-800 border border-gray-100 p-4 rounded-2xl rounded-bl-sm shadow-sm flex items-center gap-2">
               <div className="flex gap-1">
