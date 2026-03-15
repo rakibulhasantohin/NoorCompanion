@@ -63,6 +63,15 @@ export const AnimatedRubElHizbIcon = ({ className, size = 24 }: { className?: st
   </motion.svg>
 );
 
+export const StaticNoorAILogo = ({ className, size = 24 }: { className?: string, size?: number }) => (
+  <svg 
+    width={size} height={size} viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}
+  >
+    <rect x="4" y="4" width="16" height="16" rx="2" stroke="#10b981" />
+    <rect x="4" y="4" width="16" height="16" rx="2" stroke="#8b5cf6" transform="rotate(45 12 12)" />
+  </svg>
+);
+
 export const BottomNav = () => {
   const location = useLocation();
   const { state } = useAppState();
@@ -97,7 +106,7 @@ export const BottomNav = () => {
   const navItems = [
     { icon: Home, label: isBn ? 'হোম' : 'Home', path: '/' },
     setA[rotationIndex],
-    { icon: AnimatedRubElHizbIcon, label: isBn ? 'নূর এআই' : 'Noor AI', path: '/ai-assistant' },
+    { icon: StaticNoorAILogo, label: isBn ? 'নূর এআই' : 'Noor AI', path: '/ai-assistant' },
     setB[rotationIndex],
     { icon: SettingsIcon, label: isBn ? 'সেটিংস' : 'Settings', path: '/settings' },
   ];
