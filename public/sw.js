@@ -1,31 +1,32 @@
-const CACHE_NAME = 'noor-companion-v2';
+const CACHE_NAME = 'noor-companion-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/logo.svg'
+  '/logo.svg',
+  '/offline.html'
 ];
 
+// Install event - cache essential assets
 self.addEventListener('install', (event) => {
-  // Force the waiting service worker to become the active service worker.
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
+      console.log('Caching essential assets');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
 });
 
+// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  // Tell the active service worker to take control of the page immediately.
   event.waitUntil(self.clients.claim());
-  
-  // Clear old caches
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -34,36 +35,48 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Fetch event - Network first, fallback to cache, then fallback to offline page
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests, like those for Google Analytics.
-  if (!event.request.url.startsWith(self.location.origin)) {
+  // Only handle GET requests
+  if (event.request.method !== 'GET') return;
+
+  // Handle navigation requests
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          return caches.match('/index.html') || caches.match('/offline.html');
+        })
+    );
     return;
   }
 
+  // For other requests (assets, etc.)
   event.respondWith(
-    // Network First, falling back to cache strategy
-    fetch(event.request)
-      .then((networkResponse) => {
-        // If network fetch is successful, update the cache
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return fetch(event.request).then((networkResponse) => {
+        // Don't cache if not a successful response
+        if (!networkResponse || networkResponse.status !== 200) {
+          return networkResponse;
+        }
+
+        // Cache basic (same-origin) and cors (cross-origin with CORS) responses
+        if (networkResponse.type === 'basic' || networkResponse.type === 'cors') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
         }
+
         return networkResponse;
-      })
-      .catch(() => {
-        // If network fetch fails (offline), return from cache
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          // If the request is for a page and it's not in cache, return index.html
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
-          }
-        });
-      })
+      }).catch(() => {
+        // If it's an image, we could return a placeholder here if we had one
+        return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+      });
+    })
   );
 });
