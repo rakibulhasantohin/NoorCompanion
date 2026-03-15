@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { 
   User, Bell, Moon, Globe, MapPin, Shield, 
-  HelpCircle, LogOut, ChevronRight, Share2, Star, Camera
+  HelpCircle, LogOut, ChevronRight, Share2, Star, Camera, RefreshCw
 } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
 import { AppHeader, ConfirmModal } from '../components/Common';
@@ -70,6 +70,13 @@ export const Settings: React.FC = () => {
         { icon: <Moon size={20} />, label: isBn ? 'ডার্ক মোড' : 'Dark Mode', toggle: true, active: state.theme === 'dark', onToggle: toggleTheme },
         { icon: <Globe size={20} />, label: isBn ? 'ভাষা' : 'Language', value: state.language === 'bn' ? 'বাংলা' : 'English', onClick: toggleLanguage },
         { icon: <MapPin size={20} />, label: isBn ? 'লোকেশন' : 'Location', value: state.city, onClick: () => setIsResetModalOpen(true) },
+        { 
+          icon: <RefreshCw size={20} className="text-emerald-600" />, 
+          label: <span className="text-emerald-600 font-bold">{isBn ? 'আপনার অ্যাপটি রিফ্রেশ করুন' : 'Refresh your app'}</span>, 
+          onClick: () => {
+            window.location.reload();
+          } 
+        },
       ]
     },
     {
@@ -154,7 +161,8 @@ export const Settings: React.FC = () => {
                   <div className="flex items-center gap-3">
                     {item.value && <span className="text-sm text-gray-400">{item.value}</span>}
                     {item.toggle ? (
-                      <button 
+                      <motion.button 
+                        whileTap={{ scale: 0.9 }}
                         onClick={(e) => { e.stopPropagation(); item.onToggle?.(); }}
                         className={`w-12 h-6 rounded-full transition-all relative ${
                           item.active ? 'bg-primary' : 'bg-gray-200'
@@ -163,7 +171,7 @@ export const Settings: React.FC = () => {
                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
                           item.active ? 'left-7' : 'left-1'
                         }`}></div>
-                      </button>
+                      </motion.button>
                     ) : (
                       <ChevronRight size={18} className="text-gray-300" />
                     )}
@@ -186,7 +194,7 @@ export const Settings: React.FC = () => {
         )}
 
         <div className="text-center text-gray-300 text-xs py-4">
-          Nour Companion v3.6.1
+          Nour Companion v3.6.2
         </div>
       </div>
 

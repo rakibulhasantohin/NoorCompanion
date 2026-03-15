@@ -13,7 +13,8 @@ import {
   Compass,
   HandHelping,
   Book,
-  LayoutGrid
+  LayoutGrid,
+  RotateCw
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../utils/utils';
@@ -21,31 +22,37 @@ import { useAppState } from '../hooks/useAppState';
 
 export const AppHeader = ({ title, showBack = false, onBack }: { title?: string, showBack?: boolean, onBack?: () => void }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { state } = useAppState();
   const isBn = state.language === 'bn';
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md px-4 py-4 flex items-center justify-between border-b border-gray-100">
+    <header className="sticky top-0 z-50 w-full bg-emerald-600 px-4 py-4 flex items-center justify-between border-b border-emerald-700 shadow-lg">
       <div className="flex items-center gap-3">
         {showBack ? (
           <button 
             onClick={() => onBack ? onBack() : navigate(-1)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-emerald-700 rounded-full transition-colors text-white"
           >
-            <ChevronLeft size={24} className="text-gray-700" />
+            <ChevronLeft size={24} />
           </button>
         ) : (
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-            <BookOpen className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
+            <BookOpen className="w-6 h-6 text-emerald-600" />
           </div>
         )}
-        <h1 className="text-xl font-bold text-gray-800 tracking-tight">
+        <h1 className="text-xl font-bold text-white tracking-tight">
           {title || (isBn ? 'নূর কম্প্যানিয়ন' : 'Noor Companion')}
         </h1>
       </div>
       <div className="flex items-center gap-2">
-        <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-          <SettingsIcon size={22} onClick={() => navigate('/settings')} />
+        <button 
+          onClick={() => window.location.reload()}
+          className="flex items-center gap-1.5 px-4 py-2 bg-white text-emerald-600 rounded-xl shadow-xl active:scale-95 transition-all font-bold"
+          title={isBn ? 'রিলোড করুন' : 'Reload'}
+        >
+          <RotateCw size={18} className="animate-spin-slow" />
+          <span>{isBn ? 'রিফ্রেশ' : 'Refresh'}</span>
         </button>
       </div>
     </header>
