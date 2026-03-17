@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { RefreshCw } from 'lucide-react';
 import { AppHeader, BottomNav } from './components/Common';
 import { cn } from './utils/utils';
 import { Home } from './pages/Home';
@@ -55,7 +54,7 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   }, [currentTitle]);
 
   return (
-    <div className={cn("min-h-screen font-sans transition-all", state.theme === 'dark' ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900")}>
+    <div className={cn("min-h-screen font-sans", state.theme === 'dark' ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900")}>
       <main className="max-w-md mx-auto relative">
         <AnimatePresence mode="wait">
           <motion.div

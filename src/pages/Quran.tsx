@@ -10,6 +10,7 @@ import { SURAHS_LIST } from '../data/surahs';
 import { cn } from '../utils/utils';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAppState } from '../hooks/useAppState';
+import { getSurahWithBengaliPronunciation } from '../services/quranService';
 
 export const Quran = () => {
   const { state, updateState } = useAppState();
@@ -26,17 +27,14 @@ export const Quran = () => {
     setError(null);
     setAyahs([]);
     try {
-      const response = await globalThis.fetch(`https://api.alquran.cloud/v1/surah/${surahId}/editions/quran-uthmani,bn.bengali`);
-      const data = await response.json();
+      const surahData = await getSurahWithBengaliPronunciation(surahId);
       
-      if (data.code === 200 && data.data.length >= 2) {
-        const arabicAyahs = data.data[0].ayahs;
-        const bengaliAyahs = data.data[1].ayahs;
-        
-        const combinedAyahs = arabicAyahs.map((ayah: any, index: number) => ({
+      if (surahData && surahData.ayahs) {
+        const combinedAyahs = surahData.ayahs.map((ayah: any) => ({
           id: ayah.numberInSurah,
           arabic: ayah.text,
-          translation: bengaliAyahs[index].text,
+          translation: ayah.translate_bn,
+          transliteration: ayah.pronunciation_bn,
         }));
         
         setAyahs(combinedAyahs);
@@ -113,12 +111,6 @@ export const Quran = () => {
               <div className="text-center py-12 bg-white rounded-3xl p-6 border border-red-100">
                 <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                 <p className="text-gray-700 font-medium">{error}</p>
-                <button 
-                  onClick={() => fetchSurahData(selectedSurah.id)}
-                  className="mt-4 px-6 py-2 bg-primary text-white rounded-xl font-bold"
-                >
-                  {t('retry')}
-                </button>
               </div>
             ) : ayahs.length > 0 ? (
               ayahs.map((ayah) => (
@@ -136,8 +128,15 @@ export const Quran = () => {
                   <p className="text-right font-serif text-3xl text-gray-800 leading-[2.5]" dir="rtl">
                     {ayah.arabic}
                   </p>
-                  <div className="bg-gray-50 rounded-2xl p-4">
-                    <p className="text-sm text-gray-700 leading-relaxed italic">
+                  <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
+                    {ayah.transliteration && (
+                      <p className="text-[15px] text-teal-700 font-medium leading-relaxed">
+                        <span className="text-xs font-bold uppercase tracking-wider text-teal-600/70 mr-2">উচ্চারণ:</span>
+                        {ayah.transliteration}
+                      </p>
+                    )}
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-2">অর্থ:</span>
                       {ayah.translation}
                     </p>
                   </div>

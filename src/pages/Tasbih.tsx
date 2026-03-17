@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { RotateCcw, Plus, Settings, ChevronDown, ChevronLeft, ChevronRight, List, Share2, X, Volume2, VolumeX, Smartphone, Save } from 'lucide-react';
+import { Plus, Settings, ChevronDown, ChevronLeft, ChevronRight, List, Share2, X, Volume2, VolumeX, Smartphone, Save } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
 import { useTranslation } from '../hooks/useTranslation';
 import { AppHeader, ConfirmModal } from '../components/Common';
@@ -325,14 +325,6 @@ export const Tasbih: React.FC = () => {
           </button>
         </div>
 
-        {/* Reset Button */}
-        <button 
-          onClick={() => setIsResetModalOpen(true)}
-          className="mt-6 flex items-center gap-2 text-gray-400 font-bold hover:text-rose-500 transition-colors"
-        >
-          <RotateCcw size={18} />
-          <span className="text-sm uppercase tracking-wider">{isBn ? 'রিসেট' : 'Reset'}</span>
-        </button>
       </div>
 
       {/* Zikir List Modal */}

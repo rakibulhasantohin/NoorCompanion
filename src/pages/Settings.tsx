@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { 
   User, Bell, Moon, Globe, MapPin, Shield, 
-  HelpCircle, LogOut, ChevronRight, Share2, Star, Camera, RefreshCw
+  HelpCircle, LogOut, ChevronRight, Share2, Star, Camera
 } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
 import { AppHeader, ConfirmModal } from '../components/Common';
@@ -70,13 +70,6 @@ export const Settings: React.FC = () => {
         { icon: <Moon size={20} />, label: isBn ? 'ডার্ক মোড' : 'Dark Mode', toggle: true, active: state.theme === 'dark', onToggle: toggleTheme },
         { icon: <Globe size={20} />, label: isBn ? 'ভাষা' : 'Language', value: state.language === 'bn' ? 'বাংলা' : 'English', onClick: toggleLanguage },
         { icon: <MapPin size={20} />, label: isBn ? 'লোকেশন' : 'Location', value: state.city, onClick: () => setIsResetModalOpen(true) },
-        { 
-          icon: <RefreshCw size={20} className="text-emerald-600" />, 
-          label: <span className="text-emerald-600 font-bold">{isBn ? 'আপনার অ্যাপটি রিফ্রেশ করুন' : 'Refresh your app'}</span>, 
-          onClick: () => {
-            window.location.reload();
-          } 
-        },
       ]
     },
     {
@@ -164,11 +157,11 @@ export const Settings: React.FC = () => {
                       <motion.button 
                         whileTap={{ scale: 0.9 }}
                         onClick={(e) => { e.stopPropagation(); item.onToggle?.(); }}
-                        className={`w-12 h-6 rounded-full transition-all relative ${
+                        className={`w-12 h-6 rounded-full relative ${
                           item.active ? 'bg-primary' : 'bg-gray-200'
                         }`}
                       >
-                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
+                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full ${
                           item.active ? 'left-7' : 'left-1'
                         }`}></div>
                       </motion.button>

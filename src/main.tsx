@@ -40,8 +40,12 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+import { AppStateProvider } from './context/AppStateContext';
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <AppStateProvider>
+      <App />
+    </AppStateProvider>
   </StrictMode>,
 );

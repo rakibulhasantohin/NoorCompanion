@@ -13,8 +13,7 @@ import {
   Compass,
   HandHelping,
   Book,
-  LayoutGrid,
-  RotateCw
+  LayoutGrid
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../utils/utils';
@@ -44,16 +43,6 @@ export const AppHeader = ({ title, showBack = false, onBack }: { title?: string,
         <h1 className="text-xl font-bold text-white tracking-tight">
           {title || (isBn ? 'নূর কম্প্যানিয়ন' : 'Noor Companion')}
         </h1>
-      </div>
-      <div className="flex items-center gap-2">
-        <button 
-          onClick={() => window.location.reload()}
-          className="flex items-center gap-1.5 px-4 py-2 bg-white text-emerald-600 rounded-xl shadow-xl active:scale-95 transition-all font-bold"
-          title={isBn ? 'রিলোড করুন' : 'Reload'}
-        >
-          <RotateCw size={18} className="animate-spin-slow" />
-          <span>{isBn ? 'রিফ্রেশ' : 'Refresh'}</span>
-        </button>
       </div>
     </header>
   );

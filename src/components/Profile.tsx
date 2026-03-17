@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, Award, BookOpen, Hash, LogOut, Settings as SettingsIcon, RefreshCw, CloudCheck, Cloud, Camera, X, Calendar, Edit2 } from 'lucide-react';
+import { User, Award, BookOpen, Hash, LogOut, Settings as SettingsIcon, CloudCheck, Cloud, Camera, X, Calendar, Edit2 } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
 import { supabase } from '../lib/supabase';
 import { getBengaliNumber } from '../utils/utils';
@@ -150,14 +150,6 @@ export const ProfileSection = () => {
               </p>
             </div>
           </div>
-          <button
-            onClick={handleManualSync}
-            disabled={syncing}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-emerald-50 text-gray-600 hover:text-emerald-700 rounded-xl text-xs font-bold transition-all border border-transparent hover:border-emerald-100"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'ব্যাকআপ হচ্ছে...' : 'এখনই ব্যাকআপ নিন'}
-          </button>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Bot, User, RefreshCw, ArrowLeft, Book, BookOpen, ChevronRight } from 'lucide-react';
+import { Send, Bot, User, ArrowLeft, Book, BookOpen, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../hooks/useAppState';
 import { getAiResponse } from '../services/geminiService';
@@ -125,16 +125,38 @@ export const AiAssistant: React.FC = () => {
     const messageText = typeof textToSend === 'string' ? textToSend : input;
     if (!messageText.trim() || isLoading) return;
 
+    if (!navigator.onLine) {
+      const offlineMessage: Message = { 
+        role: 'assistant', 
+        content: isBn 
+          ? 'আপনার ইন্টারনেট সংযোগ নেই। দয়া করে ইন্টারনেট সংযোগ করুন।' 
+          : 'You do not have an internet connection. Please connect to the internet.' 
+      };
+      setMessages(prev => [...prev, { role: 'user', content: messageText }, offlineMessage]);
+      if (typeof textToSend !== 'string') setInput('');
+      return;
+    }
+
     const userMessage: Message = { role: 'user', content: messageText };
     setMessages(prev => [...prev, userMessage]);
     if (typeof textToSend !== 'string') setInput('');
     setIsLoading(true);
 
-    const response = await getAiResponse(messageText, state.language, messages);
-    const assistantMessage: Message = { role: 'assistant', content: response };
-    
-    setMessages(prev => [...prev, assistantMessage]);
-    setIsLoading(false);
+    try {
+      const response = await getAiResponse(messageText, state.language, messages);
+      const assistantMessage: Message = { role: 'assistant', content: response };
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      const errorMessage: Message = { 
+        role: 'assistant', 
+        content: isBn 
+          ? 'দুঃখিত, একটি ত্রুটি হয়েছে। আবার চেষ্টা করুন।' 
+          : 'Sorry, an error occurred. Please try again.' 
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
