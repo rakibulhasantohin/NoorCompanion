@@ -22,7 +22,7 @@ import { ProfilePage } from './pages/ProfilePage';
 
 import { useAppState } from './hooks/useAppState';
 import { Onboarding } from './components/Onboarding/Onboarding';
-import { EidGreetingModal } from './components/EidGreetingModal';
+import { HolidayNoticeModal } from './components/HolidayNoticeModal';
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -89,7 +89,7 @@ export default function App() {
 
   return (
     <Router>
-      <EidGreetingModal />
+      <HolidayNoticeModal />
       <PageWrapper>
         <Routes>
           <Route path="/" element={<Home />} />

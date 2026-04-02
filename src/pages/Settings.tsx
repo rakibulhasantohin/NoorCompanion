@@ -2,18 +2,21 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { 
   User, Bell, Moon, Globe, MapPin, Shield, 
-  HelpCircle, LogOut, ChevronRight, Share2, Star, Camera
+  HelpCircle, LogOut, ChevronRight, Share2, Star, Camera,
+  Cloud
 } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
 import { AppHeader, ConfirmModal } from '../components/Common';
 import { AuthModal } from '../components/AuthModal';
 import { auth } from '../firebase';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
+import { backupToFirestore, backupToGoogleDrive } from '../services/backupService';
 
 export const Settings: React.FC = () => {
   const { state, updateState } = useAppState();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isBackingUp, setIsBackingUp] = useState(false);
   const [user, setUser] = useState(auth.currentUser);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -23,9 +26,21 @@ export const Settings: React.FC = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (currentUser?.photoURL) {
+        setProfilePhoto(currentUser.photoURL);
+        if (state.profileImage !== currentUser.photoURL) {
+          updateState({ profileImage: currentUser.photoURL });
+        }
+      } else if (state.profileImage) {
+        setProfilePhoto(state.profileImage);
+      }
+      
+      if (currentUser?.displayName && state.fullName !== currentUser.displayName) {
+        updateState({ fullName: currentUser.displayName });
+      }
     });
     return unsubscribe;
-  }, []);
+  }, [state.profileImage, state.fullName]);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -56,11 +71,35 @@ export const Settings: React.FC = () => {
     }
   };
 
+  const handleManualBackup = async () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    
+    setIsBackingUp(true);
+    try {
+      await backupToFirestore(user.uid, state);
+      await backupToGoogleDrive(user.uid, state);
+      updateState({ lastBackup: new Date().toISOString() });
+    } catch (error) {
+      console.error('Manual backup failed:', error);
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
+
   const sections = [
     {
       title: isBn ? 'অ্যাকাউন্ট' : 'Account',
       items: [
         { icon: <User size={20} />, label: isBn ? 'প্রোফাইল' : 'Profile', value: user?.email || (isBn ? 'লগইন করুন' : 'Login'), onClick: () => !user && setIsAuthModalOpen(true) },
+        { 
+          icon: <Cloud size={20} className={isBackingUp ? "animate-bounce" : ""} />, 
+          label: isBn ? 'ক্লাউড ব্যাকআপ' : 'Cloud Backup', 
+          value: state.lastBackup ? (isBn ? `শেষ: ${new Date(state.lastBackup).toLocaleTimeString('bn-BD')}` : `Last: ${new Date(state.lastBackup).toLocaleTimeString()}`) : (isBn ? 'কখনো হয়নি' : 'Never'),
+          onClick: handleManualBackup 
+        },
         { icon: <Bell size={20} />, label: isBn ? 'নোটিফিকেশন' : 'Notifications', toggle: true, active: state.notifications, onToggle: () => updateState({ notifications: !state.notifications }) },
       ]
     },
@@ -92,31 +131,19 @@ export const Settings: React.FC = () => {
         <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden">
           <div 
             className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary relative cursor-pointer group overflow-hidden border-2 border-primary/20"
-            onClick={() => user ? fileInputRef.current?.click() : setIsAuthModalOpen(true)}
+            onClick={() => !user && setIsAuthModalOpen(true)}
           >
-            {profilePhoto ? (
-              <img src={profilePhoto} alt="Profile" className="w-full h-full object-cover" />
+            {profilePhoto || state.profileImage ? (
+              <img src={profilePhoto || state.profileImage || ''} alt="Profile" className="w-full h-full object-cover" />
             ) : (
               <User size={32} />
             )}
-            {user && (
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera size={24} className="text-white" />
-              </div>
-            )}
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handlePhotoUpload} 
-              accept="image/*" 
-              className="hidden" 
-            />
           </div>
           <div className="flex-1">
             {user ? (
               <>
                 <h2 className="text-lg font-bold text-gray-800 truncate">
-                  {state.fullName || (user.email?.split('@')[0] || 'User')}
+                  {state.fullName || user.displayName || (user.email?.split('@')[0] || 'User')}
                 </h2>
                 <p className="text-sm text-gray-500 truncate">{user.email || ''}</p>
               </>
@@ -127,7 +154,7 @@ export const Settings: React.FC = () => {
                   onClick={() => setIsAuthModalOpen(true)}
                   className="text-sm text-primary font-medium mt-1"
                 >
-                  {isBn ? 'লগইন / রেজিস্টার করুন' : 'Login / Register'}
+                  {isBn ? 'লগইন করুন' : 'Login'}
                 </button>
               </>
             )}

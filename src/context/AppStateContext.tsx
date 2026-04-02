@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { auth, db } from '../firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
+import { backupToFirestore, backupToGoogleDrive, restoreFromGoogleDrive } from '../services/backupService';
 
 interface Zikir {
   id: string;
@@ -87,9 +88,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       let userData = {};
       if (currentUser) {
         try {
-          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-          if (userDoc.exists()) {
-            userData = userDoc.data();
+          // 1. Try to restore from Google Drive first (as requested)
+          const driveData = await restoreFromGoogleDrive(currentUser.uid);
+          if (driveData) {
+            userData = driveData;
+          } else {
+            // 2. Fallback to Firestore
+            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+            if (userDoc.exists()) {
+              userData = userDoc.data();
+            }
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -107,9 +115,22 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return () => unsubscribe();
   }, []);
 
-  // Save state whenever it changes
+  // Save state whenever it changes (Local & Cloud)
   useEffect(() => {
     localStorage.setItem(getStateKey(user?.email || null), JSON.stringify(state));
+
+    // Automatic Cloud Backup (Debounced)
+    if (user && navigator.onLine) {
+      const timeoutId = setTimeout(async () => {
+        // Backup to Firestore (Primary)
+        await backupToFirestore(user.uid, state);
+        
+        // Backup to Google Drive (Secondary, as requested)
+        await backupToGoogleDrive(user.uid, state);
+      }, 5000); // 5 second debounce to avoid hitting quotas
+      
+      return () => clearTimeout(timeoutId);
+    }
   }, [state, user]);
 
   const updateState = (updates: Partial<AppState>) => {

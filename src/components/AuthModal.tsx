@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Mail, Lock, X, LogIn, UserPlus, Phone, User, Calendar } from 'lucide-react';
+import { Mail, Lock, X, LogIn, UserPlus, Phone, User, Calendar, Chrome } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
 import { auth, db } from '../firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { cn } from '../utils/utils';
 
 interface AuthModalProps {
@@ -13,57 +13,64 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
-  const { state } = useAppState();
+  const { state, updateState } = useAppState();
   const isBn = state.language === 'bn';
-  const [isLogin, setIsLogin] = useState(true);
-  const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGoogleLogin = async () => {
+    setLoading(true);
     setError('');
-
     try {
-      let authEmail = email;
-      if (authMethod === 'phone') {
-        if (!phoneNumber.startsWith('01') || phoneNumber.length !== 11) {
-          setError(isBn ? 'সঠিক বাংলাদেশি মোবাইল নাম্বার দিন' : 'Enter a valid Bangladeshi phone number');
-          return;
-        }
-        authEmail = `${phoneNumber}@noor.com`;
+      const provider = new GoogleAuthProvider();
+      // Add scope for Google Drive app data
+      provider.addScope('https://www.googleapis.com/auth/drive.appdata');
+      provider.addScope('https://www.googleapis.com/auth/drive.file');
+      
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Get the Google Access Token
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+      if (token) {
+        localStorage.setItem(`google_drive_token_${user.uid}`, token);
       }
 
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, authEmail, password);
-        onClose();
-      } else {
-        // Registration
-        const userCredential = await createUserWithEmailAndPassword(auth, authEmail, password);
-        const user = userCredential.user;
+      // Check if user exists in Firestore
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      
+      const userData = {
+        uid: user.uid,
+        fullName: user.displayName || 'User',
+        profileImage: user.photoURL || null,
+        email: user.email,
+        lastLogin: new Date().toISOString()
+      };
 
+      if (!userDoc.exists()) {
+        // Create new user record
         await setDoc(doc(db, 'users', user.uid), {
-          uid: user.uid,
-          fullName,
-          dateOfBirth: dateOfBirth || null,
-          email: authMethod === 'email' ? email : null,
-          phoneNumber: authMethod === 'phone' ? phoneNumber : null,
+          ...userData,
           createdAt: new Date().toISOString()
         });
-        onClose();
-      }
-    } catch (err: any) {
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        setError(isBn ? 'ভুল ইমেইল/ফোন অথবা পাসওয়ার্ড' : 'Invalid email/phone or password');
-      } else if (err.code === 'auth/email-already-in-use') {
-        setError(isBn ? 'এই ইমেইল/ফোন দিয়ে ইতিমধ্যে অ্যাকাউন্ট খোলা আছে' : 'Email/Phone already in use');
       } else {
-        setError(err.message);
+        // Update existing user record with latest Google info if needed
+        await setDoc(doc(db, 'users', user.uid), userData, { merge: true });
       }
+
+      // Update local app state
+      updateState({
+        fullName: user.displayName,
+        profileImage: user.photoURL
+      });
+
+      onClose();
+    } catch (err: any) {
+      console.error('Google Login Error:', err);
+      setError(isBn ? 'গুগল লগইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।' : 'Google login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,37 +99,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
               <div className="text-center mb-8">
                 <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-4 text-primary shadow-inner">
-                  {isLogin ? <LogIn size={36} /> : <UserPlus size={36} />}
+                  <LogIn size={36} />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  {isLogin ? (isBn ? 'লগইন করুন' : 'Login') : (isBn ? 'রেজিস্ট্রেশন করুন' : 'Register')}
+                  {isBn ? 'লগইন করুন' : 'Login'}
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  {isLogin 
-                    ? (isBn ? 'আপনার অ্যাকাউন্টে ফিরে যান' : 'Welcome back to your account')
-                    : (isBn ? 'নতুন অ্যাকাউন্ট তৈরি করুন' : 'Create a new account to get started')}
+                  {isBn ? 'আপনার গুগল অ্যাকাউন্ট দিয়ে খুব সহজেই লগইন করুন' : 'Login easily with your Google account'}
                 </p>
-              </div>
-
-              <div className="flex bg-gray-100 p-1 rounded-2xl mb-6">
-                <button 
-                  onClick={() => setAuthMethod('email')}
-                  className={cn(
-                    "flex-1 py-2 text-xs font-bold rounded-xl transition-all",
-                    authMethod === 'email' ? "bg-white text-primary shadow-sm" : "text-gray-500"
-                  )}
-                >
-                  {isBn ? 'ইমেইল' : 'Email'}
-                </button>
-                <button 
-                  onClick={() => setAuthMethod('phone')}
-                  className={cn(
-                    "flex-1 py-2 text-xs font-bold rounded-xl transition-all",
-                    authMethod === 'phone' ? "bg-white text-primary shadow-sm" : "text-gray-500"
-                  )}
-                >
-                  {isBn ? 'ফোন' : 'Phone'}
-                </button>
               </div>
 
               {error && (
@@ -135,48 +119,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 </motion.div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {!isLogin && (
-                  <>
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                      <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'পুরো নাম' : 'Full Name'} required />
-                    </div>
-                    <div className="relative">
-                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                      <input type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" required />
-                    </div>
-                  </>
-                )}
+              <button 
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 text-gray-700 py-4 rounded-2xl font-bold text-lg shadow-sm hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-6 h-6" />
+                <span>{isBn ? 'গুগল দিয়ে লগইন' : 'Login with Google'}</span>
+              </button>
 
-                {authMethod === 'phone' ? (
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'মোবাইল নাম্বার (০১...)' : 'Phone Number (01...)'} required />
-                  </div>
-                ) : (
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'ইমেইল এড্রেস' : 'Email Address'} required />
-                  </div>
-                )}
-
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder={isBn ? 'পাসওয়ার্ড' : 'Password'} required />
-                </div>
-
-                <button type="submit" className="w-full bg-primary text-white py-4 rounded-2xl font-bold text-lg mt-4 shadow-lg shadow-primary/20 active:scale-95 transition-all">
-                  {isLogin ? (isBn ? 'লগইন' : 'Login') : (isBn ? 'রেজিস্টার' : 'Register')}
-                </button>
-              </form>
-
-              <div className="mt-8 text-center">
-                <button onClick={() => { setIsLogin(!isLogin); setError(''); }} className="text-gray-500 text-sm font-medium hover:text-primary transition-colors">
-                  {isLogin 
-                    ? (isBn ? 'অ্যাকাউন্ট নেই? নতুন তৈরি করুন' : 'No account? Create one')
-                    : (isBn ? 'অ্যাকাউন্ট আছে? লগইন করুন' : 'Have an account? Login')}
-                </button>
+              <div className="mt-8 text-center text-xs text-gray-400">
+                {isBn ? 'লগইন করার মাধ্যমে আপনি আমাদের শর্তাবলীতে সম্মত হচ্ছেন' : 'By logging in, you agree to our terms and conditions'}
               </div>
             </div>
           </motion.div>

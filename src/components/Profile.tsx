@@ -86,9 +86,9 @@ export const ProfileSection = () => {
         <div className="flex items-center gap-4 mb-4">
           <div className="relative">
             <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 overflow-hidden border-2 border-emerald-50">
-              {state.profileImage ? (
+              {user.photoURL || state.profileImage ? (
                 <img 
-                  src={state.profileImage} 
+                  src={user.photoURL || state.profileImage || ''} 
                   alt="Profile" 
                   className="w-full h-full object-cover" 
                   onError={handleImageError}
@@ -100,7 +100,7 @@ export const ProfileSection = () => {
           </div>
           <div className="flex-1">
             <h3 className="text-base font-bold text-gray-900 truncate">
-              {state.fullName || user.email?.split('@')[0]}
+              {state.fullName || user.displayName || user.email?.split('@')[0]}
             </h3>
             <p className="text-xs text-gray-500 truncate">{user.email}</p>
             {state.dateOfBirth && (
@@ -204,11 +204,11 @@ export const ProfileSection = () => {
 
               <div className="space-y-4">
                 <div className="flex flex-col items-center mb-4">
-                  <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                  <div className="relative group cursor-pointer" onClick={() => !user.providerData.some(p => p.providerId === 'google.com') && fileInputRef.current?.click()}>
                     <div className="w-24 h-24 rounded-3xl bg-emerald-50 flex items-center justify-center text-emerald-600 overflow-hidden border-2 border-emerald-100">
-                      {editData.profileImage ? (
+                      {editData.profileImage || user.photoURL ? (
                         <img 
-                          src={editData.profileImage} 
+                          src={editData.profileImage || user.photoURL || ''} 
                           alt="Preview" 
                           className="w-full h-full object-cover" 
                           onError={handleImageError}
@@ -217,9 +217,11 @@ export const ProfileSection = () => {
                         <User className="w-10 h-10" />
                       )}
                     </div>
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl flex items-center justify-center">
-                      <Camera className="w-6 h-6 text-white" />
-                    </div>
+                    {!user.providerData.some(p => p.providerId === 'google.com') && (
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl flex items-center justify-center">
+                        <Camera className="w-6 h-6 text-white" />
+                      </div>
+                    )}
                     <input 
                       type="file" 
                       ref={fileInputRef} 
@@ -228,18 +230,24 @@ export const ProfileSection = () => {
                       onChange={handleImageUpload} 
                     />
                   </div>
-                  <p className="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-widest">ছবি পরিবর্তন করুন</p>
+                  <p className="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-widest">
+                    {user.providerData.some(p => p.providerId === 'google.com') ? 'গুগল থেকে সিঙ্ক করা' : 'ছবি পরিবর্তন করুন'}
+                  </p>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">পুরো নাম</label>
                   <input
                     type="text"
+                    disabled={user.providerData.some(p => p.providerId === 'google.com')}
                     placeholder="আপনার নাম"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                    value={editData.fullName}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all disabled:opacity-50"
+                    value={editData.fullName || user.displayName || ''}
                     onChange={(e) => setEditData(prev => ({ ...prev, fullName: e.target.value }))}
                   />
+                  {user.providerData.some(p => p.providerId === 'google.com') && (
+                    <p className="text-[10px] text-gray-400 ml-1">গুগল থেকে স্বয়ংক্রিয়ভাবে সেট করা হয়েছে</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">

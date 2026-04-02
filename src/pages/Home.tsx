@@ -60,18 +60,14 @@ export const Home: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (user?.email) {
-      const usersStr = localStorage.getItem('noor_users') || '{}';
-      const users = JSON.parse(usersStr);
-      if (users[user.email] && users[user.email].photo) {
-        setProfilePhoto(users[user.email].photo);
-      } else {
-        setProfilePhoto(null);
-      }
+    if (user?.photoURL) {
+      setProfilePhoto(user.photoURL);
+    } else if (state.profileImage) {
+      setProfilePhoto(state.profileImage);
     } else {
       setProfilePhoto(null);
     }
-  }, [user]);
+  }, [user, state.profileImage]);
 
   const lat = state.location?.lat || 23.7289;
   const lng = state.location?.lng || 90.3944;
