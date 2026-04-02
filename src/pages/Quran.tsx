@@ -81,7 +81,9 @@ export const Quran = () => {
               <ArrowLeft size={24} className="text-gray-700" />
             </button>
             <div>
-              <h1 className="text-lg font-bold text-gray-800">{selectedSurah.nameBn}</h1>
+              <h1 className="text-lg font-bold text-gray-800">
+                {state.language === 'en' ? selectedSurah.name : selectedSurah.nameBn}
+              </h1>
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                 {selectedSurah.revelationType === 'Meccan' ? t('meccan') : t('madani')} • {selectedSurah.totalAyahs} {t('ayah')}
               </p>
@@ -96,9 +98,11 @@ export const Quran = () => {
           <div className="bg-primary rounded-3xl p-6 text-white text-center space-y-3 shadow-xl relative overflow-hidden mb-6">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
             <div className="text-4xl font-serif mb-2">{selectedSurah.nameAr}</div>
-            <div className="text-xl font-bold">{selectedSurah.meaningBn}</div>
+            <div className="text-xl font-bold">
+              {state.language === 'en' ? selectedSurah.meaningEn : selectedSurah.meaningBn}
+            </div>
             <div className="w-24 h-px bg-white/30 mx-auto"></div>
-            <div className="text-sm opacity-80">বিসমিল্লাহির রাহমানির রাহিম</div>
+            <div className="text-sm opacity-80">{t('bismillah')}</div>
           </div>
 
           <div className="space-y-4">
@@ -131,12 +135,12 @@ export const Quran = () => {
                   <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
                     {ayah.transliteration && (
                       <p className="text-[15px] text-teal-700 font-medium leading-relaxed">
-                        <span className="text-xs font-bold uppercase tracking-wider text-teal-600/70 mr-2">উচ্চারণ:</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-teal-600/70 mr-2">{t('pronunciation_label')}</span>
                         {ayah.transliteration}
                       </p>
                     )}
                     <p className="text-sm text-gray-700 leading-relaxed">
-                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-2">অর্থ:</span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400 mr-2">{t('meaning_label')}</span>
                       {ayah.translation}
                     </p>
                   </div>
@@ -202,7 +206,9 @@ export const Quran = () => {
                   {surah.id}
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-800">{surah.nameBn}</h4>
+                  <h4 className="font-bold text-gray-800">
+                    {state.language === 'en' ? surah.name : surah.nameBn}
+                  </h4>
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                     {surah.revelationType === 'Meccan' ? t('meccan') : t('madani')} • {surah.totalAyahs} {t('ayah')}
                   </p>
@@ -210,7 +216,9 @@ export const Quran = () => {
               </div>
               <div className="text-right">
                 <p className="text-xl font-serif text-primary">{surah.nameAr}</p>
-                <p className="text-[10px] text-gray-400">{surah.meaningBn}</p>
+                <p className="text-[10px] text-gray-400">
+                  {state.language === 'en' ? surah.meaningEn : surah.meaningBn}
+                </p>
               </div>
             </motion.div>
           ))}

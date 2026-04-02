@@ -101,13 +101,16 @@ export const Home: React.FC = () => {
 
   const formatCountdownBn = (target: Date) => {
     const diff = differenceInSeconds(target, now);
-    if (diff <= 0) return '০০:০০:০০';
+    if (diff <= 0) return isBn ? '০০:০০:০০' : '00:00:00';
     const h = Math.floor(diff / 3600);
     const m = Math.floor((diff % 3600) / 60);
     const s = diff % 60;
     
-    const toBn = (n: number) => n.toString().split('').map(d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]).join('').padStart(2, '০');
-    return `${toBn(h)} ঘণ্টা ${toBn(m)} মিনিট`;
+    if (isBn) {
+      const toBn = (n: number) => n.toString().split('').map(d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]).join('').padStart(2, '০');
+      return `${toBn(h)} ঘণ্টা ${toBn(m)} মিনিট`;
+    }
+    return `${h} hours ${m} minutes`;
   };
 
   const hijriDate = moment().format('iD iMMMM iYYYY');
@@ -134,17 +137,17 @@ export const Home: React.FC = () => {
   const progressPercentage = Math.min(100, Math.max(0, (elapsedDuration / totalDuration) * 100));
 
   const features = [
-    { id: 'prayer', name: 'নামাজের সময়সূচী', icon: <Clock className="text-teal-500" />, path: '/prayer-times', terms: 'prayer salat namaz সময়সূচী' },
-    { id: 'quran', name: 'আল-কুরআন', icon: <Book className="text-emerald-500" />, path: '/quran', terms: 'quran koran কুরআন তিলাওয়াত' },
-    { id: 'ramadan', name: 'সাহরী-ইফতার', icon: <Moon className="text-indigo-500" />, path: '/sahri-iftar', terms: 'ramadan roja sahri iftar রমজান রোজা' },
-    { id: 'tasbih', name: 'তাসবিহ', icon: <Heart className="text-rose-500" />, path: '/tasbih', terms: 'tasbih zikir জিকির তাসবিহ' },
-    { id: 'qibla', name: 'কিবলা কম্পাস', icon: <Compass className="text-amber-500" />, path: '/qibla', terms: 'qibla compass দিকনির্ণয় কিবলা' },
-    { id: 'duas', name: 'দোয়া ও জিকির', icon: <Heart className="text-pink-500" />, path: '/duas', terms: 'dua zikir দোয়া জিকির মুনাজাত' },
-    { id: 'hadith', name: 'হাদিস শরীফ', icon: <Book className="text-blue-500" />, path: '/hadith', terms: 'hadith sunnah হাদিস সুন্নাহ' },
-    { id: 'pillars', name: 'ইসলামের স্তম্ভ', icon: <Users className="text-purple-500" />, path: '/pillars', terms: 'pillars islam স্তম্ভ ঈমান নামাজ রোজা হজ জাকাত' },
-    { id: 'hajj', name: 'হজ্জ ও উমরাহ', icon: <MapPin className="text-amber-500" />, path: '/hajj', terms: 'hajj umrah হজ্জ উমরাহ' },
-    { id: 'names', name: 'আসমা-উল-হুসনা', icon: <span className="text-xl font-bold text-blue-500">الله</span>, path: '/names-of-allah', terms: 'names allah asmaul husna আল্লাহর নাম' },
-    { id: 'ai', name: 'নূর এআই', icon: <AnimatedRubElHizbIcon className="text-cyan-500" size={24} />, path: '/ai-assistant', terms: 'ai assistant chat নূর এআই চ্যাট' },
+    { id: 'prayer', name: t('prayerTimes'), icon: <Clock className="text-teal-500" />, path: '/prayer-times', terms: 'prayer salat namaz সময়সূচী' },
+    { id: 'quran', name: t('quran'), icon: <Book className="text-emerald-500" />, path: '/quran', terms: 'quran koran কুরআন তিলাওয়াত' },
+    { id: 'ramadan', name: t('sahriIftar'), icon: <Moon className="text-indigo-500" />, path: '/sahri-iftar', terms: 'ramadan roja sahri iftar রমজান রোজা' },
+    { id: 'tasbih', name: t('tasbih'), icon: <Heart className="text-rose-500" />, path: '/tasbih', terms: 'tasbih zikir জিকির তাসবিহ' },
+    { id: 'qibla', name: t('qiblaCompass'), icon: <Compass className="text-amber-500" />, path: '/qibla', terms: 'qibla compass দিকনির্ণয় কিবলা' },
+    { id: 'duas', name: t('duasAndZikir'), icon: <Heart className="text-pink-500" />, path: '/duas', terms: 'dua zikir দোয়া জিকির মুনাজাত' },
+    { id: 'hadith', name: t('hadithSharif'), icon: <Book className="text-blue-500" />, path: '/hadith', terms: 'hadith sunnah হাদিস সুন্নাহ' },
+    { id: 'pillars', name: t('fivePillars'), icon: <Users className="text-purple-500" />, path: '/pillars', terms: 'pillars islam স্তম্ভ ঈমান নামাজ রোজা হজ জাকাত' },
+    { id: 'hajj', name: t('hajjAndUmrah'), icon: <MapPin className="text-amber-500" />, path: '/hajj', terms: 'hajj umrah হজ্জ উমরাহ' },
+    { id: 'names', name: t('allahNames'), icon: <span className="text-xl font-bold text-blue-500">الله</span>, path: '/names-of-allah', terms: 'names allah asmaul husna আল্লাহর নাম' },
+    { id: 'ai', name: t('noorAi'), icon: <AnimatedRubElHizbIcon className="text-cyan-500" size={24} />, path: '/ai-assistant', terms: 'ai assistant chat নূর এআই চ্যাট' },
   ];
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -480,23 +483,22 @@ export const Home: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-              <h2 className="text-2xl font-bold">
-                {isForbidden ? currentForbiddenTime?.bnName : prayerData.current?.bnName}
-              </h2>
-            </div>
-            <div className="text-xl font-medium">
-              {isForbidden 
-                ? `${format(currentForbiddenTime!.start, 'p')} - ${format(currentForbiddenTime!.end, 'p')}`
-                : `${prayerData.current?.formattedTime} - ${prayerData.current?.endTime ? format(prayerData.current.endTime, 'p') : prayerData.next?.formattedTime}`
-              }
-            </div>
-          </div>
-          <div className="text-sm font-medium mb-4">
-            {isForbidden 
-              ? `সময় বাকি: ${formatCountdownBn(currentForbiddenTime!.end)}`
-              : `সময় বাকি: ${prayerData.current?.endTime && formatCountdownBn(prayerData.current.endTime)}`
-            }
-          </div>
+              {isForbidden ? (isBn ? currentForbiddenTime?.bnName : currentForbiddenTime?.name) : (isBn ? prayerData.current?.bnName : prayerData.current?.name)}
+          </h2>
+        </div>
+        <div className="text-xl font-medium">
+          {isForbidden 
+            ? `${format(currentForbiddenTime!.start, 'p')} - ${format(currentForbiddenTime!.end, 'p')}`
+            : `${prayerData.current?.formattedTime} - ${prayerData.current?.endTime ? format(prayerData.current.endTime, 'p') : prayerData.next?.formattedTime}`
+          }
+        </div>
+      </div>
+      <div className="text-sm font-medium mb-4">
+        {isForbidden 
+          ? `${t('timeRemaining')}: ${formatCountdownBn(currentForbiddenTime!.end)}`
+          : `${t('timeRemaining')}: ${prayerData.current?.endTime && formatCountdownBn(prayerData.current.endTime)}`
+        }
+      </div>
           <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
             <motion.div 
               initial={{ width: 0 }}
@@ -514,19 +516,19 @@ export const Home: React.FC = () => {
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
           <div className="text-xs text-gray-400 mb-1">{t('nextPrayer')}</div>
-          <div className="font-bold text-gray-800">{prayerData.next?.bnName}</div>
+          <div className="font-bold text-gray-800">{isBn ? prayerData.next?.bnName : prayerData.next?.name}</div>
           <div className="text-sm text-gray-500 mt-2">{prayerData.next?.formattedTime}</div>
         </div>
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-around">
           <div className="flex flex-col items-center">
             <Sun size={20} className="text-amber-500 mb-1" />
-            <div className="text-[10px] text-gray-400">সূর্যোদয়</div>
+            <div className="text-[10px] text-gray-400">{t('sunrise_label')}</div>
             <div className="text-xs font-bold text-gray-700">{format(prayerData.sunrise, 'p')}</div>
           </div>
           <div className="w-px h-8 bg-gray-100"></div>
           <div className="flex flex-col items-center">
             <Moon size={20} className="text-indigo-500 mb-1" />
-            <div className="text-[10px] text-gray-400">সূর্যাস্ত</div>
+            <div className="text-[10px] text-gray-400">{t('sunset_label')}</div>
             <div className="text-xs font-bold text-gray-700">{format(prayerData.sunset, 'p')}</div>
           </div>
         </div>
@@ -605,7 +607,7 @@ export const Home: React.FC = () => {
         <div className="space-y-4">
           {forbiddenTimes.map((t, i) => (
             <div key={i} className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">{t.bnName}</span>
+              <span className="text-gray-500">{isBn ? t.bnName : t.name}</span>
               <span className="font-bold text-gray-700">
                 {format(t.start, 'p')} - {format(t.end, 'p')}
               </span>
@@ -645,7 +647,7 @@ export const Home: React.FC = () => {
 
       {/* Footer */}
       <div className="text-center text-gray-400 text-xs mb-8">
-        App Version: 3.6.1
+        {isBn ? 'অ্যাপ ভার্সন' : 'App Version'}: 3.6.1
       </div>
 
       {/* Location Selection Modal */}

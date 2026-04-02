@@ -81,14 +81,15 @@ export const SahriIftar: React.FC = () => {
       return isAfter(iftarWithBuffer, now);
     });
 
-  const getBengaliNumber = (n: number | string): string => {
+  const getNumber = (n: number | string): string => {
+    if (state.language === 'en') return n.toString();
     const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
     return n.toString().replace(/\d/g, (d) => bengaliDigits[parseInt(d)]);
   };
 
-  const hijriMonthNames = [
-    'মুহররম', 'সফর', 'রবিউল আউয়াল', 'রবিউস সানি', 'জামাদিউল আউয়াল', 'জামাদিউস সানি',
-    'রজব', 'শাবান', 'রমজান', 'শাওয়াল', 'জিলকদ', 'জিলহজ'
+  const hijriMonthKeys = [
+    'muharram', 'safar', 'rabi_al_awwal', 'rabi_al_thani', 'jumada_al_ula', 'jumada_al_thani',
+    'rajab', 'shaban', 'ramadan', 'shawwal', 'dhul_qadah', 'dhul_hijjah'
   ];
 
   const groups: { monthName: string, year: string, items: any[] }[] = [];
@@ -99,8 +100,8 @@ export const SahriIftar: React.FC = () => {
     const monthKey = m.format('iMMMM iYYYY');
     if (monthKey !== currentMonthKey) {
       groups.push({
-        monthName: hijriMonthNames[m.iMonth()],
-        year: getBengaliNumber(m.iYear()),
+        monthName: t(hijriMonthKeys[m.iMonth()] as any),
+        year: getNumber(m.iYear()),
         items: [item]
       });
       currentMonthKey = monthKey;
@@ -187,8 +188,8 @@ export const SahriIftar: React.FC = () => {
 
             <div className="space-y-3">
               {group.items.map((item, idx) => {
-                const dayName = format(item.date, 'EEEE', { locale: bn });
-                const dateStr = format(item.date, 'd MMMM', { locale: bn });
+                const dayName = format(item.date, 'EEEE', { locale: state.language === 'bn' ? bn : undefined });
+                const dateStr = format(item.date, 'd MMMM', { locale: state.language === 'bn' ? bn : undefined });
                 const ramadanDay = moment(item.date).format('iD');
                 
                 return (
@@ -201,7 +202,7 @@ export const SahriIftar: React.FC = () => {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold text-xs">
-                        {getBengaliNumber(ramadanDay)}
+                        {getNumber(ramadanDay)}
                       </div>
                       <div>
                         <div className="text-[10px] text-gray-500 font-medium">{dayName}</div>

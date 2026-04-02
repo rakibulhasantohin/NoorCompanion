@@ -286,7 +286,7 @@ export const Tasbih: React.FC = () => {
                   )}
                 >
                   {state.soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-                  <span className="text-[10px] font-bold">{isBn ? 'শব্দ' : 'Sound'}</span>
+                  <span className="text-[10px] font-bold">{t('sound')}</span>
                 </button>
                 <button 
                   onClick={() => updateState({ vibrationEnabled: !state.vibrationEnabled })}
@@ -296,7 +296,7 @@ export const Tasbih: React.FC = () => {
                   )}
                 >
                   <Smartphone size={20} className={state.vibrationEnabled ? "animate-pulse" : ""} />
-                  <span className="text-[10px] font-bold">{isBn ? 'ভাইব্রেশন' : 'Vibration'}</span>
+                  <span className="text-[10px] font-bold">{t('vibration')}</span>
                 </button>
               </motion.div>
             )}
@@ -416,7 +416,7 @@ export const Tasbih: React.FC = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">{isBn ? 'আরবী' : 'Arabic'}</label>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">{t('arabic')}</label>
                   <input 
                     type="text" 
                     value={newZikir.arabic}
@@ -426,22 +426,22 @@ export const Tasbih: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">{isBn ? 'উচ্চারণ (বাংলা)' : 'Pronunciation (BN)'}</label>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">{t('pronunciation')} ({isBn ? 'বাংলা' : 'BN'})</label>
                   <input 
                     type="text" 
                     value={newZikir.pronunciationBn}
                     onChange={(e) => setNewZikir({...newZikir, pronunciationBn: e.target.value})}
-                    placeholder="সুবহানাল্লাহ"
+                    placeholder={isBn ? "সুবহানাল্লাহ" : "Subhanallah"}
                     className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-primary transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">{isBn ? 'অর্থ (বাংলা)' : 'Meaning (BN)'}</label>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">{t('meaning')} ({isBn ? 'বাংলা' : 'BN'})</label>
                   <input 
                     type="text" 
                     value={newZikir.meaningBn}
                     onChange={(e) => setNewZikir({...newZikir, meaningBn: e.target.value})}
-                    placeholder="আল্লাহ পবিত্র"
+                    placeholder={isBn ? "আল্লাহ পবিত্র" : "Allah is Pure"}
                     className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-primary transition-colors"
                   />
                 </div>
@@ -453,7 +453,7 @@ export const Tasbih: React.FC = () => {
                 className="w-full mt-8 bg-primary text-white py-4 rounded-2xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
               >
                 <Save size={20} />
-                <span>{isBn ? 'সংরক্ষণ করুন' : 'Save Zikir'}</span>
+                <span>{t('save')}</span>
               </button>
             </motion.div>
           </motion.div>
