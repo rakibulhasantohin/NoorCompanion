@@ -61,7 +61,7 @@ export const PrayerTimes: React.FC = () => {
         <div className="flex items-center justify-between mb-4 px-2">
           <div className="flex items-center gap-2 text-gray-500 text-sm">
             <MapPin size={16} />
-            <span>{state.city}, Bangladesh</span>
+            <span>{state.city}, {t('bangladesh')}</span>
           </div>
           <button 
             onClick={toggleAlarm}

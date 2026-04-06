@@ -64,7 +64,6 @@ const translations = {
     travel: 'ভ্রমণ',
     danger: 'বিপদ-আপদ',
     sickness: 'অসুখ-বিসুখ',
-    pronunciation: 'উচ্চারণ',
     translation: 'অনুবাদ',
     save: 'সংরক্ষণ করুন',
     sound: 'শব্দ',
@@ -140,6 +139,7 @@ const translations = {
     zikirList: 'জিকিরসমূহ',
     countLabel: 'গণনা',
     addZikir: 'নতুন জিকির যোগ করুন',
+    namesOfAllah: 'আল্লাহর ৯৯ নাম',
     // Prayer Times
     fajr: 'ফজর',
     sunrise_label: 'সূর্যোদয়',
@@ -191,6 +191,9 @@ const translations = {
     shawwal: 'শাওয়াল',
     dhul_qadah: 'জিলকদ',
     dhul_hijjah: 'জিলহজ',
+    hour: 'ঘণ্টা',
+    minute: 'মিনিট',
+    appVersion: 'অ্যাপ ভার্সন',
   },
   en: {
     noorCompanion: 'Noor Companion',
@@ -255,7 +258,6 @@ const translations = {
     travel: 'Travel',
     danger: 'Danger',
     sickness: 'Sickness',
-    pronunciation: 'Pronunciation',
     translation: 'Translation',
     save: 'Save',
     sound: 'Sound',
@@ -331,6 +333,7 @@ const translations = {
     zikirList: 'Zikir List',
     countLabel: 'Count',
     addZikir: 'Add New Zikir',
+    namesOfAllah: '99 Names of Allah',
     // Prayer Times
     fajr: 'Fajr',
     sunrise_label: 'Sunrise',
@@ -382,6 +385,9 @@ const translations = {
     shawwal: 'Shawwal',
     dhul_qadah: 'Dhul-Qadah',
     dhul_hijjah: 'Dhul-Hijjah',
+    hour: 'hour',
+    minute: 'minute',
+    appVersion: 'App Version',
   }
 };
 

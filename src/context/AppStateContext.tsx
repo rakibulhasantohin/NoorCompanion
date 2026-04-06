@@ -99,6 +99,13 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               userData = userDoc.data();
             }
           }
+          
+          // 3. Sync profile data from Google
+          userData = {
+            ...userData,
+            fullName: currentUser.displayName || (userData as any).fullName,
+            profileImage: currentUser.photoURL || (userData as any).profileImage,
+          };
         } catch (error) {
           console.error('Error fetching user data:', error);
         }

@@ -68,7 +68,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       onClose();
     } catch (err: any) {
       console.error('Google Login Error:', err);
-      setError(isBn ? 'গুগল লগইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।' : 'Google login failed. Please try again.');
+      let errorMessage = isBn ? 'গুগল লগইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।' : 'Google login failed. Please try again.';
+      
+      if (err.code === 'auth/popup-blocked') {
+        errorMessage = isBn ? 'আপনার ব্রাউজার পপ-আপ ব্লক করেছে। দয়া করে পপ-আপ এলাউ করুন এবং আবার চেষ্টা করুন।' : 'Browser blocked the popup. Please allow popups for this site and try again.';
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        errorMessage = isBn ? 'লগইন উইন্ডোটি বন্ধ করা হয়েছে। দয়া করে আবার চেষ্টা করুন।' : 'Login window was closed. Please try again.';
+      } else if (err.code === 'auth/unauthorized-domain') {
+        errorMessage = isBn ? 'এই ডোমেইনটি অথরাইজড নয়। ফায়ারবেস কনসোলে এই ডোমেইনটি যোগ করতে হবে।' : 'This domain is not authorized. Please add this domain to Firebase Console Authorized Domains.';
+      } else if (err.code === 'auth/network-request-failed') {
+        errorMessage = isBn ? 'নেটওয়ার্ক সমস্যা। আপনার ইন্টারনেট কানেকশন চেক করুন।' : 'Network error. Please check your internet connection.';
+      } else if (err.message) {
+        errorMessage = isBn ? `লগইন ব্যর্থ হয়েছে: ${err.code || err.message}` : `Login failed: ${err.code || err.message}`;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -113,9 +127,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <motion.div 
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-rose-50 text-rose-500 p-4 rounded-2xl text-xs font-bold mb-6 text-center border border-rose-100"
+                  className="bg-rose-50 text-rose-500 p-4 rounded-2xl text-xs font-bold mb-6 text-center border border-rose-100 relative group"
                 >
                   {error}
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(error);
+                      alert(isBn ? 'এরর কপি করা হয়েছে' : 'Error copied to clipboard');
+                    }}
+                    className="block mt-2 text-[10px] underline opacity-60 hover:opacity-100 mx-auto"
+                  >
+                    {isBn ? 'এরর কপি করুন' : 'Copy Error'}
+                  </button>
                 </motion.div>
               )}
 

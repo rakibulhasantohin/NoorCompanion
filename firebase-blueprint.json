@@ -1,0 +1,66 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and application state data.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique identifier for the user." },
+        "fullName": { "type": "string", "description": "Full name of the user." },
+        "email": { "type": "string", "format": "email", "description": "Email address of the user." },
+        "profileImage": { "type": "string", "description": "Base64 or URL of the profile image." },
+        "language": { "type": "string", "enum": ["bn", "en"], "description": "Preferred language." },
+        "theme": { "type": "string", "enum": ["light", "dark"], "description": "UI theme preference." },
+        "city": { "type": "string", "description": "Selected city for prayer times." },
+        "location": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          }
+        },
+        "onboardingComplete": { "type": "boolean" },
+        "bookmarks": { "type": "array", "items": { "type": "integer" } },
+        "tasbihCount": { "type": "integer" },
+        "lastReadSurah": { "type": "integer" },
+        "notifications": { "type": "boolean" },
+        "prayerAlarms": { "type": "boolean" },
+        "lastBackup": { "type": "string", "format": "date-time" },
+        "dateOfBirth": { "type": "string" },
+        "vibrationEnabled": { "type": "boolean" },
+        "soundEnabled": { "type": "boolean" },
+        "customZikirs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "arabic": { "type": "string" },
+              "pronunciation": {
+                "type": "object",
+                "properties": {
+                  "bn": { "type": "string" },
+                  "en": { "type": "string" }
+                }
+              },
+              "meaning": {
+                "type": "object",
+                "properties": {
+                  "bn": { "type": "string" },
+                  "en": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": ["uid"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User documents containing profile and app state."
+    }
+  }
+}

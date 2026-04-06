@@ -1,3 +1,32 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {userId} (matches request.auth.uid)
+// Fields:
+//   - uid: string (required) - Unique identifier for the user.
+//   - fullName: string (optional) - Full name of the user.
+//   - email: string (optional) - Email address of the user.
+//   - profileImage: string (optional) - Base64 or URL of the profile image.
+//   - language: string (optional, enum: ['bn', 'en']) - Preferred language.
+//   - theme: string (optional, enum: ['light', 'dark']) - UI theme preference.
+//   - city: string (optional) - Selected city for prayer times.
+//   - location: map (optional) - { lat: number, lng: number }
+//   - onboardingComplete: bool (optional)
+//   - bookmarks: list (optional) - list of surah numbers
+//   - tasbihCount: int (optional)
+//   - lastReadSurah: int (optional)
+//   - notifications: bool (optional)
+//   - prayerAlarms: bool (optional)
+//   - lastBackup: string (optional, ISO 8601)
+//   - dateOfBirth: string (optional)
+//   - vibrationEnabled: bool (optional)
+//   - soundEnabled: bool (optional)
+//   - customZikirs: list (optional) - list of zikir objects
+//
+// ===============================================================
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -8,20 +37,20 @@ service cloud.firestore {
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
-    function hasRequiredFields(fields) {
-      return request.resource.data.keys().hasAll(fields);
-    }
-    function hasOnlyAllowedFields(fields) {
-      return request.resource.data.keys().hasOnly(fields);
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid']) &&
+             data.uid is string &&
+             (!('language' in data) || data.language in ['bn', 'en']) &&
+             (!('theme' in data) || data.theme in ['light', 'dark']) &&
+             (!('tasbihCount' in data) || data.tasbihCount is int) &&
+             (!('bookmarks' in data) || data.bookmarks is list) &&
+             (!('customZikirs' in data) || data.customZikirs is list);
     }
 
     match /users/{userId} {
       allow read: if isOwner(userId);
-      allow create: if isOwner(userId) && 
-                    hasRequiredFields(['uid', 'fullName', 'dateOfBirth', 'phoneNumber']) && 
-                    hasOnlyAllowedFields(['uid', 'fullName', 'dateOfBirth', 'email', 'phoneNumber', 'createdAt', 'profileImage']);
-      allow update: if isOwner(userId) && 
-                    hasOnlyAllowedFields(['uid', 'fullName', 'dateOfBirth', 'email', 'phoneNumber', 'createdAt', 'profileImage']);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
     }
   }
 }

@@ -108,9 +108,9 @@ export const Home: React.FC = () => {
     
     if (isBn) {
       const toBn = (n: number) => n.toString().split('').map(d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]).join('').padStart(2, '০');
-      return `${toBn(h)} ঘণ্টা ${toBn(m)} মিনিট`;
+      return `${toBn(h)} ${t('hour')} ${toBn(m)} ${t('minute')}`;
     }
-    return `${h} hours ${m} minutes`;
+    return `${h} ${t('hour')} ${m} ${t('minute')}`;
   };
 
   const hijriDate = moment().format('iD iMMMM iYYYY');
@@ -253,7 +253,7 @@ export const Home: React.FC = () => {
           <h1 className="text-xl font-bold text-gray-800">{t('noorCompanion')}</h1>
           <p className="text-xs text-gray-500 font-medium">
             {isBn ? 'আসসালামু আলাইকুম, ' : 'Assalamu Alaikum, '}
-            {state.fullName || (user?.email?.split('@')[0] || (isBn ? 'অতিথি' : 'Guest'))}
+            {state.fullName || (user?.email?.split('@')[0] || t('guest'))}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -462,7 +462,7 @@ export const Home: React.FC = () => {
           className="bg-gray-100 px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 transition-colors"
         >
           <MapPin size={14} />
-          <span>{state.city === 'Dhaka' ? 'বাংলাদেশ' : state.city}</span>
+          <span>{state.city === 'Dhaka' ? t('bangladesh') : state.city}</span>
         </button>
       </div>
 
@@ -483,16 +483,17 @@ export const Home: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-              {isForbidden ? (isBn ? currentForbiddenTime?.bnName : currentForbiddenTime?.name) : (isBn ? prayerData.current?.bnName : prayerData.current?.name)}
-          </h2>
-        </div>
-        <div className="text-xl font-medium">
-          {isForbidden 
-            ? `${format(currentForbiddenTime!.start, 'p')} - ${format(currentForbiddenTime!.end, 'p')}`
-            : `${prayerData.current?.formattedTime} - ${prayerData.current?.endTime ? format(prayerData.current.endTime, 'p') : prayerData.next?.formattedTime}`
-          }
-        </div>
-      </div>
+              <h2 className="text-2xl font-bold">
+                {isForbidden ? (isBn ? currentForbiddenTime?.bnName : currentForbiddenTime?.name) : (isBn ? prayerData.current?.bnName : prayerData.current?.name)}
+              </h2>
+            </div>
+            <div className="text-xl font-medium">
+              {isForbidden 
+                ? `${format(currentForbiddenTime!.start, 'p')} - ${format(currentForbiddenTime!.end, 'p')}`
+                : `${prayerData.current?.formattedTime} - ${prayerData.current?.endTime ? format(prayerData.current.endTime, 'p') : prayerData.next?.formattedTime}`
+              }
+            </div>
+          </div>
       <div className="text-sm font-medium mb-4">
         {isForbidden 
           ? `${t('timeRemaining')}: ${formatCountdownBn(currentForbiddenTime!.end)}`
@@ -647,7 +648,7 @@ export const Home: React.FC = () => {
 
       {/* Footer */}
       <div className="text-center text-gray-400 text-xs mb-8">
-        {isBn ? 'অ্যাপ ভার্সন' : 'App Version'}: 3.6.1
+        {t('appVersion')}: 3.6.1
       </div>
 
       {/* Location Selection Modal */}
@@ -668,7 +669,7 @@ export const Home: React.FC = () => {
               className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl relative z-10"
             >
               <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                <h3 className="text-lg font-bold text-gray-800">{isBn ? 'লোকেশন নির্বাচন করুন' : 'Select Location'}</h3>
+                <h3 className="text-lg font-bold text-gray-800">{t('selectLocation')}</h3>
                 <button 
                   onClick={() => setShowLocationModal(false)}
                   className="p-2 hover:bg-gray-200 rounded-full transition-colors"
@@ -686,13 +687,13 @@ export const Home: React.FC = () => {
                     <MapPin size={20} />
                   </div>
                   <div>
-                    <div className="font-bold text-teal-700">{isBn ? 'বর্তমান লোকেশন' : 'Current Location'}</div>
-                    <div className="text-xs text-teal-600/80">{isBn ? 'জিপিএস ব্যবহার করে' : 'Using GPS'}</div>
+                    <div className="font-bold text-teal-700">{t('currentLocation')}</div>
+                    <div className="text-xs text-teal-600/80">{t('usingGps')}</div>
                   </div>
                 </button>
                 
                 <div className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 py-2">
-                  {isBn ? 'শহরসমূহ' : 'Cities'}
+                  {t('cities')}
                 </div>
                 
                 <div className="grid grid-cols-1 gap-1">
@@ -744,13 +745,13 @@ export const Home: React.FC = () => {
                   onClick={confirmDialog.onCancel}
                   className="flex-1 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
                 >
-                  {isBn ? 'না' : 'No'}
+                  {t('cancel')}
                 </button>
                 <button 
                   onClick={confirmDialog.onConfirm}
                   className="flex-1 py-3 rounded-xl font-bold text-white bg-teal-500 hover:bg-teal-600 transition-colors"
                 >
-                  {isBn ? 'হ্যাঁ' : 'Yes'}
+                  {t('confirm')}
                 </button>
               </div>
             </motion.div>
