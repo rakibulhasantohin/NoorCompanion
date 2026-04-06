@@ -18,12 +18,12 @@ import { AnimatedRubElHizbIcon } from '../components/Common';
 import { districts } from '../data/districts';
 
 export const Home: React.FC = () => {
-  const { state, user, updateState } = useAppState();
+  const { state, updateState } = useAppState();
   const isBn = state.language === 'bn';
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [now, setNow] = useState(new Date());
-  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(state.profileImage);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
@@ -60,14 +60,8 @@ export const Home: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (user?.photoURL) {
-      setProfilePhoto(user.photoURL);
-    } else if (state.profileImage) {
-      setProfilePhoto(state.profileImage);
-    } else {
-      setProfilePhoto(null);
-    }
-  }, [user, state.profileImage]);
+    setProfilePhoto(state.profileImage || null);
+  }, [state.profileImage]);
 
   const lat = state.location?.lat || 23.7289;
   const lng = state.location?.lng || 90.3944;
@@ -152,7 +146,7 @@ export const Home: React.FC = () => {
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
-    target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(state.fullName || user?.email || 'User')}&background=random`;
+    target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(state.fullName || 'User')}&background=random`;
   };
 
   const handleLocationSelect = (loc: any) => {
@@ -253,7 +247,7 @@ export const Home: React.FC = () => {
           <h1 className="text-xl font-bold text-gray-800">{t('noorCompanion')}</h1>
           <p className="text-xs text-gray-500 font-medium">
             {isBn ? 'আসসালামু আলাইকুম, ' : 'Assalamu Alaikum, '}
-            {state.fullName || (user?.email?.split('@')[0] || t('guest'))}
+            {state.fullName || t('guest')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -264,9 +258,9 @@ export const Home: React.FC = () => {
             <Search size={20} />
           </button>
           <button onClick={() => navigate('/profile')} className="w-10 h-10 bg-white rounded-full shadow-sm text-gray-500 overflow-hidden border-2 border-primary/10 flex items-center justify-center">
-            {state.profileImage || profilePhoto ? (
+            {state.profileImage ? (
               <img 
-                src={state.profileImage || profilePhoto || ''} 
+                src={state.profileImage} 
                 alt="Profile" 
                 className="w-full h-full object-cover" 
                 onError={handleImageError}

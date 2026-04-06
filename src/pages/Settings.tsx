@@ -2,49 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { 
   User, Bell, Moon, Globe, MapPin, Shield, 
-  HelpCircle, LogOut, ChevronRight, Share2, Star, Camera,
-  Cloud
+  HelpCircle, ChevronRight, Share2, Star, Camera
 } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
 import { AppHeader, ConfirmModal } from '../components/Common';
-import { AuthModal } from '../components/AuthModal';
-import { auth } from '../firebase';
-import { signOut, onAuthStateChanged } from 'firebase/auth';
-import { backupToFirestore, backupToGoogleDrive } from '../services/backupService';
 
 export const Settings: React.FC = () => {
   const { state, updateState } = useAppState();
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const [isBackingUp, setIsBackingUp] = useState(false);
-  const [user, setUser] = useState(auth.currentUser);
-  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(state.profileImage);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isBn = state.language === 'bn';
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser?.photoURL) {
-        setProfilePhoto(currentUser.photoURL);
-        if (state.profileImage !== currentUser.photoURL) {
-          updateState({ profileImage: currentUser.photoURL });
-        }
-      } else if (state.profileImage) {
-        setProfilePhoto(state.profileImage);
-      }
-      
-      if (currentUser?.displayName && state.fullName !== currentUser.displayName) {
-        updateState({ fullName: currentUser.displayName });
-      }
-    });
-    return unsubscribe;
-  }, [state.profileImage, state.fullName]);
-
-  const handleLogout = async () => {
-    await signOut(auth);
-  };
+    setProfilePhoto(state.profileImage || null);
+  }, [state.profileImage]);
 
   const toggleTheme = () => {
     updateState({ theme: state.theme === 'light' ? 'dark' : 'light' });
@@ -71,35 +44,11 @@ export const Settings: React.FC = () => {
     }
   };
 
-  const handleManualBackup = async () => {
-    if (!user) {
-      setIsAuthModalOpen(true);
-      return;
-    }
-    
-    setIsBackingUp(true);
-    try {
-      await backupToFirestore(user.uid, state);
-      await backupToGoogleDrive(user.uid, state);
-      updateState({ lastBackup: new Date().toISOString() });
-    } catch (error) {
-      console.error('Manual backup failed:', error);
-    } finally {
-      setIsBackingUp(false);
-    }
-  };
-
   const sections = [
     {
       title: isBn ? 'অ্যাকাউন্ট' : 'Account',
       items: [
-        { icon: <User size={20} />, label: isBn ? 'প্রোফাইল' : 'Profile', value: user?.email || (isBn ? 'লগইন করুন' : 'Login'), onClick: () => !user && setIsAuthModalOpen(true) },
-        { 
-          icon: <Cloud size={20} className={isBackingUp ? "animate-bounce" : ""} />, 
-          label: isBn ? 'ক্লাউড ব্যাকআপ' : 'Cloud Backup', 
-          value: state.lastBackup ? (isBn ? `শেষ: ${new Date(state.lastBackup).toLocaleTimeString('bn-BD')}` : `Last: ${new Date(state.lastBackup).toLocaleTimeString()}`) : (isBn ? 'কখনো হয়নি' : 'Never'),
-          onClick: handleManualBackup 
-        },
+        { icon: <User size={20} />, label: isBn ? 'প্রোফাইল' : 'Profile', value: state.fullName || (isBn ? 'অতিথি' : 'Guest'), onClick: () => {} },
         { icon: <Bell size={20} />, label: isBn ? 'নোটিফিকেশন' : 'Notifications', toggle: true, active: state.notifications, onToggle: () => updateState({ notifications: !state.notifications }) },
       ]
     },
@@ -131,7 +80,6 @@ export const Settings: React.FC = () => {
         <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden">
           <div 
             className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary relative cursor-pointer group overflow-hidden border-2 border-primary/20"
-            onClick={() => !user && setIsAuthModalOpen(true)}
           >
             {profilePhoto || state.profileImage ? (
               <img src={profilePhoto || state.profileImage || ''} alt="Profile" className="w-full h-full object-cover" />
@@ -140,24 +88,10 @@ export const Settings: React.FC = () => {
             )}
           </div>
           <div className="flex-1">
-            {user ? (
-              <>
-                <h2 className="text-lg font-bold text-gray-800 truncate">
-                  {state.fullName || user.displayName || (user.email?.split('@')[0] || 'User')}
-                </h2>
-                <p className="text-sm text-gray-500 truncate">{user.email || ''}</p>
-              </>
-            ) : (
-              <>
-                <h2 className="text-lg font-bold text-gray-800">{isBn ? 'অতিথি ইউজার' : 'Guest User'}</h2>
-                <button 
-                  onClick={() => setIsAuthModalOpen(true)}
-                  className="text-sm text-primary font-medium mt-1"
-                >
-                  {isBn ? 'লগইন করুন' : 'Login'}
-                </button>
-              </>
-            )}
+            <h2 className="text-lg font-bold text-gray-800 truncate">
+              {state.fullName || (isBn ? 'অতিথি ইউজার' : 'Guest User')}
+            </h2>
+            <p className="text-sm text-gray-500 truncate">{isBn ? 'অফলাইন মোড' : 'Offline Mode'}</p>
           </div>
         </div>
 
@@ -202,26 +136,10 @@ export const Settings: React.FC = () => {
           </div>
         ))}
 
-        {/* Logout */}
-        {user && (
-          <button 
-            onClick={handleLogout}
-            className="w-full p-4 bg-rose-50 text-rose-500 font-bold rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all"
-          >
-            <LogOut size={20} />
-            <span>{isBn ? 'লগ আউট' : 'Logout'}</span>
-          </button>
-        )}
-
         <div className="text-center text-gray-300 text-xs py-4">
           Nour Companion v3.6.2
         </div>
       </div>
-
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
-      />
 
       <ConfirmModal 
         isOpen={isResetModalOpen}

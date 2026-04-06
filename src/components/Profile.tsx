@@ -1,16 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, Award, BookOpen, Hash, LogOut, Settings as SettingsIcon, CloudCheck, Cloud, Camera, X, Calendar, Edit2 } from 'lucide-react';
+import { User, Award, BookOpen, Hash, Settings as SettingsIcon, Camera, X, Calendar, Edit2 } from 'lucide-react';
 import { useAppState } from '../hooks/useAppState';
-import { supabase } from '../lib/supabase';
-import { getBengaliNumber } from '../utils/utils';
-
 import { useNavigate } from 'react-router-dom';
 
 export const ProfileSection = () => {
-  const { state, user, updateState } = useAppState();
+  const { state, updateState } = useAppState();
   const navigate = useNavigate();
-  const [syncing, setSyncing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     fullName: state.fullName || '',
@@ -26,12 +22,6 @@ export const ProfileSection = () => {
       profileImage: state.profileImage || ''
     });
     setIsEditing(true);
-  };
-
-  const handleManualSync = async () => {
-    setSyncing(true);
-    // manualSync(); // Removed
-    setTimeout(() => setSyncing(false), 1000);
   };
 
   const handleSave = () => {
@@ -52,12 +42,8 @@ export const ProfileSection = () => {
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
-    target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(state.fullName || user?.email || 'User')}&background=random`;
+    target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(state.fullName || 'User')}&background=random`;
   };
-
-  if (!user) {
-    return null;
-  }
 
   const stats = [
     {
@@ -86,9 +72,9 @@ export const ProfileSection = () => {
         <div className="flex items-center gap-4 mb-4">
           <div className="relative">
             <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 overflow-hidden border-2 border-emerald-50">
-              {user.photoURL || state.profileImage ? (
+              {state.profileImage ? (
                 <img 
-                  src={user.photoURL || state.profileImage || ''} 
+                  src={state.profileImage} 
                   alt="Profile" 
                   className="w-full h-full object-cover" 
                   onError={handleImageError}
@@ -100,9 +86,9 @@ export const ProfileSection = () => {
           </div>
           <div className="flex-1">
             <h3 className="text-base font-bold text-gray-900 truncate">
-              {state.fullName || user.displayName || user.email?.split('@')[0]}
+              {state.fullName || 'ব্যবহারকারী'}
             </h3>
-            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+            <p className="text-xs text-gray-500 truncate">লোকাল প্রোফাইল</p>
             {state.dateOfBirth && (
               <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-0.5">
                 <Calendar className="w-3 h-3" />
@@ -136,20 +122,6 @@ export const ProfileSection = () => {
               <span className="text-xs font-bold text-gray-900">{stat.value}</span>
             </div>
           ))}
-        </div>
-
-        <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
-              <CloudCheck className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">সর্বশেষ ব্যাকআপ</p>
-              <p className="text-xs font-bold text-gray-700">
-                {state.lastBackup ? new Date(state.lastBackup).toLocaleDateString('bn-BD') : 'কখনো হয়নি'}
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -204,11 +176,11 @@ export const ProfileSection = () => {
 
               <div className="space-y-4">
                 <div className="flex flex-col items-center mb-4">
-                  <div className="relative group cursor-pointer" onClick={() => !user.providerData.some(p => p.providerId === 'google.com') && fileInputRef.current?.click()}>
+                  <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                     <div className="w-24 h-24 rounded-3xl bg-emerald-50 flex items-center justify-center text-emerald-600 overflow-hidden border-2 border-emerald-100">
-                      {editData.profileImage || user.photoURL ? (
+                      {editData.profileImage ? (
                         <img 
-                          src={editData.profileImage || user.photoURL || ''} 
+                          src={editData.profileImage} 
                           alt="Preview" 
                           className="w-full h-full object-cover" 
                           onError={handleImageError}
@@ -217,11 +189,9 @@ export const ProfileSection = () => {
                         <User className="w-10 h-10" />
                       )}
                     </div>
-                    {!user.providerData.some(p => p.providerId === 'google.com') && (
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl flex items-center justify-center">
-                        <Camera className="w-6 h-6 text-white" />
-                      </div>
-                    )}
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl flex items-center justify-center">
+                      <Camera className="w-6 h-6 text-white" />
+                    </div>
                     <input 
                       type="file" 
                       ref={fileInputRef} 
@@ -231,7 +201,7 @@ export const ProfileSection = () => {
                     />
                   </div>
                   <p className="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-widest">
-                    {user.providerData.some(p => p.providerId === 'google.com') ? 'গুগল থেকে সিঙ্ক করা' : 'ছবি পরিবর্তন করুন'}
+                    ছবি পরিবর্তন করুন
                   </p>
                 </div>
 
@@ -239,15 +209,11 @@ export const ProfileSection = () => {
                   <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">পুরো নাম</label>
                   <input
                     type="text"
-                    disabled={user.providerData.some(p => p.providerId === 'google.com')}
                     placeholder="আপনার নাম"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all disabled:opacity-50"
-                    value={editData.fullName || user.displayName || ''}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                    value={editData.fullName}
                     onChange={(e) => setEditData(prev => ({ ...prev, fullName: e.target.value }))}
                   />
-                  {user.providerData.some(p => p.providerId === 'google.com') && (
-                    <p className="text-[10px] text-gray-400 ml-1">গুগল থেকে স্বয়ংক্রিয়ভাবে সেট করা হয়েছে</p>
-                  )}
                 </div>
 
                 <div className="space-y-2">

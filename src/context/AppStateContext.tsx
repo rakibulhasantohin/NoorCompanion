@@ -1,8 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { auth, db } from '../firebase';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { backupToFirestore, backupToGoogleDrive, restoreFromGoogleDrive } from '../services/backupService';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface Zikir {
   id: string;
@@ -60,92 +56,33 @@ const DEFAULT_STATE: AppState = {
 interface AppStateContextType {
   state: AppState;
   updateState: (updates: Partial<AppState>) => void;
-  user: User | null;
+  user: null;
   isAuthReady: boolean;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
 
-export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(auth.currentUser);
-  const [isAuthReady, setIsAuthReady] = useState(false);
-  const isInternalUpdate = useRef(false);
+const STATE_KEY = 'noor_companion_local_state';
 
-  const getStateKey = (email: string | null) => {
-    return email ? `noor_state_${email}` : 'noor_companion_state';
-  };
+export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isAuthReady, setIsAuthReady] = useState(true);
 
   const [state, setState] = useState<AppState>(() => {
-    const saved = localStorage.getItem(getStateKey(auth.currentUser?.email || null));
+    const saved = localStorage.getItem(STATE_KEY);
     return saved ? JSON.parse(saved) : DEFAULT_STATE;
   });
 
+  // Save state whenever it changes to Local Storage
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      setIsAuthReady(true);
-      
-      let userData = {};
-      if (currentUser) {
-        try {
-          // 1. Try to restore from Google Drive first (as requested)
-          const driveData = await restoreFromGoogleDrive(currentUser.uid);
-          if (driveData) {
-            userData = driveData;
-          } else {
-            // 2. Fallback to Firestore
-            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-            if (userDoc.exists()) {
-              userData = userDoc.data();
-            }
-          }
-          
-          // 3. Sync profile data from Google
-          userData = {
-            ...userData,
-            fullName: currentUser.displayName || (userData as any).fullName,
-            profileImage: currentUser.photoURL || (userData as any).profileImage,
-          };
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      }
-
-      const saved = localStorage.getItem(getStateKey(currentUser?.email || null));
-      if (saved) {
-        setState(prev => ({ ...JSON.parse(saved), ...userData }));
-      } else {
-        setState(prev => ({ ...DEFAULT_STATE, onboardingComplete: prev.onboardingComplete, ...userData }));
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Save state whenever it changes (Local & Cloud)
-  useEffect(() => {
-    localStorage.setItem(getStateKey(user?.email || null), JSON.stringify(state));
-
-    // Automatic Cloud Backup (Debounced)
-    if (user && navigator.onLine) {
-      const timeoutId = setTimeout(async () => {
-        // Backup to Firestore (Primary)
-        await backupToFirestore(user.uid, state);
-        
-        // Backup to Google Drive (Secondary, as requested)
-        await backupToGoogleDrive(user.uid, state);
-      }, 5000); // 5 second debounce to avoid hitting quotas
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [state, user]);
+    localStorage.setItem(STATE_KEY, JSON.stringify(state));
+  }, [state]);
 
   const updateState = (updates: Partial<AppState>) => {
     setState((prev) => ({ ...prev, ...updates }));
   };
 
   return (
-    <AppStateContext.Provider value={{ state, updateState, user, isAuthReady }}>
+    <AppStateContext.Provider value={{ state, updateState, user: null, isAuthReady }}>
       {children}
     </AppStateContext.Provider>
   );
