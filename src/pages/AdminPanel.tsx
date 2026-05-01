@@ -69,6 +69,29 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
+  const resetAllUsers = async () => {
+    if (!window.confirm('Are you absolutely sure? This will delete all user records from Firestore. Users will need to re-register. Note: This does not delete accounts from Firebase Authentication automatically.')) return;
+    
+    setLoading(true);
+    try {
+      const { deleteDoc, doc } = await import('firebase/firestore');
+      const q = query(collection(db, 'users'));
+      const querySnapshot = await getDocs(q);
+      
+      const deletions = querySnapshot.docs.map(d => deleteDoc(doc(db, 'users', d.id)));
+      await Promise.all(deletions);
+      
+      alert('All user records deleted from Firestore. Logging out...');
+      const { logout } = await import('../lib/firebase');
+      await logout();
+      navigate('/auth');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, 'users');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isAdmin) {
       navigate('/settings');
@@ -239,6 +262,21 @@ export const AdminPanel: React.FC = () => {
                   Save Changes
                 </button>
               </div>
+            </div>
+
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mt-6">
+              <h3 className="font-bold text-red-500 flex items-center gap-2 mb-4">
+                <Trash2 size={20} />
+                Danger Zone
+              </h3>
+              <p className="text-xs text-gray-500 mb-4">This will clear the Firestore users list. Note: To fully reset, manual deletion from Auth console is recommended.</p>
+              <button 
+                onClick={resetAllUsers}
+                className="w-full p-4 border-2 border-red-100 text-red-500 font-bold rounded-2xl hover:bg-red-50 active:scale-95 transition-transform flex items-center justify-center gap-2"
+              >
+                <Trash2 size={18} />
+                Reset All User Records
+              </button>
             </div>
           </div>
         ) : (
