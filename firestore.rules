@@ -48,5 +48,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // Dynamic Notifications Content
+    match /notifications_content/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }

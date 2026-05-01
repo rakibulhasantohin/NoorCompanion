@@ -68,6 +68,9 @@ export const Settings: React.FC = () => {
           onClick: user ? logout : signInWithGoogle 
         },
         { icon: <Bell size={20} />, label: isBn ? 'নোটিফিকেশন' : 'Notifications', toggle: true, active: state.notifications, onToggle: () => updateState({ notifications: !state.notifications }) },
+        { icon: <Bell size={20} />, label: isBn ? 'নামাজের অ্যালার্ম' : 'Prayer Alarms', toggle: true, active: state.prayerAlarms, onToggle: () => updateState({ prayerAlarms: !state.prayerAlarms }) },
+        { icon: <Bell size={20} />, label: isBn ? 'দৈনিক ইসলামিক তথ্য' : 'Daily Islamic Facts', toggle: true, active: state.dailyFactsNotification, onToggle: () => updateState({ dailyFactsNotification: !state.dailyFactsNotification }) },
+        { icon: <Star size={20} />, label: isBn ? 'অনুপ্রেরণামূলক উক্তি' : 'Daily Motivational Quotes', toggle: true, active: state.dailyMotivationNotification, onToggle: () => updateState({ dailyMotivationNotification: !state.dailyMotivationNotification }) },
       ]
     },
     ...(isAdmin ? [{

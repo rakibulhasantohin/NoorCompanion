@@ -25,6 +25,7 @@ import { AdminPanel } from './pages/AdminPanel';
 import { useAppState } from './hooks/useAppState';
 import { Onboarding } from './components/Onboarding/Onboarding';
 import { HolidayNoticeModal } from './components/HolidayNoticeModal';
+import { NotificationManager } from './components/NotificationManager';
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -92,6 +93,7 @@ export default function App() {
 
   return (
     <Router>
+      <NotificationManager />
       <HolidayNoticeModal />
       <PageWrapper>
         <Routes>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   Users, Settings, Shield, ChevronLeft, 
-  Search, ExternalLink, Trash2, Edit, Save
+  Search, ExternalLink, Trash2, Edit, Save, Bell, Plus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -13,14 +13,45 @@ import { handleFirestoreError, OperationType } from '../utils/firestoreErrorHand
 export const AdminPanel: React.FC = () => {
   const { isAdmin, user } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'users' | 'settings'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'settings' | 'notifications'>('users');
   const [usersList, setUsersList] = useState<any[]>([]);
+  const [notificationsContent, setNotificationsContent] = useState<any[]>([]);
   const [appSettings, setAppSettings] = useState({
     facebookPage: 'https://www.facebook.com/share/188NYWqk6w/',
     facebookGroup: 'https://www.facebook.com/share/g/1LEXoM7A3b/',
     version: '1.0'
   });
   const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newContent, setNewContent] = useState({ text_bn: '', text_en: '', type: 'fact' as 'fact' | 'motivation' });
+
+  const addContent = async () => {
+    if (!newContent.text_bn || !newContent.text_en) return;
+    const path = 'notifications_content';
+    try {
+      const { addDoc } = await import('firebase/firestore');
+      await addDoc(collection(db, path), newContent);
+      setShowAddForm(false);
+      setNewContent({ text_bn: '', text_en: '', type: 'fact' });
+      // Refresh list
+      const q = query(collection(db, path));
+      const querySnapshot = await getDocs(q);
+      setNotificationsContent(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    } catch (error) {
+       handleFirestoreError(error, OperationType.WRITE, path);
+    }
+  };
+
+  const deleteContent = async (id: string) => {
+    const path = `notifications_content/${id}`;
+    try {
+      const { deleteDoc, doc } = await import('firebase/firestore');
+      await deleteDoc(doc(db, 'notifications_content', id));
+      setNotificationsContent(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, path);
+    }
+  };
 
   useEffect(() => {
     if (!isAdmin) {
@@ -40,7 +71,20 @@ export const AdminPanel: React.FC = () => {
       }
     };
 
+    const fetchNotifications = async () => {
+      const path = 'notifications_content';
+      try {
+        const q = query(collection(db, path));
+        const querySnapshot = await getDocs(q);
+        const fetched = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setNotificationsContent(fetched);
+      } catch (error) {
+        handleFirestoreError(error, OperationType.LIST, path);
+      }
+    };
+
     fetchUsers();
+    fetchNotifications();
     setLoading(false);
   }, [isAdmin, navigate]);
 
@@ -73,7 +117,14 @@ export const AdminPanel: React.FC = () => {
           className={`flex-1 p-3 rounded-2xl flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'settings' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white text-gray-500'}`}
         >
           <Settings size={20} />
-          App Config
+          Config
+        </button>
+        <button 
+          onClick={() => setActiveTab('notifications')}
+          className={`flex-1 p-3 rounded-2xl flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'notifications' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white text-gray-500'}`}
+        >
+          <Bell size={20} />
+          Alerts
         </button>
       </div>
 
@@ -109,16 +160,13 @@ export const AdminPanel: React.FC = () => {
                         <h4 className="font-bold text-gray-800">{usr.fullName || 'Unnamed User'}</h4>
                         <p className="text-xs text-gray-500">{usr.email}</p>
                       </div>
-                      <button className="p-2 text-gray-400 hover:text-primary">
-                        <ExternalLink size={18} />
-                      </button>
                     </div>
                   ))}
                 </div>
               )}
             </div>
           </div>
-        ) : (
+        ) : activeTab === 'settings' ? (
           <div className="space-y-6">
             <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-4">
               <h3 className="font-bold text-gray-800 flex items-center gap-2">
@@ -132,6 +180,7 @@ export const AdminPanel: React.FC = () => {
                   <input 
                     type="text" 
                     value={appSettings.facebookPage}
+                    onChange={(e) => setAppSettings(prev => ({ ...prev, facebookPage: e.target.value }))}
                     className="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 mt-1"
                   />
                 </div>
@@ -140,6 +189,7 @@ export const AdminPanel: React.FC = () => {
                   <input 
                     type="text" 
                     value={appSettings.facebookGroup}
+                    onChange={(e) => setAppSettings(prev => ({ ...prev, facebookGroup: e.target.value }))}
                     className="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 mt-1"
                   />
                 </div>
@@ -148,6 +198,7 @@ export const AdminPanel: React.FC = () => {
                   <input 
                     type="text" 
                     value={appSettings.version}
+                    onChange={(e) => setAppSettings(prev => ({ ...prev, version: e.target.value }))}
                     className="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100 mt-1"
                   />
                 </div>
@@ -158,17 +209,85 @@ export const AdminPanel: React.FC = () => {
                 </button>
               </div>
             </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+             <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold text-gray-800">Dynamic Content</h3>
+                <button 
+                  onClick={() => setShowAddForm(!showAddForm)}
+                  className="bg-primary text-white p-2 rounded-xl flex items-center gap-2 text-xs font-bold shadow-lg shadow-primary/20"
+                >
+                   <Plus size={16} /> {showAddForm ? 'Cancel' : 'Add Content'}
+                </button>
+             </div>
 
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-              <h3 className="font-bold text-red-500 flex items-center gap-2 mb-4">
-                <Trash2 size={20} />
-                Danger Zone
-              </h3>
-              <p className="text-xs text-gray-500 mb-4">These actions are permanent and cannot be undone.</p>
-              <button className="w-full p-4 border-2 border-red-100 text-red-500 font-bold rounded-2xl hover:bg-red-50">
-                Reset All Users
-              </button>
-            </div>
+             {showAddForm && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-4 mb-4"
+                >
+                   <h4 className="font-bold text-gray-800 text-sm">Add New Fact or Quote</h4>
+                   <div className="space-y-3">
+                      <select 
+                        value={newContent.type}
+                        onChange={(e) => setNewContent({...newContent, type: e.target.value as any})}
+                        className="w-full p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm"
+                      >
+                        <option value="fact">Islamic Fact</option>
+                        <option value="motivation">Motivational Quote</option>
+                      </select>
+                      <textarea 
+                        placeholder="Text in Bengali"
+                        value={newContent.text_bn}
+                        onChange={(e) => setNewContent({...newContent, text_bn: e.target.value})}
+                        className="w-full p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm h-20"
+                      />
+                      <textarea 
+                        placeholder="Text in English"
+                        value={newContent.text_en}
+                        onChange={(e) => setNewContent({...newContent, text_en: e.target.value})}
+                        className="w-full p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm h-20"
+                      />
+                      <button 
+                        onClick={addContent}
+                        className="w-full p-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20"
+                      >
+                        Add to List
+                      </button>
+                   </div>
+                </motion.div>
+             )}
+
+             <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
+                {notificationsContent.length === 0 ? (
+                  <div className="p-10 text-center text-gray-400">
+                    <p>No custom notification content found.</p>
+                    <p className="text-[10px]">Static content will be used instead.</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-gray-50">
+                    {notificationsContent.map((item) => (
+                      <div key={item.id} className="p-4 flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.type === 'fact' ? 'bg-blue-50 text-blue-500' : 'bg-amber-50 text-amber-500'}`}>
+                          {item.type === 'fact' ? <Shield size={20} /> : <Star size={20} />}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-800 text-sm truncate">{item.text_bn}</h4>
+                          <p className="text-[10px] text-gray-400 truncate">{item.text_en}</p>
+                        </div>
+                        <button 
+                          onClick={() => deleteContent(item.id)}
+                          className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+             </div>
           </div>
         )}
       </div>

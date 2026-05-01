@@ -35,6 +35,16 @@
         "uid": { "type": "string" }
       },
       "required": ["email", "uid"]
+    },
+    "NotificationContent": {
+      "title": "Notification Content",
+      "description": "Daily facts or motivational quotes.",
+      "type": "object",
+      "properties": {
+        "text_bn": { "type": "string" },
+        "text_en": { "type": "string" },
+        "type": { "type": "string", "enum": ["fact", "motivation"] }
+      }
     }
   },
   "firestore": {
@@ -49,6 +59,10 @@
     "admins/{uid}": {
       "schema": "Admin",
       "description": "List of authorized administrators."
+    },
+    "notifications_content/{id}": {
+      "schema": "NotificationContent",
+      "description": "Dynamic content for daily notifications."
     }
   }
 }

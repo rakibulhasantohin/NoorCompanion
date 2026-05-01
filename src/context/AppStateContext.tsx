@@ -24,6 +24,8 @@ export interface AppState {
   lastReadSurah: number | null;
   notifications: boolean;
   prayerAlarms: boolean;
+  dailyFactsNotification: boolean;
+  dailyMotivationNotification: boolean;
   profileImage: string | null;
   lastBackup: string | null;
   fullName: string | null;
@@ -44,6 +46,8 @@ const DEFAULT_STATE: AppState = {
   lastReadSurah: null,
   notifications: true,
   prayerAlarms: true,
+  dailyFactsNotification: true,
+  dailyMotivationNotification: true,
   profileImage: null,
   lastBackup: null,
   fullName: null,
