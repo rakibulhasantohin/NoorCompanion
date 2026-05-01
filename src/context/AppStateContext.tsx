@@ -56,8 +56,6 @@ const DEFAULT_STATE: AppState = {
 interface AppStateContextType {
   state: AppState;
   updateState: (updates: Partial<AppState>) => void;
-  user: null;
-  isAuthReady: boolean;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
@@ -65,8 +63,6 @@ const AppStateContext = createContext<AppStateContextType | undefined>(undefined
 const STATE_KEY = 'noor_companion_local_state';
 
 export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthReady, setIsAuthReady] = useState(true);
-
   const [state, setState] = useState<AppState>(() => {
     const saved = localStorage.getItem(STATE_KEY);
     return saved ? JSON.parse(saved) : DEFAULT_STATE;
@@ -82,7 +78,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <AppStateContext.Provider value={{ state, updateState, user: null, isAuthReady }}>
+    <AppStateContext.Provider value={{ state, updateState }}>
       {children}
     </AppStateContext.Provider>
   );

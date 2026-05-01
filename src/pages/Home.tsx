@@ -613,36 +613,46 @@ export const Home: React.FC = () => {
 
       {/* Social Links */}
       <div className="space-y-3 mb-6">
-        <button className="w-full p-4 bg-white border border-blue-100 rounded-2xl flex items-center justify-between group">
+        <a 
+          href="https://www.facebook.com/share/188NYWqk6w/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full p-4 bg-white border border-blue-100 rounded-2xl flex items-center justify-between group"
+        >
           <div className="flex items-center gap-3">
             <div className="bg-blue-500 p-2 rounded-full text-white">
               <Facebook size={18} />
             </div>
             <div className="text-left">
-              <div className="text-xs text-gray-500">{t('appUpdate')}</div>
-              <div className="text-sm font-bold text-gray-700">{t('followUs')}</div>
+              <div className="text-xs text-gray-500">{isBn ? 'অ্যাপ সম্পর্কিত সকল আপডেট পেতে' : 'Get all updates related to the app'}</div>
+              <div className="text-sm font-bold text-gray-700">{isBn ? 'আমাদের ফেসবুক পেজ ফলো করুন।' : 'Follow our Facebook page.'}</div>
             </div>
           </div>
-          <div className="bg-blue-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">{t('follow')}</div>
-        </button>
+          <div className="bg-blue-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">{isBn ? 'Follow' : 'Follow'}</div>
+        </a>
 
-        <button className="w-full p-4 bg-white border border-teal-100 rounded-2xl flex items-center justify-between group">
+        <a 
+          href="https://www.facebook.com/share/g/1LEXoM7A3b/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full p-4 bg-white border border-teal-100 rounded-2xl flex items-center justify-between group"
+        >
           <div className="flex items-center gap-3">
             <div className="bg-teal-500 p-2 rounded-full text-white">
               <Users size={18} />
             </div>
             <div className="text-left">
-              <div className="text-xs text-gray-500">{t('opinion')}</div>
-              <div className="text-sm font-bold text-gray-700">{t('joinGroup')}</div>
+              <div className="text-xs text-gray-500">{isBn ? 'অ্যাপ সম্পর্কে আপনার মতামত জানাতে' : 'Share your feedback'}</div>
+              <div className="text-sm font-bold text-gray-700">{isBn ? 'আমাদের ফেসবুক গ্রুপে জয়েন করুন।' : 'Join our Facebook group.'}</div>
             </div>
           </div>
-          <div className="bg-teal-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">{t('join')}</div>
-        </button>
+          <div className="bg-teal-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">{isBn ? 'Join' : 'Join'}</div>
+        </a>
       </div>
 
       {/* Footer */}
       <div className="text-center text-gray-400 text-xs mb-8">
-        {t('appVersion')}: 3.6.1
+        {isBn ? 'অ্যাপ ভার্সন' : 'App Version'}: 1.0 (Updated)
       </div>
 
       {/* Location Selection Modal */}

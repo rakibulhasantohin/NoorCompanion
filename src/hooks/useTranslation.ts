@@ -194,6 +194,7 @@ const translations = {
     hour: 'ঘণ্টা',
     minute: 'মিনিট',
     appVersion: 'অ্যাপ ভার্সন',
+    versionNumber: '1.0',
   },
   en: {
     noorCompanion: 'Noor Companion',
@@ -388,6 +389,7 @@ const translations = {
     hour: 'hour',
     minute: 'minute',
     appVersion: 'App Version',
+    versionNumber: '1.0',
   }
 };
 
