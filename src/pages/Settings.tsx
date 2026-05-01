@@ -57,6 +57,15 @@ export const Settings: React.FC = () => {
     setIsEditModalOpen(false);
   };
 
+  const handleLogin = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error: any) {
+      console.error("Login failed:", error);
+      // alert(isBn ? "লগইন ব্যর্থ হয়েছে। দয়া করে আবার চেষ্টা করুন।" : "Login failed. Please try again.");
+    }
+  };
+
   const sections = [
     {
       title: isBn ? 'ব্যক্তিগত' : 'Personal',
@@ -65,7 +74,7 @@ export const Settings: React.FC = () => {
         { 
           icon: user ? <LogOut size={20} /> : <LogIn size={20} />, 
           label: user ? (isBn ? 'লগআউট' : 'Logout') : (isBn ? 'গুগল দিয়ে লগইন' : 'Login with Google'), 
-          onClick: user ? logout : signInWithGoogle 
+          onClick: user ? () => logout() : handleLogin
         },
         { icon: <Bell size={20} />, label: isBn ? 'নোটিফিকেশন' : 'Notifications', toggle: true, active: state.notifications, onToggle: () => updateState({ notifications: !state.notifications }) },
         { icon: <Bell size={20} />, label: isBn ? 'নামাজের অ্যালার্ম' : 'Prayer Alarms', toggle: true, active: state.prayerAlarms, onToggle: () => updateState({ prayerAlarms: !state.prayerAlarms }) },

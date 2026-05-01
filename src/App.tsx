@@ -21,6 +21,7 @@ import { NamesOfAllah } from './pages/NamesOfAllah';
 import { ProfilePage } from './pages/ProfilePage';
 
 import { AdminPanel } from './pages/AdminPanel';
+import { useAuth } from './context/AuthContext';
 
 import { useAppState } from './hooks/useAppState';
 import { Onboarding } from './components/Onboarding/Onboarding';
@@ -80,6 +81,7 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
 
 export default function App() {
   const { state } = useAppState();
+  const { loading: authLoading } = useAuth();
   
   useEffect(() => {
     // Robust dark mode toggle
@@ -90,6 +92,22 @@ export default function App() {
       root.classList.remove('dark');
     }
   }, [state.theme]);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-primary flex items-center justify-center p-6 text-white text-center">
+        <motion.div
+           initial={{ opacity: 0, scale: 0.9 }}
+           animate={{ opacity: 1, scale: 1 }}
+           className="space-y-4"
+        >
+           <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4" />
+           <p className="font-bold text-lg">নূর কম্প্যানিয়ন</p>
+           <p className="text-sm text-white/70">ইবাদতের এক নির্ভরযোগ্য সঙ্গী</p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <Router>
