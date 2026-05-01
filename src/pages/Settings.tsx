@@ -58,12 +58,7 @@ export const Settings: React.FC = () => {
   };
 
   const handleLogin = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (error: any) {
-      console.error("Login failed:", error);
-      // alert(isBn ? "লগইন ব্যর্থ হয়েছে। দয়া করে আবার চেষ্টা করুন।" : "Login failed. Please try again.");
-    }
+    navigate('/auth');
   };
 
   const sections = [

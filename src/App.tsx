@@ -21,6 +21,7 @@ import { NamesOfAllah } from './pages/NamesOfAllah';
 import { ProfilePage } from './pages/ProfilePage';
 
 import { AdminPanel } from './pages/AdminPanel';
+import { AuthPage } from './pages/AuthPage';
 import { useAuth } from './context/AuthContext';
 
 import { useAppState } from './hooks/useAppState';
@@ -49,6 +50,7 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
       case '/profile': return isBn ? 'প্রোফাইল' : 'Profile';
       case '/settings': return isBn ? 'সেটিংস' : 'Settings';
       case '/admin': return 'Admin Panel';
+      case '/auth': return isBn ? 'লগইন' : 'Authentication';
       default: return isBn ? 'নূর কম্প্যানিয়ন' : 'Noor Companion';
     }
   };
@@ -131,6 +133,7 @@ export default function App() {
           <Route path="/ai-assistant" element={<AiAssistant />} />
           <Route path="/names-of-allah" element={<NamesOfAllah />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/auth" element={<AuthPage />} />
         </Routes>
       </PageWrapper>
     </Router>
