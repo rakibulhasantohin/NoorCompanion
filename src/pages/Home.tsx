@@ -239,6 +239,22 @@ export const Home: React.FC = () => {
     (f.terms && f.terms.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  const openFacebookLink = (url: string) => {
+    // Attempt to open in app using common schemes for mobile
+    const fbAppUrl = "fb://facewebmodal/f?href=" + encodeURIComponent(url);
+    
+    // Create a temporary hidden link to try opening the app
+    const start = Date.now();
+    window.location.href = fbAppUrl;
+    
+    // If the app doesn't open within 500ms, open the web URL in a new tab
+    setTimeout(() => {
+      if (Date.now() - start < 1000) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    }, 500);
+  };
+
   return (
     <div className="pb-20 px-4 pt-4 max-w-md mx-auto">
       {/* Header */}
@@ -613,11 +629,9 @@ export const Home: React.FC = () => {
 
       {/* Social Links */}
       <div className="space-y-3 mb-6">
-        <a 
-          href="https://www.facebook.com/share/188NYWqk6w/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full p-4 bg-white border border-blue-100 rounded-2xl flex items-center justify-between group"
+        <button 
+          onClick={() => openFacebookLink("https://www.facebook.com/share/188NYWqk6w/")}
+          className="w-full p-4 bg-white border border-blue-100 rounded-2xl flex items-center justify-between group cursor-pointer active:scale-[0.98] transition-transform"
         >
           <div className="flex items-center gap-3">
             <div className="bg-blue-500 p-2 rounded-full text-white">
@@ -628,14 +642,12 @@ export const Home: React.FC = () => {
               <div className="text-sm font-bold text-gray-700">{isBn ? 'আমাদের ফেসবুক পেজ ফলো করুন।' : 'Follow our Facebook page.'}</div>
             </div>
           </div>
-          <div className="bg-blue-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">{isBn ? 'Follow' : 'Follow'}</div>
-        </a>
+          <div className="bg-blue-500 text-white px-4 py-1.5 rounded-full text-xs font-bold font-sans">Follow</div>
+        </button>
 
-        <a 
-          href="https://www.facebook.com/share/g/1LEXoM7A3b/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full p-4 bg-white border border-teal-100 rounded-2xl flex items-center justify-between group"
+        <button 
+          onClick={() => openFacebookLink("https://www.facebook.com/share/g/1LEXoM7A3b/")}
+          className="w-full p-4 bg-white border border-teal-100 rounded-2xl flex items-center justify-between group cursor-pointer active:scale-[0.98] transition-transform"
         >
           <div className="flex items-center gap-3">
             <div className="bg-teal-500 p-2 rounded-full text-white">
@@ -643,11 +655,11 @@ export const Home: React.FC = () => {
             </div>
             <div className="text-left">
               <div className="text-xs text-gray-500">{isBn ? 'অ্যাপ সম্পর্কে আপনার মতামত জানাতে' : 'Share your feedback'}</div>
-              <div className="text-sm font-bold text-gray-700">{isBn ? 'আমাদের ফেসবুক গ্রুপে জয়েন করুন।' : 'Join our Facebook group.'}</div>
+              <div className="text-sm font-bold text-gray-700">{isBn ? 'আমাদের ফেসবুক গ্রুপে জয়েন করুন। ' : 'Join our Facebook group.'}</div>
             </div>
           </div>
-          <div className="bg-teal-500 text-white px-4 py-1.5 rounded-full text-xs font-bold">{isBn ? 'Join' : 'Join'}</div>
-        </a>
+          <div className="bg-teal-500 text-white px-4 py-1.5 rounded-full text-xs font-bold font-sans">Join</div>
+        </button>
       </div>
 
       {/* Footer */}
