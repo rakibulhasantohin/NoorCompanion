@@ -32,15 +32,12 @@ async function testConnection() {
 }
 testConnection();
 
-export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider);
-export const signInWithGoogleRedirect = () => signInWithRedirect(auth, googleProvider);
-export const signInWithGoogle = signInWithGoogleRedirect;
+export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 export const logout = () => signOut(auth);
 
 export { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   updateProfile,
-  sendPasswordResetEmail,
-  getRedirectResult
+  sendPasswordResetEmail
 };

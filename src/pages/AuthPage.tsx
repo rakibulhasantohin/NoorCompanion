@@ -109,10 +109,8 @@ export const AuthPage: React.FC = () => {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      // Use redirect for better mobile experience and to meet user's "native" look request
-      const { signInWithGoogleRedirect } = await import('../lib/firebase');
-      await signInWithGoogleRedirect();
-      // No need to navigate here, the redirect will handle it on reload
+      await signInWithGoogle();
+      navigate('/settings');
     } catch (err) {
       console.error(err);
       setError(isBn ? 'গুগল লগইন ব্যর্থ হয়েছে' : 'Google login failed');

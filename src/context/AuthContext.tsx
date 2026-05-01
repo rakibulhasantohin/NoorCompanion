@@ -20,23 +20,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const ADMIN_EMAIL = 'rakibulhasantohin@gmail.com';
 
   useEffect(() => {
-    // Handle redirect result
-    const handleRedirect = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          console.log("Logged in via redirect:", result.user.email);
-        }
-      } catch (error: any) {
-        if (error.code === 'auth/redirect-cancelled-by-user') {
-          console.log("Redirect cancelled by user");
-        } else {
-          console.error("Redirect login error:", error);
-        }
-      }
-    };
-    handleRedirect();
-
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         setUser(user);
