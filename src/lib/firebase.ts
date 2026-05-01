@@ -6,7 +6,8 @@ import {
   signOut,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  updateProfile
+  updateProfile,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
@@ -35,5 +36,6 @@ export const logout = () => signOut(auth);
 export { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
-  updateProfile 
+  updateProfile,
+  sendPasswordResetEmail
 };

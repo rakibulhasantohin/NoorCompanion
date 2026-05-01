@@ -7,10 +7,12 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { 
   auth, 
+  db,
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   updateProfile,
-  signInWithGoogle
+  signInWithGoogle,
+  sendPasswordResetEmail
 } from '../lib/firebase';
 import { useAppState } from '../hooks/useAppState';
 
@@ -19,9 +21,10 @@ export const AuthPage: React.FC = () => {
   const { state } = useAppState();
   const isBn = state.language === 'bn';
   
-  const [isLogin, setIsLogin] = useState(true);
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'forgot'>('login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -34,11 +37,13 @@ export const AuthPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
-      if (isLogin) {
+      if (authMode === 'login') {
         await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      } else {
+        navigate('/settings');
+      } else if (authMode === 'signup') {
         if (formData.password !== formData.confirmPassword) {
           throw new Error(isBn ? 'পাসওয়ার্ড মিলছে না' : 'Passwords do not match');
         }
@@ -50,8 +55,39 @@ export const AuthPage: React.FC = () => {
         await updateProfile(userCredential.user, {
           displayName: formData.name
         });
+        navigate('/settings');
+      } else if (authMode === 'forgot') {
+        // 1. Verify if name matches in Firestore
+        const { collection, query, where, getDocs, limit } = await import('firebase/firestore');
+        
+        const q = query(
+          collection(db, 'users'), 
+          where('email', '==', formData.email),
+          limit(1)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          throw new Error(isBn 
+            ? 'এই ইমেইলটি আমাদের রেকর্ডে নেই' 
+            : 'Email not found in our records');
+        }
+
+        const userData = querySnapshot.docs[0].data();
+        if (userData.fullName !== formData.name) {
+          throw new Error(isBn 
+            ? 'নামের তথ্যটি ভুল। নিবন্ধিত নামটি লিখুন' 
+            : 'The name does not match our records');
+        }
+
+        // 2. Send Reset Email (Standard Secure Way)
+        await sendPasswordResetEmail(auth, formData.email);
+        
+        setSuccess(isBn 
+          ? 'তথ্য যাচাই করা হয়েছে এবং পাসওয়ার্ড রিসেট করার একটি লিংক আপনার ইমেইলে পাঠানো হয়েছে।' 
+          : 'Identity verified. A password reset link has been sent to your email.');
       }
-      navigate('/settings');
     } catch (err: any) {
       console.error(err);
       let message = err.message;
@@ -95,12 +131,16 @@ export const AuthPage: React.FC = () => {
           </button>
           <div>
             <h1 className="text-xl font-bold">
-              {isLogin 
+              {authMode === 'login' 
                 ? (isBn ? 'লগইন করুন' : 'Sign In') 
-                : (isBn ? 'অ্যাকাউন্ট তৈরি করুন' : 'Create Account')}
+                : authMode === 'signup' 
+                ? (isBn ? 'অ্যাকাউন্ট তৈরি করুন' : 'Create Account')
+                : (isBn ? 'পাসওয়ার্ড পুনরুদ্ধার' : 'Reset Password')}
             </h1>
             <p className="text-xs text-white/70">
-              {isBn ? 'নূর কম্প্যানিয়ন-এ স্বাগতম' : 'Welcome to Noor Companion'}
+              {authMode === 'forgot' 
+                ? (isBn ? 'আপনার তথ্য যাচাই করুন' : 'Verify your information')
+                : (isBn ? 'নূর কম্প্যানিয়ন-এ স্বাগতম' : 'Welcome to Noor Companion')}
             </p>
           </div>
         </motion.div>
@@ -113,7 +153,7 @@ export const AuthPage: React.FC = () => {
       <div className="max-w-md mx-auto p-6 space-y-6">
         <form onSubmit={handleAuth} className="space-y-4">
           <AnimatePresence mode="wait">
-            {!isLogin && (
+            {(authMode === 'signup' || authMode === 'forgot') && (
               <motion.div 
                 key="name-field"
                 initial={{ opacity: 0, height: 0 }}
@@ -122,13 +162,13 @@ export const AuthPage: React.FC = () => {
                 className="space-y-2 overflow-hidden"
               >
                 <label className="text-xs font-bold text-gray-400 uppercase ml-1">
-                  {isBn ? 'পুরো নাম' : 'Full Name'}
+                  {authMode === 'signup' ? (isBn ? 'পুরো নাম' : 'Full Name') : (isBn ? 'নিবন্ধিত নাম' : 'Registered Name')}
                 </label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                   <input 
                     type="text"
-                    required={!isLogin}
+                    required={(authMode === 'signup' || authMode === 'forgot')}
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     placeholder={isBn ? 'আপনার নাম লিখুন' : 'Enter your name'}
@@ -156,25 +196,50 @@ export const AuthPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-400 uppercase ml-1">
-              {isBn ? 'পাসওয়ার্ড' : 'Password'}
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input 
-                type="password"
-                required
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                placeholder={isBn ? 'পাসওয়ার্ড দিন' : 'Enter password'}
-                className="w-full p-4 bg-white rounded-2xl border border-gray-100 pl-12 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
-              />
-            </div>
-          </div>
+          <AnimatePresence mode="wait">
+            {authMode !== 'forgot' && (
+              <motion.div 
+                key="password-field"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-2 overflow-hidden"
+              >
+                <div className="flex justify-between items-center px-1">
+                  <label className="text-xs font-bold text-gray-400 uppercase">
+                    {isBn ? 'পাসওয়ার্ড' : 'Password'}
+                  </label>
+                  {authMode === 'login' && (
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setAuthMode('forgot');
+                        setError(null);
+                        setSuccess(null);
+                      }}
+                      className="text-[10px] font-bold text-primary hover:underline uppercase"
+                    >
+                      {isBn ? 'পাসওয়ার্ড ভুলে গেছেন?' : 'Forgot Password?'}
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input 
+                    type="password"
+                    required={authMode !== 'forgot'}
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    placeholder={isBn ? 'পাসওয়ার্ড দিন' : 'Enter password'}
+                    className="w-full p-4 bg-white rounded-2xl border border-gray-100 pl-12 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <AnimatePresence>
-            {!isLogin && (
+            {authMode === 'signup' && (
               <motion.div 
                 key="confirm-password"
                 initial={{ opacity: 0, height: 0 }}
@@ -189,7 +254,7 @@ export const AuthPage: React.FC = () => {
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                   <input 
                     type="password"
-                    required={!isLogin}
+                    required={authMode === 'signup'}
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                     placeholder={isBn ? 'আবার পাসওয়ার্ড দিন' : 'Rewrite password'}
@@ -213,6 +278,19 @@ export const AuthPage: React.FC = () => {
             )}
           </AnimatePresence>
 
+          <AnimatePresence>
+            {success && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 p-4 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-bold border border-emerald-100 leading-relaxed"
+              >
+                <ShieldCheck size={18} className="shrink-0" />
+                {success}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <button 
             type="submit"
             disabled={loading}
@@ -222,7 +300,11 @@ export const AuthPage: React.FC = () => {
               <Loader2 className="animate-spin" size={20} />
             ) : (
               <>
-                {isLogin ? (isBn ? 'লগইন' : 'Login') : (isBn ? 'নিবন্ধন করুন' : 'Sign Up')}
+                {authMode === 'login' 
+                  ? (isBn ? 'লগইন' : 'Login') 
+                  : authMode === 'signup' 
+                  ? (isBn ? 'নিবন্ধন করুন' : 'Sign Up')
+                  : (isBn ? 'তথ্য যাচাই করুন' : 'Verify Info')}
                 <ArrowRight size={20} />
               </>
             )}
@@ -249,18 +331,22 @@ export const AuthPage: React.FC = () => {
 
         <div className="text-center">
           <p className="text-sm text-gray-500">
-            {isLogin 
+            {authMode === 'login' 
               ? (isBn ? 'অ্যাকাউন্ট নেই?' : "Don't have an account?") 
-              : (isBn ? 'ইতিমধ্যে অ্যাকাউন্ট আছে?' : 'Already have an account?')}
+              : authMode === 'signup'
+              ? (isBn ? 'ইতিমধ্যে অ্যাকাউন্ট আছে?' : 'Already have an account?')
+              : (isBn ? 'লগইন-এ ফিরে যান' : 'Back to login')}
             {' '}
             <button 
               onClick={() => {
-                setIsLogin(!isLogin);
+                if (authMode === 'login') setAuthMode('signup');
+                else setAuthMode('login');
                 setError(null);
+                setSuccess(null);
               }}
               className="text-primary font-bold hover:underline"
             >
-              {isLogin 
+              {authMode === 'login' 
                 ? (isBn ? 'নতুন তৈরি করুন' : 'Create One') 
                 : (isBn ? 'লগইন করুন' : 'Sign In')}
             </button>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   Users, Settings, Shield, ChevronLeft, 
-  Search, ExternalLink, Trash2, Edit, Save, Bell, Plus
+  Search, ExternalLink, Trash2, Edit, Save, Bell, Plus, Star
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
