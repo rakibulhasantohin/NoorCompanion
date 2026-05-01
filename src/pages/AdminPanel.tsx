@@ -7,7 +7,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { db } from '../lib/firebase';
-import { collection, getDocs, query } from 'firebase/firestore';
+import { collection, getDocs, query, doc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../utils/firestoreErrorHandler';
 
 export const AdminPanel: React.FC = () => {
@@ -23,14 +23,30 @@ export const AdminPanel: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
   const [newContent, setNewContent] = useState({ text_bn: '', text_en: '', type: 'fact' as 'fact' | 'motivation' });
+
+  const saveSettings = async () => {
+    const path = 'config/global';
+    try {
+      await setDoc(doc(db, 'config', 'global'), appSettings);
+      alert('Settings saved successfully!');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, path);
+    }
+  };
 
   const addContent = async () => {
     if (!newContent.text_bn || !newContent.text_en) return;
     const path = 'notifications_content';
     try {
       const { addDoc } = await import('firebase/firestore');
-      await addDoc(collection(db, path), newContent);
+      if (editingItem) {
+        await updateDoc(doc(db, path, editingItem.id), newContent);
+        setEditingItem(null);
+      } else {
+        await addDoc(collection(db, path), newContent);
+      }
       setShowAddForm(false);
       setNewContent({ text_bn: '', text_en: '', type: 'fact' });
       // Refresh list
@@ -83,8 +99,20 @@ export const AdminPanel: React.FC = () => {
       }
     };
 
+    const fetchSettings = async () => {
+      try {
+        const snap = await getDoc(doc(db, 'config', 'global'));
+        if (snap.exists()) {
+          setAppSettings(snap.data() as any);
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      }
+    };
+
     fetchUsers();
     fetchNotifications();
+    fetchSettings();
     setLoading(false);
   }, [isAdmin, navigate]);
 
@@ -203,7 +231,10 @@ export const AdminPanel: React.FC = () => {
                   />
                 </div>
                 
-                <button className="w-full p-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                <button 
+                  onClick={saveSettings}
+                  className="w-full p-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                >
                   <Save size={20} />
                   Save Changes
                 </button>
@@ -277,12 +308,24 @@ export const AdminPanel: React.FC = () => {
                           <h4 className="font-bold text-gray-800 text-sm truncate">{item.text_bn}</h4>
                           <p className="text-[10px] text-gray-400 truncate">{item.text_en}</p>
                         </div>
-                        <button 
-                          onClick={() => deleteContent(item.id)}
-                          className="p-2 text-gray-300 hover:text-red-500 transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => {
+                              setEditingItem(item);
+                              setNewContent({ text_bn: item.text_bn, text_en: item.text_en, type: item.type });
+                              setShowAddForm(true);
+                            }}
+                            className="p-2 text-gray-300 hover:text-primary transition-colors"
+                          >
+                            <Edit size={16} />
+                          </button>
+                          <button 
+                            onClick={() => deleteContent(item.id)}
+                            className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

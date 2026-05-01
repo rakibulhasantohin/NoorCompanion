@@ -17,6 +17,9 @@ import { cn } from '../utils/utils';
 import { AnimatedRubElHizbIcon } from '../components/Common';
 import { districts } from '../data/districts';
 
+import { db } from '../lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+
 export const Home: React.FC = () => {
   const { state, updateState } = useAppState();
   const isBn = state.language === 'bn';
@@ -53,6 +56,25 @@ export const Home: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [config, setConfig] = useState({
+    facebookPage: 'https://www.facebook.com/share/188NYWqk6w/',
+    facebookGroup: 'https://www.facebook.com/share/g/1LEXoM7A3b/',
+    version: '1.0'
+  });
+  
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const snap = await getDoc(doc(db, 'config', 'global'));
+        if (snap.exists()) {
+          setConfig(snap.data() as any);
+        }
+      } catch (error) {
+        console.error("Error fetching config:", error);
+      }
+    };
+    fetchConfig();
+  }, []);
   
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -630,7 +652,7 @@ export const Home: React.FC = () => {
       {/* Social Links */}
       <div className="space-y-3 mb-6">
         <button 
-          onClick={() => openFacebookLink("https://www.facebook.com/share/188NYWqk6w/")}
+          onClick={() => openFacebookLink(config.facebookPage)}
           className="w-full p-4 bg-white border border-blue-100 rounded-2xl flex items-center justify-between group cursor-pointer active:scale-[0.98] transition-transform"
         >
           <div className="flex items-center gap-3">
@@ -646,7 +668,7 @@ export const Home: React.FC = () => {
         </button>
 
         <button 
-          onClick={() => openFacebookLink("https://www.facebook.com/share/g/1LEXoM7A3b/")}
+          onClick={() => openFacebookLink(config.facebookGroup)}
           className="w-full p-4 bg-white border border-teal-100 rounded-2xl flex items-center justify-between group cursor-pointer active:scale-[0.98] transition-transform"
         >
           <div className="flex items-center gap-3">
@@ -664,7 +686,7 @@ export const Home: React.FC = () => {
 
       {/* Footer */}
       <div className="text-center text-gray-400 text-xs mb-8">
-        {isBn ? 'অ্যাপ ভার্সন' : 'App Version'}: 1.0 (Updated)
+        {isBn ? 'অ্যাপ ভার্সন' : 'App Version'}: {config.version}
       </div>
 
       {/* Location Selection Modal */}
