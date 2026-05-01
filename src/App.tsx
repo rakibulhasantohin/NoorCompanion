@@ -20,6 +20,8 @@ import { NamesOfAllah } from './pages/NamesOfAllah';
 
 import { ProfilePage } from './pages/ProfilePage';
 
+import { AdminPanel } from './pages/AdminPanel';
+
 import { useAppState } from './hooks/useAppState';
 import { Onboarding } from './components/Onboarding/Onboarding';
 import { HolidayNoticeModal } from './components/HolidayNoticeModal';
@@ -44,6 +46,7 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
       case '/names-of-allah': return isBn ? 'আল্লাহর নাম' : 'Allah Names';
       case '/profile': return isBn ? 'প্রোফাইল' : 'Profile';
       case '/settings': return isBn ? 'সেটিংস' : 'Settings';
+      case '/admin': return 'Admin Panel';
       default: return isBn ? 'নূর কম্প্যানিয়ন' : 'Noor Companion';
     }
   };
@@ -107,6 +110,7 @@ export default function App() {
           <Route path="/sahri-iftar" element={<SahriIftar />} />
           <Route path="/ai-assistant" element={<AiAssistant />} />
           <Route path="/names-of-allah" element={<NamesOfAllah />} />
+          <Route path="/admin" element={<AdminPanel />} />
         </Routes>
       </PageWrapper>
     </Router>

@@ -41,11 +41,14 @@ if ('serviceWorker' in navigator) {
 }
 
 import { AppStateProvider } from './context/AppStateContext';
+import { AuthProvider } from './context/AuthContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AppStateProvider>
-      <App />
-    </AppStateProvider>
+    <AuthProvider>
+      <AppStateProvider>
+        <App />
+      </AppStateProvider>
+    </AuthProvider>
   </StrictMode>,
 );

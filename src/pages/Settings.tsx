@@ -2,13 +2,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   User, Bell, Moon, Globe, MapPin, Shield, 
-  HelpCircle, ChevronRight, Share2, Star, Camera, Edit2
+  HelpCircle, ChevronRight, Share2, Star, Camera, Edit2, LogIn, LogOut, LayoutDashboard
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../hooks/useAppState';
+import { useAuth } from '../context/AuthContext';
+import { signInWithGoogle, logout } from '../lib/firebase';
 import { AppHeader, ConfirmModal } from '../components/Common';
 
 export const Settings: React.FC = () => {
   const { state, updateState } = useAppState();
+  const { user, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [tempName, setTempName] = useState(state.fullName || '');
@@ -57,9 +62,20 @@ export const Settings: React.FC = () => {
       title: isBn ? 'ব্যক্তিগত' : 'Personal',
       items: [
         { icon: <User size={20} />, label: isBn ? 'প্রোফাইল' : 'Profile', value: state.fullName || (isBn ? 'অতিথি' : 'Guest'), onClick: () => setIsEditModalOpen(true) },
+        { 
+          icon: user ? <LogOut size={20} /> : <LogIn size={20} />, 
+          label: user ? (isBn ? 'লগআউট' : 'Logout') : (isBn ? 'গুগল দিয়ে লগইন' : 'Login with Google'), 
+          onClick: user ? logout : signInWithGoogle 
+        },
         { icon: <Bell size={20} />, label: isBn ? 'নোটিফিকেশন' : 'Notifications', toggle: true, active: state.notifications, onToggle: () => updateState({ notifications: !state.notifications }) },
       ]
     },
+    ...(isAdmin ? [{
+      title: isBn ? 'অ্যাডমিন' : 'Admin',
+      items: [
+        { icon: <LayoutDashboard size={20} />, label: isBn ? 'অ্যাডমিন প্যানেল' : 'Admin Panel', onClick: () => navigate('/admin') },
+      ]
+    }] : []),
     {
       title: isBn ? 'অ্যাপ সেটিংস' : 'App Settings',
       items: [
